@@ -3,34 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文言文背誦大師之旅</title>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-     
-    <!-- 專用於Chrome的PWA支持 -->
-    <!-- 默認favicon（使用base64編碼的小PNG圖標） -->
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAEJQTFRFAFz/AV3/Al7/A1//BGD/BWH/Dl//D2D/EGD/SXz/Sn3/kK7/ka//z9f/0Nj/0dn/4uf/4+j/8vX/8/X/9fb//f3//v7/bIBJkQAAACZ0Uk5TAAECBQcNDxUfICQmJy0uNTo7PUBBTE5YXWNveYqTpqu1yM7c7fb95XPJAAAAt0lEQVR42q2TSQ6DMBAEG4JZbMj+/P8nUQAplsm4hLpstyVXOTbqbZYgtlnfk8iwi+QcuZAEsiF7PGCD7J2SJwxIguRNvkwEgkmU3JYkEUwSSw5sNB1MYqJkCaArmCTNDmw0XThJZpLlgXZy4Gvx7JLcPBtfEhBsKBIbPkFRtKBOFFf2q1ApIoCqaKPdLPr5dPFt4nnJtOFxzb7jdc1OwvOaXcnjP3DW4PTkd8cP8meAn+NTGADR/RXVyPYnZAAAAABJRU5ErkJggg==">
-    
-    <!-- Chrome/Android專用Web App Manifest (直接使用data URI) -->
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIuiyswSEKzYWzi6LKzYWwgNpPrDosrs+NUw6L+U5Y23mn4/lj6MiLAogICJzaG9ydF9uYW1lIjogIuiyswSEKzYWwgOnj+WPoyIsCiAgImRlc2NyaXB0aW9uIjogIua0u+WJjeWfteW+l+S+huiysyEiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZmZmZmZmIiwKICAidGhlbWVfY29sb3IiOiAiIzVENUNERSIsCiAgImdjbV9zZW5kZXJfaWQiOiAiIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pLmltZ3VyLmNvbS91NFVkc0N5LmpwZWciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL2pwZWciLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vaS5pbWd1ci5jb20vdTRVZHNDeS5qcGVnIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQo=">
-    
-    <!-- Chrome Web App特定元數據 -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="文言背誦大師之旅">
-    
-    <!-- 為Chrome設置主題色 -->
-    <meta name="theme-color" content="#5D5CDE">
-    
-    <!-- iOS特有標籤 -->
-    <link rel="apple-touch-icon" href="https://i.imgur.com/u4UdsCy.jpeg">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="文言背誦大師之旅">
-    
-    <!-- 兼容舊版本浏覽器 -->
-    <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAEJQTFRFAFz/AV3/Al7/A1//BGD/BWH/Dl//D2D/EGD/SXz/Sn3/kK7/ka//z9f/0Nj/0dn/4uf/4+j/8vX/8/X/9fb//f3//v7/bIBJkQAAACZ0Uk5TAAECBQcNDxUfICQmJy0uNTo7PUBBTE5YXWNveYqTpqu1yM7c7fb95XPJAAAAt0lEQVR42q2TSQ6DMBAEG4JZbMj+/P8nUQAplsm4hLpstyVXOTbqbZYgtlnfk8iwi+QcuZAEsiF7PGCD7J2SJwxIguRNvkwEgkmU3JYkEUwSSw5sNB1MYqJkCaArmCTNDmw0XThJZpLlgXZy4Gvx7JLcPBtfEhBsKBIbPkFRtKBOFFf2q1ApIoCqaKPdLPr5dPFt4nnJtOFxzb7jdc1OwvOaXcnjP3DW4PTkd8cP8meAn+NTGADR/RXVyPYnZAAAAABJRU5ErkJggg==" type="image/png">
+    <title>文言文背誦程序</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -4219,4 +4194,3 @@ if (passageHeader && passageToggle && passageContent) {
     </script>
 </body>
 </html>
-
