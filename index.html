@@ -893,6 +893,15 @@
                     ]
                 },
 
+                '魚dwdw': {
+                    title: '《dwdwd》',
+                    author: '孟子',
+                    category: '指定文言',
+                    paragraphs: [
+                        '孟子曰：「魚，我所欲也，'
+                    ]
+                },
+
                 // 在這裡添加更多篇章...
                 // 新增篇章格式:
                 /*
@@ -2553,34 +2562,48 @@ if (passageHeader && passageToggle && passageContent) {
                         let rangeText = "";
                         
                         // 取得全局保存的段落索引，如果提供的參數無效
-                        const indicesToUse = (paragraphIndices && Array.isArray(paragraphIndices) && paragraphIndices.length > 0) 
-                            ? paragraphIndices 
-                            : (window.selectedParagraphIndices || []);
+                        let indicesToUse = [];
+                        if (paragraphIndices && Array.isArray(paragraphIndices) && paragraphIndices.length > 0) {
+                            indicesToUse = paragraphIndices;
+                            console.log("使用提供的段落索引:", indicesToUse);
+                        } else if (window.selectedParagraphIndices && Array.isArray(window.selectedParagraphIndices) && window.selectedParagraphIndices.length > 0) {
+                            indicesToUse = window.selectedParagraphIndices;
+                            console.log("使用全局保存的段落索引:", indicesToUse);
+                        } else {
+                            console.log("未找到段落索引資訊");
+                        }
                         
-                        console.log("分享卡片使用的段落索引:", indicesToUse);
-                        
-                        // 如果有段落索引數組且不是完整篇章，構建顯示範圍
+                        // 如果有段落索引數組，構建顯示範圍
                         if (indicesToUse.length > 0) {
                             const selectedPassage = passages[currentPassageKey];
-                            if (selectedPassage && indicesToUse.length < selectedPassage.paragraphs.length) {
-                                // 確定是否是連續的段落
-                                let isConsecutive = true;
-                                for (let i = 0; i < indicesToUse.length - 1; i++) {
-                                    if (indicesToUse[i + 1] !== indicesToUse[i] + 1) {
-                                        isConsecutive = false;
-                                        break;
+                            if (selectedPassage) {
+                                // 檢查是否是完整篇章
+                                const isFullPassage = indicesToUse.length >= selectedPassage.paragraphs.length;
+                                
+                                if (!isFullPassage) {
+                                    // 對段落索引進行排序
+                                    indicesToUse.sort((a, b) => a - b);
+                                    
+                                    // 確定是否是連續的段落
+                                    let isConsecutive = true;
+                                    for (let i = 0; i < indicesToUse.length - 1; i++) {
+                                        if (indicesToUse[i + 1] !== indicesToUse[i] + 1) {
+                                            isConsecutive = false;
+                                            break;
+                                        }
                                     }
+                                    
+                                    if (indicesToUse.length === 1) {
+                                        rangeText = `第${indicesToUse[0] + 1}段`;
+                                    } else if (isConsecutive) {
+                                        rangeText = `第${indicesToUse[0] + 1}-${indicesToUse[indicesToUse.length - 1] + 1}段`;
+                                    } else {
+                                        rangeText = `第${indicesToUse.map(idx => idx + 1).join('、')}段`;
+                                    }
+                                    
+                                    displayTitle = `${passageTitle}（${rangeText}）`;
+                                    console.log("生成的顯示標題:", displayTitle);
                                 }
-                                
-                                if (indicesToUse.length === 1) {
-                                    rangeText = `第${indicesToUse[0] + 1}段`;
-                                } else if (isConsecutive) {
-                                    rangeText = `第${indicesToUse[0] + 1}-${indicesToUse[indicesToUse.length - 1] + 1}段`;
-                                } else {
-                                    rangeText = `第${indicesToUse.map(idx => idx + 1).join('、')}段`;
-                                }
-                                
-                                displayTitle = `${passageTitle}（${rangeText}）`;
                             }
                         }
                         
@@ -4664,7 +4687,37 @@ function displayAchievements() {
         { center: '#8BC34A', middle: '#7CB342', outer: '#689F38' }  // 沉吟至今
     ];
     
-    // 當前文學冒險者等級
+    // 獲取所有「文學」分類的篇章
+    const literaturePassages = Object.keys(passages).filter(key => 
+        passages[key].category === '文學'
+    );
+    
+    // 從用戶記錄中讀取每篇篇章的完成次數
+    const literatureCompletionCounts = literaturePassages.map(key => 
+        userRecordsMemory[key]?.completionCount || 0
+    );
+    
+    // 找出最小完成次數
+    const literatureMinCompletions = literatureCompletionCounts.length > 0 ? Math.min(...literatureCompletionCounts) : 0;
+    
+    // 確定成就等級 - 基於所有篇章的最小完成次數
+    let calculatedLiteratureLevel = 0;
+    for (let i = 0; i < literatureRequirements.length; i++) {
+        if (literatureMinCompletions >= literatureRequirements[i]) {
+            calculatedLiteratureLevel = i + 1;
+        } else {
+            break;
+        }
+    }
+    
+    // 更新全局統計中的成就等級（如果計算出的等級更高）
+    if (calculatedLiteratureLevel > globalStats.achievements.literatureRouteLevel) {
+        globalStats.achievements.literatureRouteLevel = calculatedLiteratureLevel;
+        // 保存更新的統計
+        saveStats();
+    }
+    
+    // 使用更新後的等級
     const currentLiteratureLevel = globalStats.achievements.literatureRouteLevel;
     
     // 如果已經達成任何等級
@@ -4682,16 +4735,21 @@ function displayAchievements() {
                 </div>
                 <div class="ml-5">
                     <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${literatureLevels[levelIndex]}</p>
-                    <p class="text-gray-600 dark:text-gray-400">文學篇章完成情況</p>
+                    <p class="text-gray-600 dark:text-gray-400">文學篇章最少完成：${literatureMinCompletions}次</p>
         `;
         
         // 如果還有下一等級，顯示進度
         if (currentLiteratureLevel < 4) {
             const nextLevelIndex = currentLiteratureLevel;
+            const nextRequirement = literatureRequirements[nextLevelIndex];
+            const progress = Math.min(100, (literatureMinCompletions / nextRequirement) * 100);
             
             contentHTML += `
                     <div class="mt-3">
-                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${literatureLevels[nextLevelIndex]}" 需完成所有文學篇章各${literatureRequirements[nextLevelIndex]}次</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${literatureLevels[nextLevelIndex]}" 還需完成所有文學篇章至少${nextRequirement - literatureMinCompletions}次</p>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
                     </div>
             `;
         } else {
@@ -4844,5 +4902,3 @@ function displayAchievements() {
     </script>
 </body>
 </html>
-
-
