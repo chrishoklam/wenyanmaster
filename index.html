@@ -436,9 +436,78 @@
         .fade-out {
             animation: fadeOut 0.5s ease forwards;
         }
+        
+        /* 啟動界面樣式 */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.imgur.com/ACyJYTg.png');
+            background-color: rgba(0, 0, 0, 0.7);
+            background-blend-mode: overlay;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease;
+        }
+        
+        .start-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            line-height: 1.3;
+        }
+        
+        .start-button {
+            padding: 0.8rem 2.5rem;
+            background-color: #5D5CDE;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2.5rem;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 10px rgba(0, 0, 0, 0.4);
+            background-color: #4a49c8;
+        }
+        
+        .start-button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .version-info {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body class="bg-white font-serif min-h-screen bg-cover bg-center bg-fixed" style="background-image: url('https://i.imgur.com/ACyJYTg.png'); background-color: rgba(255, 255, 255, 0.8); background-blend-mode: overlay;">
+    <!-- 啟動界面 -->
+    <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cover bg-center" style="background-image: url('https://i.imgur.com/ACyJYTg.png'); background-color: rgba(0, 0, 0, 0.7); background-blend-mode: overlay;">
+        <div class="text-center p-8 max-w-xl">
+            <h1 class="start-title mb-10 text-4xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg">文言文背誦<br>大師之旅</h1>
+            <button id="start-journey-btn" class="start-button text-xl font-medium px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transform transition hover:scale-105">
+                開始旅程
+            </button>
+            <p class="version-info mt-10 text-white/70 text-sm">v1.3</p>
+        </div>
+    </div>
     <!-- 暫停菜單覆蓋層 -->
     <div id="pause-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
@@ -690,6 +759,59 @@
                 }
             });
             console.log("DOM加載完成，開始初始化...");
+            
+            // 隱藏主界面，直到用戶點擊「開始旅程」
+            const mainContainer = document.querySelector('.container');
+            const startScreen = document.getElementById('start-screen');
+            const startJourneyBtn = document.getElementById('start-journey-btn');
+            const settingsButton = document.getElementById('settings-button');
+            
+            // 初始隱藏主內容和設置按鈕
+            if (mainContainer) mainContainer.style.display = 'none';
+            if (settingsButton) settingsButton.style.display = 'none';
+            
+            // 開始旅程按鈕事件
+            if (startJourneyBtn && startScreen && mainContainer) {
+                startJourneyBtn.addEventListener('click', function() {
+                    // 先禁用按鈕防止重複點擊
+                    startJourneyBtn.disabled = true;
+                    
+                    // 1. 讓啟動界面淡出
+                    startScreen.style.opacity = '0';
+                    
+                    // 2. 在淡出過程中（大約400ms後）播放墨水擴散動畫
+                    setTimeout(() => {
+                        // 創建墨水擴散動畫
+                        const loadingAnimation = document.createElement('div');
+                        loadingAnimation.id = 'loading-container';
+                        loadingAnimation.innerHTML = `<div id="main-splash"></div>`;
+                        document.body.appendChild(loadingAnimation);
+                        
+                        // 3. 淡出完全結束后（大約800ms）隱藏啟動界面並顯示主界面
+                        setTimeout(() => {
+                            // 隱藏啟動界面
+                            startScreen.style.display = 'none';
+                            // 顯示主界面
+                            mainContainer.style.display = 'block';
+                            
+                            // 4. 最後顯示設置按鈕
+                            setTimeout(() => {
+                                settingsButton.style.display = 'flex';
+                                
+                                // 墨水動畫淡出並移除
+                                loadingAnimation.classList.add('fade-out');
+                                setTimeout(() => {
+                                    if (loadingAnimation.parentNode) {
+                                        loadingAnimation.parentNode.removeChild(loadingAnimation);
+                                    }
+                                    // 重新啟用按鈕（雖然啟動界面已經隱藏）
+                                    startJourneyBtn.disabled = false;
+                                }, 500);
+                            }, 100); // 短暫延遲後顯示設置按鈕
+                        }, 400); // 總共約800ms的淡出時間
+                    }, 400); // 淡出到一半時開始播放墨水擴散動畫
+                });
+            }
             
             // 新增暫停功能相關變量
             let isPaused = false;
@@ -2461,7 +2583,7 @@ if (passageHeader && passageToggle && passageContent) {
             }
             
             // 創建結果分享卡片
-            function createShareCard(passageTitle, author, finalTime, wrongAnswersCount, totalNonPunctChars, achievements, paragraphInfo) {
+            function createShareCard(passageTitle, author, finalTime, wrongAnswersCount, totalNonPunctChars, achievements, paragraphIndices) {
                 return new Promise((resolve, reject) => {
                     try {
                         // 創建一個離屏的卡片元素用於截圖
@@ -2472,33 +2594,56 @@ if (passageHeader && passageToggle && passageContent) {
                         card.style.width = '350px';
                         card.style.zIndex = '-100'; // 確保在屏幕外不可見
                         
-                        // 處理標題，添加段落範圍（如果不是全文）
+                        // 處理標題，添加段落範圍信息
                         let displayTitle = passageTitle;
-                        if (paragraphInfo && paragraphInfo.isPartial) {
-                            displayTitle = `${passageTitle}（${paragraphInfo.rangeText}）`;
+                        let rangeText = "";
+                        
+                        // 如果有段落索引數組且不是完整篇章，構建顯示範圍
+                        if (paragraphIndices && Array.isArray(paragraphIndices)) {
+                            const selectedPassage = passages[currentPassageKey];
+                            if (selectedPassage && paragraphIndices.length < selectedPassage.paragraphs.length) {
+                                // 確定是否是連續的段落
+                                let isConsecutive = true;
+                                for (let i = 0; i < paragraphIndices.length - 1; i++) {
+                                    if (paragraphIndices[i + 1] !== paragraphIndices[i] + 1) {
+                                        isConsecutive = false;
+                                        break;
+                                    }
+                                }
+                                
+                                if (paragraphIndices.length === 1) {
+                                    rangeText = `第${paragraphIndices[0] + 1}段`;
+                                } else if (isConsecutive) {
+                                    rangeText = `第${paragraphIndices[0] + 1}-${paragraphIndices[paragraphIndices.length - 1] + 1}段`;
+                                } else {
+                                    rangeText = `第${paragraphIndices.map(idx => idx + 1).join('、')}段`;
+                                }
+                                
+                                displayTitle = `${passageTitle}（${rangeText}）`;
+                            }
                         }
                         
-                        // 生成成就徽章HTML - 使用與遊戲內相同的印章風格
+                        // 生成成就徽章HTML - 修正印章內文字居中問題
                         let achievementsHTML = '';
                         if (achievements && achievements.length > 0) {
                             achievementsHTML = `
                             <div class="mt-4 mb-3 border-t border-gray-600 pt-3">
                                 <p class="text-sm font-medium text-amber-400 mb-2">獲得成就:</p>
-                                <div class="flex flex-wrap justify-center mb-2">
+                                <div class="flex flex-wrap justify-center mb-2" style="margin: 0 -8px;">
                             `;
                             
-                            // 添加每個成就徽章 - 參考遊戲完成界面的印章樣式
+                            // 添加每個成就徽章 - 改進文字居中和邊距
                             achievements.forEach(achievement => {
                                 // 提取SVG
                                 const svg = achievement.svg;
                                 
                                 achievementsHTML += `
-                                <div class="mx-2 my-2" style="width: 80px; height: 80px; position: relative; display: inline-flex; justify-content: center; align-items: center; transform: rotate(-5deg);">
+                                <div style="width: 70px; height: 70px; position: relative; display: inline-flex; justify-content: center; align-items: center; transform: rotate(-5deg); margin: 4px;">
                                     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
                                         ${svg}
                                     </div>
-                                    <div style="position: relative; z-index: 10; font-family: 'Noto Serif TC', serif; font-weight: bold; text-align: center; color: #fff; width: 80%; display: flex; justify-content: center; align-items: center; pointer-events: none;">
-                                        <span style="font-size: 12px; line-height: 1.2;">${achievement.title}</span>
+                                    <div style="position: relative; z-index: 10; font-family: 'Noto Serif TC', serif; font-weight: bold; text-align: center; color: #fff; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                                        <span style="font-size: 10px; line-height: 1.2; display: block; width: 80%; text-align: center;">${achievement.title}</span>
                                     </div>
                                 </div>`;
                             });
