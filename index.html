@@ -3416,779 +3416,580 @@ if (passageHeader && passageToggle && passageContent) {
             }
             
             // 顯示歷史成就
-            function displayAchievements() {
-                const infoModalContent = document.getElementById('info-modal-content');
-                if (!infoModalContent) return;
-                
-                // 確保globalStats已初始化
-                if (typeof globalStats !== 'object' || globalStats === null) {
-                    globalStats = {
-                        totalCompletionCount: 0,
-                        failAfterHalfwayCount: 0,
-                        lightningAchievementCount: 0,
-                        perfectAchievementCount: 0,
-                        memoryAchievementCount: 0,
-                        tirelessAchievementCount: 0,
-                        nightOwlAchievementCount: 0,
-                        badDigestionAchievementCount: 0,
-                        achievements: {
-                            nightOwl: false,
-                            badDigestion: false,
-                            dryEyes: false,
-                            nightOwlKing: false,
-                            focusOnEating: false,
-                            adventureLevel: 0,
-                            defeatLevel: 0,
-                            speedRouteLevel: 0,
-                            perfectRouteLevel: 0,
-                            memoryRouteLevel: 0
-                        }
-                    };
-                }
-                
-                // 創建SVG徽章
-                const createAchievementSVG = (colors, borderColor) => {
-                    const uniqueId = 'seal_' + Math.random().toString(36).substr(2, 9);
-                    return `
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <radialGradient id="${uniqueId}" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                                <stop offset="0%" style="stop-color:${colors.center}" />
-                                <stop offset="70%" style="stop-color:${colors.middle}" />
-                                <stop offset="100%" style="stop-color:${colors.outer}" />
-                            </radialGradient>
-                        </defs>
-                        <circle cx="50" cy="50" r="45" fill="url(#${uniqueId})" />
-                        <circle cx="50" cy="50" r="42" fill="none" stroke="${borderColor}" stroke-width="1" stroke-dasharray="2,1" />
-                        <circle cx="50" cy="50" r="38" fill="none" stroke="${borderColor}" stroke-width="0.5" />
-                    </svg>
-                    `;
-                };
-                
-                // 各成就顏色定義
-                // 冒險之路成就顏色
-                const adventureColors = [
-                    { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, // 初心者
-                    { center: '#81C784', middle: '#66BB6A', outer: '#4CAF50' }, // 勇者
-                    { center: '#FF8A65', middle: '#FF7043', outer: '#F4511E' }, // 大師
-                    { center: '#9575CD', middle: '#7E57C2', outer: '#673AB7' }, // 偏執狂
-                    { center: '#FFD54F', middle: '#FFCA28', outer: '#FFC107' }  // 掃地僧
-                ];
-                
-                // 挫敗之路成就顏色
-                const defeatColors = [
-                    { center: '#B39DDB', middle: '#9575CD', outer: '#7E57C2' }, // 初嘗敗績
-                    { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, // 堅毅
-                    { center: '#26A69A', middle: '#009688', outer: '#00796B' }, // 鋼鐵意志
-                    { center: '#FFA726', middle: '#FF9800', outer: '#F57C00' }, // 小強是我
-                    { center: '#EF5350', middle: '#F44336', outer: '#D32F2F' }  // 心如止水
-                ];
-                
-                // 極速之路成就顏色
-                const speedColors = [
-                    { center: '#5E35B1', middle: '#4527A0', outer: '#311B92' }, // 敏捷
-                    { center: '#3949AB', middle: '#303F9F', outer: '#283593' }, // 肌肉記憶
-                    { center: '#1E88E5', middle: '#1976D2', outer: '#1565C0' }, // 無影手
-                    { center: '#039BE5', middle: '#0288D1', outer: '#0277BD' }  // 世界第一束光
-                ];
-                
-                // 完美之路成就顏色
-                const perfectColors = [
-                    { center: '#D81B60', middle: '#C2185B', outer: '#AD1457' }, // 如沐春風
-                    { center: '#8E24AA', middle: '#7B1FA2', outer: '#6A1B9A' }, // 完美主義
-                    { center: '#5E35B1', middle: '#512DA8', outer: '#4527A0' }, // 滿月
-                    { center: '#3949AB', middle: '#303F9F', outer: '#283593' }  // 至善
-                ];
-                
-                // 記憶之路成就顏色
-                const memoryColors = [
-                    { center: '#00796B', middle: '#00695C', outer: '#004D40' }, // 激活腦細胞
-                    { center: '#00ACC1', middle: '#0097A7', outer: '#00838F' }, // 記憶麵包
-                    { center: '#43A047', middle: '#388E3C', outer: '#2E7D32' }, // 移動圖書館
-                    { center: '#7CB342', middle: '#689F38', outer: '#558B2F' }  // 流如背倒
-                ];
-                
-                // 特殊累積成就顏色
-                const dryEyesColors = { center: '#0288D1', middle: '#0277BD', outer: '#01579B' }; // 眼乾
-                const nightOwlKingColors = { center: '#3E2723', middle: '#3E2723', outer: '#3E2723' }; // 夜貓王
-                const focusOnEatingColors = { center: '#BF360C', middle: '#BF360C', outer: '#BF360C' }; // 請專心吃飯
-                
-                // 特殊成就顏色
-                const nightOwlColors = { center: '#2C3E50', middle: '#1E2A36', outer: '#1A1A2E' };
-                const badDigestionColors = { center: '#8D6E63', middle: '#6D4C41', outer: '#5D4037' };
-                
-                let contentHTML = `
-                <div class="space-y-6">
-                    <!-- 冒險之路成就 -->
-                    <div>
-                        <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">冒險之路</h4>
-                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
-                `;
-                
-                // 冒險之路成就等級名稱
-                const adventureLevels = ['初心者', '勇者', '大師', '偏執狂', '掃地僧'];
-                const adventureRequirements = [1, 10, 100, 300, 500];
-                const adventureBorderColors = ['#90CAF9', '#4CAF50', '#F4511E', '#673AB7', '#FFC107'];
-                
-                // 當前冒險等級
-                const currentLevel = globalStats.achievements.adventureLevel;
-                
-                // 如果已經達成任何等級
-                if (currentLevel > 0) {
-                    // 顯示當前等級成就
-                    const levelIndex = currentLevel - 1;
-                    contentHTML += `
-                        <div class="flex items-center mb-6">
-                            <div class="achievement-seal" style="width: 120px; height: 120px;">
-                                ${createAchievementSVG(adventureColors[levelIndex], adventureBorderColors[levelIndex])}
-                                <div class="seal-text">
-                                    <span class="seal-title text-lg">${adventureLevels[levelIndex]}</span>
-                                    <span class="seal-desc">完成${adventureRequirements[levelIndex]}次</span>
-                                </div>
-                            </div>
-                            <div class="ml-5">
-                                <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${adventureLevels[levelIndex]}</p>
-                                <p class="text-gray-600 dark:text-gray-400">總完成次數：${globalStats.totalCompletionCount}</p>
-                    `;
-                    
-                    // 如果還有下一等級，顯示進度
-                    if (currentLevel < 5) {
-                        const nextLevelIndex = currentLevel;
-                        const nextRequirement = adventureRequirements[nextLevelIndex];
-                        const progress = Math.min(100, (globalStats.totalCompletionCount / nextRequirement) * 100);
-                        
-                        contentHTML += `
-                                <div class="mt-3">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${adventureLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.totalCompletionCount} 次</p>
-                                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                        <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                                    </div>
-                                </div>
-                        `;
-                    } else {
-                        contentHTML += `
-                                <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                            </div>
-                        </div>
-                    `;
-                    
-                    // 顯示所有等級解鎖條件（已解鎖的用不同顏色）
-                    contentHTML += `
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    `;
-                    
-                    for (let i = 0; i < adventureLevels.length; i++) {
-                        const isUnlocked = i < currentLevel;
-                        contentHTML += `
-                            <div class="flex items-center p-3 ${isUnlocked ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-100 dark:bg-gray-700/40'} rounded-lg">
-                                <div class="mr-3">
-                                    <i class="fas ${isUnlocked ? 'fa-unlock text-green-500' : 'fa-lock text-gray-400'} text-lg"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}">${adventureLevels[i]}</p>
-                                    <p class="text-sm ${isUnlocked ? 'text-gray-600 dark:text-gray-300' : 'text-gray-500 dark:text-gray-500'}">完成 ${adventureRequirements[i]} 次挑戰</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                        </div>
-                    `;
-                } else {
-                    // 顯示尚未獲得任何成就的提示
-                    contentHTML += `
-                        <div class="text-center py-8">
-                            <i class="fas fa-medal text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
-                            <p class="text-gray-600 dark:text-gray-400">尚未獲得冒險成就</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">完成至少1次挑戰解鎖「初心者」成就</p>
-                        </div>
-                    `;
-                }
-                
-                contentHTML += `
-                        </div>
-                    </div>
-                    
-                    <!-- 挫敗之路成就 -->
-                    <div>
-                        <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">挫敗之路</h4>
-                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
-                `;
-                
-                // 挫敗之路成就等級名稱
-                const defeatLevels = ['初嘗敗績', '堅毅', '鋼鐵意志', '小強是我', '心如止水'];
-                const defeatRequirements = [1, 10, 50, 100, 200];
-                const defeatBorderColors = ['#7E57C2', '#42A5F5', '#00796B', '#F57C00', '#D32F2F'];
-                
-                // 當前挫敗等級
-                const currentDefeatLevel = globalStats.achievements.defeatLevel;
-                
-                // 如果已經達成任何等級
-                if (currentDefeatLevel > 0) {
-                    // 顯示當前等級成就
-                    const levelIndex = currentDefeatLevel - 1;
-                    contentHTML += `
-                        <div class="flex items-center mb-6">
-                            <div class="achievement-seal" style="width: 120px; height: 120px;">
-                                ${createAchievementSVG(defeatColors[levelIndex], defeatBorderColors[levelIndex])}
-                                <div class="seal-text">
-                                    <span class="seal-title text-lg">${defeatLevels[levelIndex]}</span>
-                                    <span class="seal-desc">失敗${defeatRequirements[levelIndex]}次</span>
-                                </div>
-                            </div>
-                            <div class="ml-5">
-                                <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${defeatLevels[levelIndex]}</p>
-                                <p class="text-gray-600 dark:text-gray-400">遊戲過半後失敗：${globalStats.failAfterHalfwayCount}次</p>
-                    `;
-                    
-                    // 如果還有下一等級，顯示進度
-                    if (currentDefeatLevel < 5) {
-                        const nextLevelIndex = currentDefeatLevel;
-                        const nextRequirement = defeatRequirements[nextLevelIndex];
-                        const progress = Math.min(100, (globalStats.failAfterHalfwayCount / nextRequirement) * 100);
-                        
-                        contentHTML += `
-                                <div class="mt-3">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${defeatLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.failAfterHalfwayCount} 次</p>
-                                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                        <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                                    </div>
-                                </div>
-                        `;
-                    } else {
-                        contentHTML += `
-                                <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                            </div>
-                        </div>
-                    `;
-                    
-                    // 顯示所有等級解鎖條件（已解鎖的用不同顏色）
-                    contentHTML += `
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    `;
-                    
-                    for (let i = 0; i < defeatLevels.length; i++) {
-                        const isUnlocked = i < currentDefeatLevel;
-                        contentHTML += `
-                            <div class="flex items-center p-3 ${isUnlocked ? 'bg-purple-50 dark:bg-purple-900/20' : 'bg-gray-100 dark:bg-gray-700/40'} rounded-lg">
-                                <div class="mr-3">
-                                    <i class="fas ${isUnlocked ? 'fa-unlock text-purple-500' : 'fa-lock text-gray-400'} text-lg"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}">${defeatLevels[i]}</p>
-                                    <p class="text-sm ${isUnlocked ? 'text-gray-600 dark:text-gray-300' : 'text-gray-500 dark:text-gray-500'}">遊戲過半後失敗 ${defeatRequirements[i]} 次</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                        </div>
-                    `;
-                } else {
-                    // 顯示尚未獲得任何成就的提示
-                    contentHTML += `
-                        <div class="text-center py-8">
-                            <i class="fas fa-bolt-lightning text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
-                            <p class="text-gray-600 dark:text-gray-400">尚未獲得挫敗成就</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">在遊戲過半後失敗至少1次解鎖「初嘗敗績」成就</p>
-                        </div>
-                    `;
-                }
-                
-                contentHTML += `
-                        </div>
-                    </div>
-                    
-                    <!-- 特殊成就 -->
-                    <div>
-                        <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">特殊時間成就</h4>
-                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                `;
-                
-                // 夜貓成就
-                if (globalStats.achievements.nightOwl) {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
-                                ${createAchievementSVG(nightOwlColors, '#38BDF8')}
-                                <div class="seal-text">
-                                    <span class="seal-title">夜貓</span>
-                                    <span class="seal-desc text-[8px]">深夜通關</span>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <p class="font-medium text-gray-800 dark:text-gray-200">夜貓</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">01:00-03:00完成遊戲</p>
-                                <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
-                                <i class="fas fa-moon text-gray-400 dark:text-gray-500"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-500 dark:text-gray-400">夜貓</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-500">在凌晨1點至3點完成遊戲</p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                // 腸胃不好成就
-                if (globalStats.achievements.badDigestion) {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                            <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
-                                ${createAchievementSVG(badDigestionColors, '#F59E0B')}
-                                <div class="seal-text">
-                                    <span class="seal-title">腸胃不好</span>
-                                    <span class="seal-desc text-[8px]">午間通關</span>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <p class="font-medium text-gray-800 dark:text-gray-200">腸胃不好</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">11:59-12:45完成遊戲</p>
-                                <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
-                                <i class="fas fa-utensils text-gray-400 dark:text-gray-500"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-500 dark:text-gray-400">腸胃不好</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-500">在中午11:59至12:45完成遊戲</p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                contentHTML += `
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 極速之路成就 -->
-                    <div>
-                        <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">極速之路</h4>
-                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
-                `;
-                
-                // 極速之路成就等級名稱
-                const speedLevels = ['敏捷', '肌肉記憶', '無影手', '世界第一束光'];
-                const speedRequirements = [1, 10, 50, 100];
-                const speedBorderColors = ['#311B92', '#283593', '#1565C0', '#0277BD'];
-                
-                // 當前極速等級
-                const currentSpeedLevel = globalStats.achievements.speedRouteLevel;
-                
-                // 如果已經達成任何等級
-                if (currentSpeedLevel > 0) {
-                    // 顯示當前等級成就
-                    const levelIndex = currentSpeedLevel - 1;
-                    contentHTML += `
-                        <div class="flex items-center mb-6">
-                            <div class="achievement-seal" style="width: 120px; height: 120px;">
-                                ${createAchievementSVG(speedColors[levelIndex], speedBorderColors[levelIndex])}
-                                <div class="seal-text">
-                                    <span class="seal-title text-lg">${speedLevels[levelIndex]}</span>
-                                    <span class="seal-desc">獲得${speedRequirements[levelIndex]}次</span>
-                                </div>
-                            </div>
-                            <div class="ml-5">
-                                <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${speedLevels[levelIndex]}</p>
-                                <p class="text-gray-600 dark:text-gray-400">閃電俠成就獲得次數：${globalStats.lightningAchievementCount}次</p>
-                    `;
-                    
-                    // 如果還有下一等級，顯示進度
-                    if (currentSpeedLevel < 4) {
-                        const nextLevelIndex = currentSpeedLevel;
-                        const nextRequirement = speedRequirements[nextLevelIndex];
-                        const progress = Math.min(100, (globalStats.lightningAchievementCount / nextRequirement) * 100);
-                        
-                        contentHTML += `
-                                <div class="mt-3">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${speedLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.lightningAchievementCount} 次</p>
-                                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                        <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                                    </div>
-                                </div>
-                        `;
-                    } else {
-                        contentHTML += `
-                                <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                            </div>
-                        </div>
-                    `;
-                    
-                    // 顯示所有等級解鎖條件（已解鎖的用不同顏色）
-                    contentHTML += `
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    `;
-                    
-                    for (let i = 0; i < speedLevels.length; i++) {
-                        const isUnlocked = i < currentSpeedLevel;
-                        contentHTML += `
-                            <div class="flex items-center p-3 ${isUnlocked ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-100 dark:bg-gray-700/40'} rounded-lg">
-                                <div class="mr-3">
-                                    <i class="fas ${isUnlocked ? 'fa-unlock text-blue-500' : 'fa-lock text-gray-400'} text-lg"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}">${speedLevels[i]}</p>
-                                    <p class="text-sm ${isUnlocked ? 'text-gray-600 dark:text-gray-300' : 'text-gray-500 dark:text-gray-500'}">獲得「閃電俠」成就 ${speedRequirements[i]} 次</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                        </div>
-                    `;
-                } else {
-                    // 顯示尚未獲得任何成就的提示
-                    contentHTML += `
-                        <div class="text-center py-8">
-                            <i class="fas fa-bolt text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
-                            <p class="text-gray-600 dark:text-gray-400">尚未獲得極速成就</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">獲得「閃電俠」成就至少1次解鎖「敏捷」成就</p>
-                        </div>
-                    `;
-                }
-                
-                contentHTML += `
-                        </div>
-                    </div>
-                    
-                    <!-- 完美之路成就 -->
-                    <div>
-                        <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">完美之路</h4>
-                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
-                `;
-                
-                // 完美之路成就等級名稱
-                const perfectLevels = ['如沐春風', '完美主義', '滿月', '至善'];
-                const perfectRequirements = [1, 10, 50, 100];
-                const perfectBorderColors = ['#AD1457', '#6A1B9A', '#4527A0', '#283593'];
-                
-                // 當前完美等級
-                const currentPerfectLevel = globalStats.achievements.perfectRouteLevel;
-                
-                // 如果已經達成任何等級
-                if (currentPerfectLevel > 0) {
-                    // 顯示當前等級成就
-                    const levelIndex = currentPerfectLevel - 1;
-                    contentHTML += `
-                        <div class="flex items-center mb-6">
-                            <div class="achievement-seal" style="width: 120px; height: 120px;">
-                                ${createAchievementSVG(perfectColors[levelIndex], perfectBorderColors[levelIndex])}
-                                <div class="seal-text">
-                                    <span class="seal-title text-lg">${perfectLevels[levelIndex]}</span>
-                                    <span class="seal-desc">獲得${perfectRequirements[levelIndex]}次</span>
-                                </div>
-                            </div>
-                            <div class="ml-5">
-                                <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${perfectLevels[levelIndex]}</p>
-                                <p class="text-gray-600 dark:text-gray-400">完美無瑕成就獲得次數：${globalStats.perfectAchievementCount}次</p>
-                    `;
-                    
-                    // 如果還有下一等級，顯示進度
-                    if (currentPerfectLevel < 4) {
-                        const nextLevelIndex = currentPerfectLevel;
-                        const nextRequirement = perfectRequirements[nextLevelIndex];
-                        const progress = Math.min(100, (globalStats.perfectAchievementCount / nextRequirement) * 100);
-                        
-                        contentHTML += `
-                                <div class="mt-3">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${perfectLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.perfectAchievementCount} 次</p>
-                                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                        <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                                    </div>
-                                </div>
-                        `;
-                    } else {
-                        contentHTML += `
-                                <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                            </div>
-                        </div>
-                    `;
-                    
-                    // 顯示所有等級解鎖條件（已解鎖的用不同顏色）
-                    contentHTML += `
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    `;
-                    
-                    for (let i = 0; i < perfectLevels.length; i++) {
-                        const isUnlocked = i < currentPerfectLevel;
-                        contentHTML += `
-                            <div class="flex items-center p-3 ${isUnlocked ? 'bg-pink-50 dark:bg-pink-900/20' : 'bg-gray-100 dark:bg-gray-700/40'} rounded-lg">
-                                <div class="mr-3">
-                                    <i class="fas ${isUnlocked ? 'fa-unlock text-pink-500' : 'fa-lock text-gray-400'} text-lg"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}">${perfectLevels[i]}</p>
-                                    <p class="text-sm ${isUnlocked ? 'text-gray-600 dark:text-gray-300' : 'text-gray-500 dark:text-gray-500'}">獲得「完美無瑕」成就 ${perfectRequirements[i]} 次</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                        </div>
-                    `;
-                } else {
-                    // 顯示尚未獲得任何成就的提示
-                    contentHTML += `
-                        <div class="text-center py-8">
-                            <i class="fas fa-gem text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
-                            <p class="text-gray-600 dark:text-gray-400">尚未獲得完美成就</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">獲得「完美無瑕」成就至少1次解鎖「如沐春風」成就</p>
-                        </div>
-                    `;
-                }
-                
-                // 記憶之路成就
-                contentHTML += `
-                    <div>
-                        <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">記憶之路</h4>
-                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
-                `;
-                
-                // 記憶之路成就等級名稱
-                const memoryLevels = ['激活腦細胞', '記憶麵包', '移動圖書館', '流如背倒'];
-                const memoryRequirements = [1, 20, 50, 80];
-                const memoryBorderColors = ['#004D40', '#00838F', '#2E7D32', '#558B2F'];
-                
-                // 當前記憶等級
-                const currentMemoryLevel = globalStats.achievements.memoryRouteLevel;
-                
-                // 如果已經達成任何等級
-                if (currentMemoryLevel > 0) {
-                    // 顯示當前等級成就
-                    const levelIndex = currentMemoryLevel - 1;
-                    contentHTML += `
-                        <div class="flex items-center mb-6">
-                            <div class="achievement-seal" style="width: 120px; height: 120px;">
-                                ${createAchievementSVG(memoryColors[levelIndex], memoryBorderColors[levelIndex])}
-                                <div class="seal-text">
-                                    <span class="seal-title text-lg">${memoryLevels[levelIndex]}</span>
-                                    <span class="seal-desc">獲得${memoryRequirements[levelIndex]}次</span>
-                                </div>
-                            </div>
-                            <div class="ml-5">
-                                <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${memoryLevels[levelIndex]}</p>
-                                <p class="text-gray-600 dark:text-gray-400">記憶大師成就獲得次數：${globalStats.memoryAchievementCount}次</p>
-                    `;
-                    
-                    // 如果還有下一等級，顯示進度
-                    if (currentMemoryLevel < 4) {
-                        const nextLevelIndex = currentMemoryLevel;
-                        const nextRequirement = memoryRequirements[nextLevelIndex];
-                        const progress = Math.min(100, (globalStats.memoryAchievementCount / nextRequirement) * 100);
-                        
-                        contentHTML += `
-                                <div class="mt-3">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${memoryLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.memoryAchievementCount} 次</p>
-                                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                        <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                                    </div>
-                                </div>
-                        `;
-                    } else {
-                        contentHTML += `
-                                <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                            </div>
-                        </div>
-                    `;
-                    
-                    // 顯示所有等級解鎖條件（已解鎖的用不同顏色）
-                    contentHTML += `
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    `;
-                    
-                    for (let i = 0; i < memoryLevels.length; i++) {
-                        const isUnlocked = i < currentMemoryLevel;
-                        contentHTML += `
-                            <div class="flex items-center p-3 ${isUnlocked ? 'bg-teal-50 dark:bg-teal-900/20' : 'bg-gray-100 dark:bg-gray-700/40'} rounded-lg">
-                                <div class="mr-3">
-                                    <i class="fas ${isUnlocked ? 'fa-unlock text-teal-500' : 'fa-lock text-gray-400'} text-lg"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}">${memoryLevels[i]}</p>
-                                    <p class="text-sm ${isUnlocked ? 'text-gray-600 dark:text-gray-300' : 'text-gray-500 dark:text-gray-500'}">獲得「記憶大師」成就 ${memoryRequirements[i]} 次</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    contentHTML += `
-                        </div>
-                    `;
-                } else {
-                    // 顯示尚未獲得任何成就的提示
-                    contentHTML += `
-                        <div class="text-center py-8">
-                            <i class="fas fa-brain text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
-                            <p class="text-gray-600 dark:text-gray-400">尚未獲得記憶成就</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">獲得「記憶大師」成就至少1次解鎖「激活腦細胞」成就</p>
-                        </div>
-                    `;
-                }
-                
-                contentHTML += `
-                        </div>
-                    </div>
-                    
-                    <!-- 特殊進階成就 -->
-                    <div>
-                        <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">進階成就</h4>
-                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                `;
-                
-                // 眼乾成就 (獲得不知疲倦30次)
-                if (globalStats.achievements.dryEyes) {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
-                                ${createAchievementSVG(dryEyesColors, '#0277BD')}
-                                <div class="seal-text">
-                                    <span class="seal-title">眼乾</span>
-                                    <span class="seal-desc text-[8px]">不暫停成癮</span>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <p class="font-medium text-gray-800 dark:text-gray-200">眼乾</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">獲得不知疲倦30次</p>
-                                <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
-                                <i class="fas fa-eye text-gray-400 dark:text-gray-500"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-500 dark:text-gray-400">眼乾</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-500">獲得「不知疲倦」30次</p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                // 夜貓王成就 (獲得夜貓20次)
-                if (globalStats.achievements.nightOwlKing) {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                            <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
-                                ${createAchievementSVG(nightOwlKingColors, '#5D4037')}
-                                <div class="seal-text">
-                                    <span class="seal-title">夜貓王</span>
-                                    <span class="seal-desc text-[8px]">深夜成癮</span>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <p class="font-medium text-gray-800 dark:text-gray-200">夜貓王</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">獲得「夜貓」20次</p>
-                                <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
-                                <i class="fas fa-moon text-gray-400 dark:text-gray-500"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-500 dark:text-gray-400">夜貓王</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-500">獲得「夜貓」20次</p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                // 請專心吃飯成就 (獲得腸胃不好20次)
-                if (globalStats.achievements.focusOnEating) {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                            <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
-                                ${createAchievementSVG(focusOnEatingColors, '#E65100')}
-                                <div class="seal-text">
-                                    <span class="seal-title">請專心吃飯</span>
-                                    <span class="seal-desc text-[8px]">午餐時背誦</span>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <p class="font-medium text-gray-800 dark:text-gray-200">請專心吃飯</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">獲得「腸胃不好」20次</p>
-                                <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    contentHTML += `
-                        <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
-                                <i class="fas fa-utensils text-gray-400 dark:text-gray-500"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-500 dark:text-gray-400">請專心吃飯</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-500">獲得「腸胃不好」20次</p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                contentHTML += `
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-                        持續挑戰，解鎖更多成就！
+function displayAchievements() {
+    const infoModalContent = document.getElementById('info-modal-content');
+    if (!infoModalContent) return;
+    
+    // 確保globalStats已初始化
+    if (typeof globalStats !== 'object' || globalStats === null) {
+        globalStats = {
+            totalCompletionCount: 0,
+            failAfterHalfwayCount: 0,
+            lightningAchievementCount: 0,
+            perfectAchievementCount: 0,
+            memoryAchievementCount: 0,
+            tirelessAchievementCount: 0,
+            nightOwlAchievementCount: 0,
+            badDigestionAchievementCount: 0,
+            achievements: {
+                nightOwl: false,
+                badDigestion: false,
+                dryEyes: false,
+                nightOwlKing: false,
+                focusOnEating: false,
+                adventureLevel: 0,
+                defeatLevel: 0,
+                speedRouteLevel: 0,
+                perfectRouteLevel: 0,
+                memoryRouteLevel: 0
+            }
+        };
+    }
+    
+    // 創建SVG徽章
+    const createAchievementSVG = (colors, borderColor) => {
+        const uniqueId = 'seal_' + Math.random().toString(36).substr(2, 9);
+        return `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="${uniqueId}" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                    <stop offset="0%" style="stop-color:${colors.center}" />
+                    <stop offset="70%" style="stop-color:${colors.middle}" />
+                    <stop offset="100%" style="stop-color:${colors.outer}" />
+                </radialGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="url(#${uniqueId})" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="${borderColor}" stroke-width="1" stroke-dasharray="2,1" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="${borderColor}" stroke-width="0.5" />
+        </svg>
+        `;
+    };
+    
+    // 各成就顏色定義
+    // 冒險之路成就顏色
+    const adventureColors = [
+        { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, // 初心者
+        { center: '#81C784', middle: '#66BB6A', outer: '#4CAF50' }, // 勇者
+        { center: '#FF8A65', middle: '#FF7043', outer: '#F4511E' }, // 大師
+        { center: '#9575CD', middle: '#7E57C2', outer: '#673AB7' }, // 偏執狂
+        { center: '#FFD54F', middle: '#FFCA28', outer: '#FFC107' }  // 掃地僧
+    ];
+    
+    // 挫敗之路成就顏色
+    const defeatColors = [
+        { center: '#B39DDB', middle: '#9575CD', outer: '#7E57C2' }, // 初嘗敗績
+        { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, // 堅毅
+        { center: '#26A69A', middle: '#009688', outer: '#00796B' }, // 鋼鐵意志
+        { center: '#FFA726', middle: '#FF9800', outer: '#F57C00' }, // 小強是我
+        { center: '#EF5350', middle: '#F44336', outer: '#D32F2F' }  // 心如止水
+    ];
+    
+    // 極速之路成就顏色
+    const speedColors = [
+        { center: '#5E35B1', middle: '#4527A0', outer: '#311B92' }, // 敏捷
+        { center: '#3949AB', middle: '#303F9F', outer: '#283593' }, // 肌肉記憶
+        { center: '#1E88E5', middle: '#1976D2', outer: '#1565C0' }, // 無影手
+        { center: '#039BE5', middle: '#0288D1', outer: '#0277BD' }  // 世界第一束光
+    ];
+    
+    // 完美之路成就顏色
+    const perfectColors = [
+        { center: '#D81B60', middle: '#C2185B', outer: '#AD1457' }, // 如沐春風
+        { center: '#8E24AA', middle: '#7B1FA2', outer: '#6A1B9A' }, // 完美主義
+        { center: '#5E35B1', middle: '#512DA8', outer: '#4527A0' }, // 滿月
+        { center: '#3949AB', middle: '#303F9F', outer: '#283593' }  // 至善
+    ];
+    
+    // 記憶之路成就顏色
+    const memoryColors = [
+        { center: '#00796B', middle: '#00695C', outer: '#004D40' }, // 激活腦細胞
+        { center: '#00ACC1', middle: '#0097A7', outer: '#00838F' }, // 記憶麵包
+        { center: '#43A047', middle: '#388E3C', outer: '#2E7D32' }, // 移動圖書館
+        { center: '#7CB342', middle: '#689F38', outer: '#558B2F' }  // 流如背倒
+    ];
+    
+    // 特殊累積成就顏色
+    const dryEyesColors = { center: '#0288D1', middle: '#0277BD', outer: '#01579B' }; // 眼乾
+    const nightOwlKingColors = { center: '#3E2723', middle: '#3E2723', outer: '#3E2723' }; // 夜貓王
+    const focusOnEatingColors = { center: '#BF360C', middle: '#BF360C', outer: '#BF360C' }; // 請專心吃飯
+    
+    let contentHTML = `
+    <div class="space-y-6">
+        <!-- 冒險之路成就 -->
+        <div>
+            <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">冒險之路</h4>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+    `;
+    
+    // 冒險之路成就等級名稱
+    const adventureLevels = ['初心者', '勇者', '大師', '偏執狂', '掃地僧'];
+    const adventureRequirements = [1, 10, 100, 300, 500];
+    const adventureBorderColors = ['#90CAF9', '#4CAF50', '#F4511E', '#673AB7', '#FFC107'];
+    
+    // 當前冒險等級
+    const currentLevel = globalStats.achievements.adventureLevel;
+    
+    // 如果已經達成任何等級
+    if (currentLevel > 0) {
+        // 顯示當前等級成就
+        const levelIndex = currentLevel - 1;
+        contentHTML += `
+            <div class="flex items-center mb-6">
+                <div class="achievement-seal" style="width: 120px; height: 120px;">
+                    ${createAchievementSVG(adventureColors[levelIndex], adventureBorderColors[levelIndex])}
+                    <div class="seal-text">
+                        <span class="seal-title text-lg">${adventureLevels[levelIndex]}</span>
+                        <span class="seal-desc">完成${adventureRequirements[levelIndex]}次</span>
                     </div>
                 </div>
-                `;
-                
-                infoModalContent.innerHTML = contentHTML;
-            }
+                <div class="ml-5">
+                    <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${adventureLevels[levelIndex]}</p>
+                    <p class="text-gray-600 dark:text-gray-400">總完成次數：${globalStats.totalCompletionCount}</p>
+        `;
+        
+        // 如果還有下一等級，顯示進度
+        if (currentLevel < 5) {
+            const nextLevelIndex = currentLevel;
+            const nextRequirement = adventureRequirements[nextLevelIndex];
+            const progress = Math.min(100, (globalStats.totalCompletionCount / nextRequirement) * 100);
             
+            contentHTML += `
+                    <div class="mt-3">
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${adventureLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.totalCompletionCount} 次</p>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+            `;
+        } else {
+            contentHTML += `
+                    <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
+            `;
+        }
+        
+        contentHTML += `
+                </div>
+            </div>
+        `;
+    } else {
+        // 顯示尚未獲得任何成就的提示
+        contentHTML += `
+            <div class="text-center py-8">
+                <i class="fas fa-medal text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+                <p class="text-gray-600 dark:text-gray-400">尚未獲得冒險成就</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">完成至少1次挑戰解鎖「初心者」成就</p>
+            </div>
+        `;
+    }
+    
+    contentHTML += `
+            </div>
+        </div>
+        
+        <!-- 挫敗之路成就 -->
+        <div>
+            <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">挫敗之路</h4>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+    `;
+    
+    // 挫敗之路成就等級名稱
+    const defeatLevels = ['初嘗敗績', '堅毅', '鋼鐵意志', '小強是我', '心如止水'];
+    const defeatRequirements = [1, 10, 50, 100, 200];
+    const defeatBorderColors = ['#7E57C2', '#42A5F5', '#00796B', '#F57C00', '#D32F2F'];
+    
+    // 當前挫敗等級
+    const currentDefeatLevel = globalStats.achievements.defeatLevel;
+    
+    // 如果已經達成任何等級
+    if (currentDefeatLevel > 0) {
+        // 顯示當前等級成就
+        const levelIndex = currentDefeatLevel - 1;
+        contentHTML += `
+            <div class="flex items-center mb-6">
+                <div class="achievement-seal" style="width: 120px; height: 120px;">
+                    ${createAchievementSVG(defeatColors[levelIndex], defeatBorderColors[levelIndex])}
+                    <div class="seal-text">
+                        <span class="seal-title text-lg">${defeatLevels[levelIndex]}</span>
+                        <span class="seal-desc">失敗${defeatRequirements[levelIndex]}次</span>
+                    </div>
+                </div>
+                <div class="ml-5">
+                    <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${defeatLevels[levelIndex]}</p>
+                    <p class="text-gray-600 dark:text-gray-400">遊戲過半後失敗：${globalStats.failAfterHalfwayCount}次</p>
+        `;
+        
+        // 如果還有下一等級，顯示進度
+        if (currentDefeatLevel < 5) {
+            const nextLevelIndex = currentDefeatLevel;
+            const nextRequirement = defeatRequirements[nextLevelIndex];
+            const progress = Math.min(100, (globalStats.failAfterHalfwayCount / nextRequirement) * 100);
+            
+            contentHTML += `
+                    <div class="mt-3">
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${defeatLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.failAfterHalfwayCount} 次</p>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+            `;
+        } else {
+            contentHTML += `
+                    <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
+            `;
+        }
+        
+        contentHTML += `
+                </div>
+            </div>
+        `;
+    } else {
+        // 顯示尚未獲得任何成就的提示
+        contentHTML += `
+            <div class="text-center py-8">
+                <i class="fas fa-bolt-lightning text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+                <p class="text-gray-600 dark:text-gray-400">尚未獲得挫敗成就</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">在遊戲過半後失敗至少1次解鎖「初嘗敗績」成就</p>
+            </div>
+        `;
+    }
+    
+    contentHTML += `
+            </div>
+        </div>
+        
+        <!-- 極速之路成就 -->
+        <div>
+            <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">極速之路</h4>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+    `;
+    
+    // 極速之路成就等級名稱
+    const speedLevels = ['敏捷', '肌肉記憶', '無影手', '世界第一束光'];
+    const speedRequirements = [1, 10, 50, 100];
+    const speedBorderColors = ['#311B92', '#283593', '#1565C0', '#0277BD'];
+    
+    // 當前極速等級
+    const currentSpeedLevel = globalStats.achievements.speedRouteLevel;
+    
+    // 如果已經達成任何等級
+    if (currentSpeedLevel > 0) {
+        // 顯示當前等級成就
+        const levelIndex = currentSpeedLevel - 1;
+        contentHTML += `
+            <div class="flex items-center mb-6">
+                <div class="achievement-seal" style="width: 120px; height: 120px;">
+                    ${createAchievementSVG(speedColors[levelIndex], speedBorderColors[levelIndex])}
+                    <div class="seal-text">
+                        <span class="seal-title text-lg">${speedLevels[levelIndex]}</span>
+                        <span class="seal-desc">獲得${speedRequirements[levelIndex]}次</span>
+                    </div>
+                </div>
+                <div class="ml-5">
+                    <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${speedLevels[levelIndex]}</p>
+                    <p class="text-gray-600 dark:text-gray-400">閃電俠成就獲得次數：${globalStats.lightningAchievementCount}次</p>
+        `;
+        
+        // 如果還有下一等級，顯示進度
+        if (currentSpeedLevel < 4) {
+            const nextLevelIndex = currentSpeedLevel;
+            const nextRequirement = speedRequirements[nextLevelIndex];
+            const progress = Math.min(100, (globalStats.lightningAchievementCount / nextRequirement) * 100);
+            
+            contentHTML += `
+                    <div class="mt-3">
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${speedLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.lightningAchievementCount} 次</p>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+            `;
+        } else {
+            contentHTML += `
+                    <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
+            `;
+        }
+        
+        contentHTML += `
+                </div>
+            </div>
+        `;
+    } else {
+        // 顯示尚未獲得任何成就的提示
+        contentHTML += `
+            <div class="text-center py-8">
+                <i class="fas fa-bolt text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+                <p class="text-gray-600 dark:text-gray-400">尚未獲得極速成就</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">獲得「閃電俠」成就至少1次解鎖「敏捷」成就</p>
+            </div>
+        `;
+    }
+    
+    contentHTML += `
+            </div>
+        </div>
+        
+        <!-- 完美之路成就 -->
+        <div>
+            <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">完美之路</h4>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+    `;
+    
+    // 完美之路成就等級名稱
+    const perfectLevels = ['如沐春風', '完美主義', '滿月', '至善'];
+    const perfectRequirements = [1, 10, 50, 100];
+    const perfectBorderColors = ['#AD1457', '#6A1B9A', '#4527A0', '#283593'];
+    
+    // 當前完美等級
+    const currentPerfectLevel = globalStats.achievements.perfectRouteLevel;
+    
+    // 如果已經達成任何等級
+    if (currentPerfectLevel > 0) {
+        // 顯示當前等級成就
+        const levelIndex = currentPerfectLevel - 1;
+        contentHTML += `
+            <div class="flex items-center mb-6">
+                <div class="achievement-seal" style="width: 120px; height: 120px;">
+                    ${createAchievementSVG(perfectColors[levelIndex], perfectBorderColors[levelIndex])}
+                    <div class="seal-text">
+                        <span class="seal-title text-lg">${perfectLevels[levelIndex]}</span>
+                        <span class="seal-desc">獲得${perfectRequirements[levelIndex]}次</span>
+                    </div>
+                </div>
+                <div class="ml-5">
+                    <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${perfectLevels[levelIndex]}</p>
+                    <p class="text-gray-600 dark:text-gray-400">完美無瑕成就獲得次數：${globalStats.perfectAchievementCount}次</p>
+        `;
+        
+        // 如果還有下一等級，顯示進度
+        if (currentPerfectLevel < 4) {
+            const nextLevelIndex = currentPerfectLevel;
+            const nextRequirement = perfectRequirements[nextLevelIndex];
+            const progress = Math.min(100, (globalStats.perfectAchievementCount / nextRequirement) * 100);
+            
+            contentHTML += `
+                    <div class="mt-3">
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${perfectLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.perfectAchievementCount} 次</p>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+            `;
+        } else {
+            contentHTML += `
+                    <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
+            `;
+        }
+        
+        contentHTML += `
+                </div>
+            </div>
+        `;
+    } else {
+        // 顯示尚未獲得任何成就的提示
+        contentHTML += `
+            <div class="text-center py-8">
+                <i class="fas fa-gem text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+                <p class="text-gray-600 dark:text-gray-400">尚未獲得完美成就</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">獲得「完美無瑕」成就至少1次解鎖「如沐春風」成就</p>
+            </div>
+        `;
+    }
+    
+    contentHTML += `
+            </div>
+        </div>
+        
+        <!-- 記憶之路成就 -->
+        <div>
+            <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">記憶之路</h4>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+    `;
+    
+    // 記憶之路成就等級名稱
+    const memoryLevels = ['激活腦細胞', '記憶麵包', '移動圖書館', '流如背倒'];
+    const memoryRequirements = [1, 20, 50, 80];
+    const memoryBorderColors = ['#004D40', '#00838F', '#2E7D32', '#558B2F'];
+    
+    // 當前記憶等級
+    const currentMemoryLevel = globalStats.achievements.memoryRouteLevel;
+    
+    // 如果已經達成任何等級
+    if (currentMemoryLevel > 0) {
+        // 顯示當前等級成就
+        const levelIndex = currentMemoryLevel - 1;
+        contentHTML += `
+            <div class="flex items-center mb-6">
+                <div class="achievement-seal" style="width: 120px; height: 120px;">
+                    ${createAchievementSVG(memoryColors[levelIndex], memoryBorderColors[levelIndex])}
+                    <div class="seal-text">
+                        <span class="seal-title text-lg">${memoryLevels[levelIndex]}</span>
+                        <span class="seal-desc">獲得${memoryRequirements[levelIndex]}次</span>
+                    </div>
+                </div>
+                <div class="ml-5">
+                    <p class="text-lg font-bold text-gray-800 dark:text-gray-200">目前等級：${memoryLevels[levelIndex]}</p>
+                    <p class="text-gray-600 dark:text-gray-400">記憶大師成就獲得次數：${globalStats.memoryAchievementCount}次</p>
+        `;
+        
+        // 如果還有下一等級，顯示進度
+        if (currentMemoryLevel < 4) {
+            const nextLevelIndex = currentMemoryLevel;
+            const nextRequirement = memoryRequirements[nextLevelIndex];
+            const progress = Math.min(100, (globalStats.memoryAchievementCount / nextRequirement) * 100);
+            
+            contentHTML += `
+                    <div class="mt-3">
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">距離 "${memoryLevels[nextLevelIndex]}" 還需 ${nextRequirement - globalStats.memoryAchievementCount} 次</p>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+            `;
+        } else {
+            contentHTML += `
+                    <p class="mt-3 text-sm text-green-500 dark:text-green-400"><i class="fas fa-crown mr-1"></i> 已達成最高等級！</p>
+            `;
+        }
+        
+        contentHTML += `
+                </div>
+            </div>
+        `;
+    } else {
+        // 顯示尚未獲得任何成就的提示
+        contentHTML += `
+            <div class="text-center py-8">
+                <i class="fas fa-brain text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+                <p class="text-gray-600 dark:text-gray-400">尚未獲得記憶成就</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">獲得「記憶大師」成就至少1次解鎖「激活腦細胞」成就</p>
+            </div>
+        `;
+    }
+    
+    // 特殊成就
+    contentHTML += `
+            </div>
+        </div>
+        
+        <!-- 特殊成就 -->
+        <div>
+            <h4 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-4">特殊成就</h4>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                <div class="space-y-4">
+    `;
+    
+    // 眼乾成就 (獲得不知疲倦30次)
+    if (globalStats.achievements.dryEyes) {
+        contentHTML += `
+            <div class="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
+                    ${createAchievementSVG(dryEyesColors, '#0277BD')}
+                    <div class="seal-text">
+                        <span class="seal-title">眼乾</span>
+                        <span class="seal-desc text-[8px]">不暫停成癮</span>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium text-gray-800 dark:text-gray-200">眼乾</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">獲得不知疲倦30次</p>
+                    <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
+                </div>
+            </div>
+        `;
+    } else {
+        contentHTML += `
+            <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
+                <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
+                    <i class="fas fa-eye text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-500 dark:text-gray-400">眼乾</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-500">獲得「不知疲倦」30次</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 夜貓王成就 (獲得夜貓20次)
+    if (globalStats.achievements.nightOwlKing) {
+        contentHTML += `
+            <div class="flex items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
+                    ${createAchievementSVG(nightOwlKingColors, '#5D4037')}
+                    <div class="seal-text">
+                        <span class="seal-title">夜貓王</span>
+                        <span class="seal-desc text-[8px]">深夜成癮</span>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium text-gray-800 dark:text-gray-200">夜貓王</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">獲得「夜貓」20次</p>
+                    <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
+                </div>
+            </div>
+        `;
+    } else {
+        contentHTML += `
+            <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
+                <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
+                    <i class="fas fa-moon text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-500 dark:text-gray-400">夜貓王</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-500">獲得「夜貓」20次</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 請專心吃飯成就 (獲得腸胃不好20次)
+    if (globalStats.achievements.focusOnEating) {
+        contentHTML += `
+            <div class="flex items-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <div class="achievement-seal" style="width: 80px; height: 80px; margin: 0 10px 0 0;">
+                    ${createAchievementSVG(focusOnEatingColors, '#E65100')}
+                    <div class="seal-text">
+                        <span class="seal-title">請專心吃飯</span>
+                        <span class="seal-desc text-[8px]">午餐時背誦</span>
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium text-gray-800 dark:text-gray-200">請專心吃飯</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">獲得「腸胃不好」20次</p>
+                    <p class="text-xs text-green-500 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i> 已獲得</p>
+                </div>
+            </div>
+        `;
+    } else {
+        contentHTML += `
+            <div class="flex items-center p-4 bg-gray-100 dark:bg-gray-700/40 rounded-lg">
+                <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
+                    <i class="fas fa-utensils text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-500 dark:text-gray-400">請專心吃飯</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-500">獲得「腸胃不好」20次</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"><i class="fas fa-lock mr-1"></i> 未解鎖</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    contentHTML += `
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
+            持續挑戰，解鎖更多成就！
+        </div>
+    </div>
+    `;
+    
+    infoModalContent.innerHTML = contentHTML;
+}            
             console.log("初始化完成");
         });
     </script>
