@@ -650,19 +650,8 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 檢查系統深色模式並設置應用的模式
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.classList.add('dark');
-            }
-            
-            // 監聽系統深色模式變化
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (event.matches) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            });
+            // 確保移除深色模式類
+            document.documentElement.classList.remove('dark');
             
             // 添加視窗大小變化監聽
             window.addEventListener('resize', function() {
@@ -945,6 +934,9 @@
                     // 重置暫停狀態
                     hasPaused = false;
                     
+                    // 在倒計時期間禁用設置按鈕
+                    window.disableSettingsButton();
+                    
                     let countdown = 3;
                     
                     // 显示倒计时
@@ -972,6 +964,9 @@
                                 // 重置並開始秒表 (確保從0開始)
                                 elapsedTimeBeforePause = 0; // 重置累計時間
                                 resetStopwatch();
+                                
+                                // 遊戲開始后重新啟用設置按鈕
+                                window.enableSettingsButton();
                                 
                                 // 显示游戏内容
                                 updateDisplay();
@@ -1803,6 +1798,9 @@ if (passageHeader && passageToggle && passageContent) {
                 
                 // 禁止選擇選項
                 canSelect = false;
+                
+                // 禁用設置按鈕
+                window.disableSettingsButton();
                 
                 // 顯示暫停覆蓋層
                 const pauseOverlay = document.getElementById('pause-overlay');
@@ -3093,15 +3091,15 @@ if (passageHeader && passageToggle && passageContent) {
                     return;
                 }
                 
-                // 添加設置按鈕狀態控制功能
-                function disableSettingsButton() {
+                // 添加設置按鈕狀態控制功能 - 設為全局函數以便在其他地方調用
+                window.disableSettingsButton = function() {
                     settingsButton.classList.add('disabled');
                     settingsButton.style.opacity = '0.5';
                     settingsButton.style.cursor = 'not-allowed';
                     settingsButton.style.pointerEvents = 'none'; // 阻止所有點擊
                 }
                 
-                function enableSettingsButton() {
+                window.enableSettingsButton = function() {
                     settingsButton.classList.remove('disabled');
                     settingsButton.style.opacity = '1';
                     settingsButton.style.cursor = 'pointer';
