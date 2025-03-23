@@ -1522,6 +1522,9 @@ if (passageHeader && passageToggle && passageContent) {
                 console.log("開始加載段落:", passageKey, paragraphIndices);
                 
                 try {
+                    // 保存選擇的段落索引到全局變量，供分享使用
+                    window.selectedParagraphIndices = paragraphIndices;
+                    console.log("已保存段落索引:", window.selectedParagraphIndices);
                     
                     // 確保遊戲頁面存在
                     const gamePage = document.getElementById('game-page');
@@ -2549,25 +2552,32 @@ if (passageHeader && passageToggle && passageContent) {
                         let displayTitle = passageTitle;
                         let rangeText = "";
                         
+                        // 取得全局保存的段落索引，如果提供的參數無效
+                        const indicesToUse = (paragraphIndices && Array.isArray(paragraphIndices) && paragraphIndices.length > 0) 
+                            ? paragraphIndices 
+                            : (window.selectedParagraphIndices || []);
+                        
+                        console.log("分享卡片使用的段落索引:", indicesToUse);
+                        
                         // 如果有段落索引數組且不是完整篇章，構建顯示範圍
-                        if (paragraphIndices && Array.isArray(paragraphIndices)) {
+                        if (indicesToUse.length > 0) {
                             const selectedPassage = passages[currentPassageKey];
-                            if (selectedPassage && paragraphIndices.length < selectedPassage.paragraphs.length) {
+                            if (selectedPassage && indicesToUse.length < selectedPassage.paragraphs.length) {
                                 // 確定是否是連續的段落
                                 let isConsecutive = true;
-                                for (let i = 0; i < paragraphIndices.length - 1; i++) {
-                                    if (paragraphIndices[i + 1] !== paragraphIndices[i] + 1) {
+                                for (let i = 0; i < indicesToUse.length - 1; i++) {
+                                    if (indicesToUse[i + 1] !== indicesToUse[i] + 1) {
                                         isConsecutive = false;
                                         break;
                                     }
                                 }
                                 
-                                if (paragraphIndices.length === 1) {
-                                    rangeText = `第${paragraphIndices[0] + 1}段`;
+                                if (indicesToUse.length === 1) {
+                                    rangeText = `第${indicesToUse[0] + 1}段`;
                                 } else if (isConsecutive) {
-                                    rangeText = `第${paragraphIndices[0] + 1}-${paragraphIndices[paragraphIndices.length - 1] + 1}段`;
+                                    rangeText = `第${indicesToUse[0] + 1}-${indicesToUse[indicesToUse.length - 1] + 1}段`;
                                 } else {
-                                    rangeText = `第${paragraphIndices.map(idx => idx + 1).join('、')}段`;
+                                    rangeText = `第${indicesToUse.map(idx => idx + 1).join('、')}段`;
                                 }
                                 
                                 displayTitle = `${passageTitle}（${rangeText}）`;
@@ -4741,4 +4751,3 @@ function displayAchievements() {
     </script>
 </body>
 </html>
-
