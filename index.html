@@ -6,6 +6,8 @@
     <title>文言文背誦大師之旅</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- 添加html2canvas库 - 用于截图功能 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -500,14 +502,18 @@
     
     <!-- 詳細信息模態框 -->
     <div id="info-modal" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10">
+        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full mx-4 max-h-[80vh] flex flex-col">
+            <!-- 固定在頂部的標題欄，不參與滾動 -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-20 shadow-sm">
                 <h3 id="info-modal-title" class="text-xl font-bold text-gray-800 dark:text-gray-100"></h3>
                 <button id="close-info-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="info-modal-content" class="text-gray-700 dark:text-gray-300"></div>
+            <!-- 內容區域可滾動 -->
+            <div class="overflow-y-auto p-6 pt-2 flex-1">
+                <div id="info-modal-content" class="text-gray-700 dark:text-gray-300"></div>
+            </div>
         </div>
     </div>
 
@@ -712,15 +718,6 @@
             // 文言文數據 - 您可以在此處添加更多篇章
             const passages = {
 
-                '測試': {
-                    title: '《測試》',
-                    author: '小明',
-                    category: '中一',
-                    paragraphs: [
-                        '測試版本'
-                    ]
-                },
-
                 '人間詞話': {
                     title: '《人間詞話》（節錄）',
                     author: '王國維',
@@ -853,9 +850,6 @@
                 */
             };
             
-            // 重新生成篇章列表
-            generatePassageItems();
-
             // 自動生成內容和初始化
             initializePassages();
             
@@ -2468,6 +2462,188 @@ if (passageHeader && passageToggle && passageContent) {
                 };
             }
             
+            // 創建結果分享卡片
+            function createShareCard(passageTitle, author, finalTime, wrongAnswersCount, totalNonPunctChars, achievements) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        // 創建一個離屏的卡片元素用於截圖
+                        const card = document.createElement('div');
+                        card.id = 'share-card';
+                        card.className = 'fixed top-0 left-0 bg-paper-light dark:bg-paper-dark border-8 border-amber-800 p-6 rounded-lg shadow-xl';
+                        card.style.width = '350px';
+                        card.style.zIndex = '-100'; // 確保在屏幕外不可見
+                        
+                        // 學習印章效果
+                        const stampHTML = `
+                        <div class="absolute top-5 right-5 transform rotate-12">
+                            <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="50" cy="50" r="45" fill="#d00" fill-opacity="0.7" />
+                                <circle cx="50" cy="50" r="42" fill="none" stroke="#fff" stroke-width="1" stroke-dasharray="2,1" />
+                                <text x="50" y="45" font-family="'Noto Serif TC', serif" font-weight="bold" font-size="18" text-anchor="middle" fill="#fff">精通</text>
+                                <text x="50" y="65" font-family="'Noto Serif TC', serif" font-weight="bold" font-size="12" text-anchor="middle" fill="#fff">文言文</text>
+                            </svg>
+                        </div>`;
+                        
+                        // 生成成就徽章HTML
+                        let achievementsHTML = '';
+                        if (achievements && achievements.length > 0) {
+                            achievementsHTML = `
+                            <div class="mt-3 mb-2 border-t border-gray-300 dark:border-gray-600 pt-3">
+                                <p class="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">獲得成就:</p>
+                                <div class="flex flex-wrap justify-center gap-2">
+                            `;
+                            
+                            // 添加每個成就徽章
+                            achievements.forEach(achievement => {
+                                achievementsHTML += `
+                                <div class="bg-amber-100 dark:bg-amber-900/40 px-2 py-1 rounded-full text-xs text-amber-800 dark:text-amber-200">
+                                    ${achievement.title}
+                                </div>`;
+                            });
+                            
+                            achievementsHTML += `</div></div>`;
+                        }
+                        
+                        // 卡片內容
+                        card.innerHTML = `
+                            <div class="relative">
+                                ${stampHTML}
+                                <div class="text-center mb-3">
+                                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">${passageTitle}</h2>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm">${author}</p>
+                                </div>
+                                
+                                <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">完成時間:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200">${finalTime}</span>
+                                    </div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">錯誤次數:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200">${wrongAnswersCount}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">總字數:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200">${totalNonPunctChars}</span>
+                                    </div>
+                                </div>
+                                
+                                ${achievementsHTML}
+                                
+                                <div class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">
+                                    文言文背誦大師之旅 © ${new Date().getFullYear()}
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.body.appendChild(card);
+                        
+                        // 給元素一些時間渲染
+                        setTimeout(() => {
+                            html2canvas(card, {
+                                backgroundColor: document.documentElement.classList.contains('dark') ? '#2a2a2a' : '#f9f9ec',
+                                scale: 2, // 高解析度
+                                logging: false,
+                                allowTaint: true,
+                                useCORS: true
+                            }).then(canvas => {
+                                const imageData = canvas.toDataURL('image/png');
+                                document.body.removeChild(card);
+                                resolve(imageData);
+                            }).catch(err => {
+                                document.body.removeChild(card);
+                                reject(err);
+                            });
+                        }, 100);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            // 處理分享功能
+            function handleShare(imageData) {
+                // 檢查是否支持 Web Share API
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([dataURItoBlob(imageData)], 'result.png', { type: 'image/png' })] })) {
+                    // 手機分享方式
+                    navigator.share({
+                        files: [new File([dataURItoBlob(imageData)], 'result.png', { type: 'image/png' })],
+                        title: '文言文背誦大師之旅',
+                        text: '我剛剛完成了文言文背誦挑戰！'
+                    }).catch(err => {
+                        console.log('分享失敗:', err);
+                        // 如果Web Share API失敗，提供備用選項
+                        showShareOptions(imageData);
+                    });
+                } else {
+                    // 桌面版或不支持Web Share API時的分享選項
+                    showShareOptions(imageData);
+                }
+            }
+            
+            // 顯示分享選項
+            function showShareOptions(imageData) {
+                const shareModal = document.createElement('div');
+                shareModal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100]';
+                shareModal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">分享您的成績</h3>
+                        <button id="close-share-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-center mb-4">
+                        <img src="${imageData}" alt="成績卡片" class="max-h-[350px] border border-gray-200 dark:border-gray-700 rounded-lg shadow-md" />
+                    </div>
+                    <div class="flex justify-center gap-4">
+                        <button id="download-share-image" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">
+                            <i class="fas fa-download mr-2"></i>下載圖片
+                        </button>
+                    </div>
+                    <p class="text-center text-sm text-gray-500 mt-3">保存圖片後可以分享到社交媒體</p>
+                </div>
+                `;
+                
+                document.body.appendChild(shareModal);
+                
+                // 關閉按鈕
+                document.getElementById('close-share-modal').addEventListener('click', () => {
+                    document.body.removeChild(shareModal);
+                });
+                
+                // 下載圖片
+                document.getElementById('download-share-image').addEventListener('click', () => {
+                    const link = document.createElement('a');
+                    link.href = imageData;
+                    link.download = '文言文背誦成績.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+                
+                // 點擊背景關閉模態框
+                shareModal.addEventListener('click', (e) => {
+                    if (e.target === shareModal) {
+                        document.body.removeChild(shareModal);
+                    }
+                });
+            }
+            
+            // 將DataURI轉換為Blob
+            function dataURItoBlob(dataURI) {
+                const byteString = atob(dataURI.split(',')[1]);
+                const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                
+                return new Blob([ab], { type: mimeString });
+            }
+
             function completePassage() {
                 // 停止遊戲内容顯示
                 if (gameContent) {
@@ -2666,6 +2842,7 @@ if (passageHeader && passageToggle && passageContent) {
                 
                 const completionMessage = document.createElement('div');
                 completionMessage.className = 'text-center bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md w-full sm:w-4/5';
+                completionMessage.id = 'completion-result';
                 
                 // 生成成就徽章HTML
                 let achievementsHTML = '';
@@ -2701,6 +2878,9 @@ if (passageHeader && passageToggle && passageContent) {
                     </div>
                     ${achievementsHTML}
                     <div class="flex justify-center gap-4 mt-4">
+                        <button id="share-result-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-share-alt mr-2"></i>分享
+                        </button>
                         <button id="completion-return-btn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">
                             返回
                         </button>
@@ -2709,8 +2889,45 @@ if (passageHeader && passageToggle && passageContent) {
                 
                 optionsContainer.appendChild(completionMessage);
                 
-                // 添加返回按鈕的事件監聽
+                // 添加按鈕的事件監聽
                 setTimeout(() => {
+                    // 分享按鈕
+                    const shareResultBtn = document.getElementById('share-result-btn');
+                    if (shareResultBtn) {
+                        shareResultBtn.addEventListener('click', function() {
+                            // 顯示加載中動畫
+                            const loadingOverlay = document.createElement('div');
+                            loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[101]';
+                            loadingOverlay.innerHTML = `
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg flex flex-col items-center">
+                                    <i class="fas fa-spinner fa-spin text-3xl text-primary mb-3"></i>
+                                    <p class="text-gray-700 dark:text-gray-300">正在生成分享圖片...</p>
+                                </div>
+                            `;
+                            document.body.appendChild(loadingOverlay);
+                            
+                            // 創建分享卡片
+                            createShareCard(
+                                selectedPassage.title, 
+                                selectedPassage.author, 
+                                finalTime, 
+                                wrongAnswersCount, 
+                                totalNonPunctChars, 
+                                achievements
+                            ).then(imageData => {
+                                // 移除加載動畫
+                                document.body.removeChild(loadingOverlay);
+                                // 處理分享
+                                handleShare(imageData);
+                            }).catch(err => {
+                                console.error('創建分享卡片失敗:', err);
+                                document.body.removeChild(loadingOverlay);
+                                alert('生成分享圖片失敗，請稍後再試。');
+                            });
+                        });
+                    }
+                    
+                    // 返回按鈕
                     const completionReturnBtn = document.getElementById('completion-return-btn');
                     if (completionReturnBtn) {
                         completionReturnBtn.addEventListener('click', function() {
