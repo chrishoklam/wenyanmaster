@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文言文背誦大師之旅</title>
+    <title>文言大師之旅</title>
     <link rel="manifest" href="manifest.json"> 
     <meta name="theme-color" content="#4CAF50">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -549,7 +549,7 @@
         <div class="text-center p-8 max-w-xl">
             <h1 class="start-title mb-10 text-4xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg">文言文背誦<br>大師之旅</h1>
             <button id="start-journey-btn" class="start-button text-xl font-medium px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transform transition hover:scale-105">
-                開始旅程
+                進入
             </button>
             <p class="version-info mt-10 text-white/70 text-sm">v1.3</p>
         </div>
@@ -634,8 +634,8 @@
 
     <div class="container mx-auto px-4 py-8 max-w-2xl">
         <header class="mb-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">文言文背誦大師之旅</h1>
-            <p class="text-gray-600 dark:text-gray-300 text-m">製作：@chl____chl</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">文言大師之旅</h1>
+            <p class="text-gray-600 dark:text-gray-300 text-m">踏上屬於自己的征途</p>
         </header>
         
         <div class="passage-selector mb-6">
@@ -875,58 +875,12 @@
             // 文言文數據 - 您可以在此處添加更多篇章
             const passages = {
 
-                '人間詞話': {
-                    title: '《人間詞話》（節錄）',
-                    author: '王國維',
-                    category: '中三',
-                    paragraphs: [
-                        '古今之成大事業、大學問者，必經過三種境界：「昨夜西風凋碧樹。獨上高樓，望盡天涯路。」此第一境界也。「衣帶漸寬終不悔，為伊消得人憔悴。」此第二境界也。「眾裡尋他千百度，驀然回首，那人卻在，燈火闌珊處。」此第三境界也。此等語皆非大詞人不能道。然遽以此意解釋諸詞，恐為晏、歐諸公所不許也。'
-                    ]
-                },
-
-                '論四端': {
-                    title: '《論四端》',
-                    author: '孟子',
-                    category: '中三',
-                    paragraphs: [
-                        '孟子曰：「人皆有不忍人之心。先王有不忍人之心，斯有不忍人之政矣。以不忍人之心，行不忍人之政，治天下可運之掌上。」',
-                        '所以謂人皆有不忍人之心者，今人乍見孺子將入於井，皆有怵惕惻隱之心----非所以內交於孺子之父母也，非所以要譽於鄉黨朋友也，非惡其聲而然也。由是觀之，無惻隱之心，非人也；無羞惡之心，非人也；無辭讓之心，非人也；無是非之心，非人也。惻隱之心，仁之端也；羞惡之心，義之端也；辭讓之心，禮之端也；是非之心，智之端也。',
-                        '人之有是四端也，猶其有四體也。有是四端而自謂不能者，自賊者也；謂其君不能者，賊其君者也。凡有四端於我者，知皆擴而充之矣，若火之始然，泉之始達。苟能充之，足以保四海；苟不充之，不足以事父母。」'
-                    ]
-                },
-
-                '鄒忌諷齊王納諫': {
-                    title: '《鄒忌諷齊王納諫》',
-                    author: '戰國策',
-                    category: '中三', 
-                    paragraphs: [
-                        '鄒忌脩八尺有餘，而形貌昳麗。朝服衣冠，窺鏡，謂其妻曰：「我孰與城北徐公美？」其妻曰：「君美甚，徐公何能及君也！」城北徐公，齊國之美麗者也。忌不自信，而復問其妾曰：「吾孰與徐公美？」妾曰：「徐公何能及君也！」旦日，客從外來，與坐談，問之客曰：「吾與徐公孰美？」客曰：「徐公不若君之美也。」明日，徐公來，孰視之，自以為不如；窺鏡而自視，又弗如遠甚。暮寢而思之，曰：「吾妻之美我者，私我也；妾之美我者，畏我也；客之美我者，欲有求於我也。」',
-                        '於是入朝見威王，曰：「臣誠知不如徐公美。臣之妻私臣，臣之妾畏臣，臣之客欲有求於臣，皆以美於徐公。今齊地方千里，百二十城，宮婦左右，莫不私王；朝廷之臣，莫不畏王，四境之內，莫不有求於王。由此觀之，王之蔽甚矣。」王曰：「善。」乃下令：「羣臣吏民能面刺寡人之過者，受上賞；上書諫寡人者，受中賞；能謗議於市朝，聞寡人之耳者，受下賞。」',
-                        '令初下，羣臣進諫，門庭若市；數月之後，時時而間進；期年之後，雖欲言，無可進者。燕、趙、韓、魏聞之，皆朝於齊。此所謂戰勝於朝廷。'
-                    ]
-                },
-
                 '論仁論孝論君子': {
                     title: '《論仁論孝論君子》',
                     author: '論語',
                     category: '指定文言',
                     paragraphs: [
-                        '子曰：「不仁者，不可以久處約，不可以長處樂。仁者安仁，知者利仁。」',
-                        '子曰：「富與貴，是人之所欲也；不以其道得之，不處也。貧與賤，是人之所惡也；不以其道得之，不去也。君子去仁，惡乎成名？君子無終食之間違仁，造次必於是，顛沛必於是。」',
-                        '顏淵問仁。子曰：「克己復禮為仁。一日克己復禮，天下歸仁焉。為仁由己，而由人乎哉？」顏淵曰：「請問其目。」子曰：「非禮勿視，非禮勿聽，非禮勿言，非禮勿動。」顏淵曰：「回雖不敏，請事斯語矣。」',
-                        '子曰：「志士仁人，無求生以害仁，有殺身以成仁。」',
-                        '孟懿子問孝。子曰：「無違。」樊遲御，子告之曰：「孟孫問孝於我，我對曰，無違。」樊遲曰：「何謂也？」子曰：「生，事之以禮；死，葬之以禮，祭之以禮。',
-                        '子游問孝。子曰：「今之孝者，是謂能養。至於犬馬，皆能有養；不敬，何以別乎！」',
-                        '子曰：「事父母幾諫，見志不從，又敬不違，勞而不怨。」',
-                        '子曰：「父母之年，不可不知也。一則以喜，一則以懼。」',
-                        '子曰：「君子不重則不威；學則不固。主忠信。無友不如己者。過則勿憚改。」',
-                        '子曰：「君子坦蕩蕩，小人長戚戚。」',
-                        '司馬牛問君子。子曰：「君子不憂不懼。」曰：「不憂不懼，斯謂之君子已乎？」子曰：「內省不疚，夫何憂何懼？」',
-                        '子曰：「君子成人之美，不成人之惡。小人反是。」',
-                        '子曰：「君子恥其言而過其行。」',
-                        '子曰：「君子義以為質，禮以行之，孫以出之，信以成之。君子哉！」',
-                        '子曰：「君子病無能焉，不病人之不己知也。」',
-                        '子曰：「君子求諸己，小人求諸人。」'
+                        '子曰：「不仁者， '
                     ]
                 },
 
@@ -935,8 +889,7 @@
                     author: '孟子',
                     category: '指定文言',
                     paragraphs: [
-                        '孟子曰：「魚，我所欲也，熊掌，亦我所欲也；二者不可得兼，舍魚而取熊掌者也。生亦我所欲也，義亦我所欲也；二者不可得兼，舍生而取義者也。生亦我所欲，所欲有甚於生者，故不為苟得也；死亦我所惡，所惡有甚於死者，故患有所不辟也。如使人之所欲莫甚於生，則凡可以得生者，何不用也？使人之所惡莫甚於死者，則凡可以辟患者，何不為也？由是則生而有不用也，由是則可以辟患而有不為也，是故所欲有甚於生者，所惡有甚於死者。非獨賢者有是心也，人皆有之，賢者能勿喪耳。',
-                        '一簞食，一豆羹，得之則生，弗得則死。嘑爾而與之，行道之人弗受；蹴爾而與之，乞人不屑也；萬鍾則不辯禮義而受之。萬鍾於我何加焉？為宮室之美、妻妾之奉、所識窮乏者得我與？鄉為身死而不受，今為宮室之美為之；鄉為身死而不受，今為妻妾之奉為之；鄉為身死而不受，今為所識窮乏者得我而為之，是亦不可以已乎？此之謂失其本心。」'
+                        '孟子曰：「魚，我所欲也， '
                     ]
                 },
 
@@ -945,9 +898,7 @@
                     author: '荀子',
                     category: '指定文言',
                     paragraphs: [
-                        '君子曰：學不可以已。青，取之於藍，而青於藍；冰，水為之，而寒於水。木直中繩，輮以為輪，其曲中規；雖有槁暴、不復挺者，輮使之然也。故木受繩則直，金就礪則利，君子博學而日參省乎己，則知明而行無過矣。',
-                        '吾嘗終日而思矣，不如須臾之所學也；吾嘗跂而望矣，不如登高之博見也。登高而招，臂非加長也，而見者遠。順風而呼，聲非加疾也，而聞者彰。假輿馬者，非利足也，而致千里；假舟楫者，非能水也，而絕江河。君子生非異也，善假於物也。',
-                        '積土成山，風雨興焉；積水成淵，蛟龍生焉；積善成德，而神明自得，聖心備焉。故不積跬步，無以至千里；不積小流，無以成江海。騏驥一躍，不能十步；駑馬十駕，功在不舍。鍥而舍之，朽木不折；鍥而不舍，金石可鏤。螾無爪牙之利，筋骨之強，上食埃土，下飲黃泉，用心一也。蟹六跪而二螯，非蛇蟺之穴無可寄託者，用心躁也。'
+                        '君子曰：。'
                     ]
                 },
                 
@@ -956,13 +907,7 @@
                     author: '韓愈',
                     category: '指定文言',
                     paragraphs: [
-                        '古之學者必有師。師者，所以傳道、受業、解惑也。人非生而知之者，孰能無惑？惑而不從師，其為惑也終不解矣。生乎吾前，其聞道也，固先乎吾，吾從而師之；生乎吾後，其聞道也，亦先乎吾，吾從而師之。吾師道也，夫庸知其年之先後生於吾乎？是故無貴無賤，無長無少，道之所存，師之所存也。',
-                        '嗟乎！師道之不傳也久矣！欲人之無惑也難矣！古之聖人，其出人也遠矣，猶且從師而問焉；今之眾人，其下聖人也亦遠矣，而恥學於師。是故聖益聖，愚益愚，聖人之所以為聖，愚人之所以為愚，其皆出於此乎！',
-                        '愛其子，擇師而教之；於其身也，則恥師焉，惑矣！彼童子之師，授之書而習其句讀者，非吾所謂傳其道、解其惑者也。句讀之不知，惑之不解，或師焉，或不焉，小學而大遺，吾未見其明也。',
-                        '巫、醫、樂師、百工之人，不恥相師；士大夫之族，曰師、曰弟子云者，則羣聚而笑之。問之，則曰：「彼與彼年相若也，道相似也。」位卑則足羞，官盛則近諛。嗚呼！師道之不復，可知矣。巫、醫、樂師、百工之人，君子不齒，今其智乃反不能及，其可怪也歟！',
-                        '聖人無常師，孔子師郯子、萇弘、師襄、老聃。郯子之徒，其賢不及孔子。孔子曰：「三人行，則必有我師。」是故弟子不必不如師，師不必賢於弟子；聞道有先後，術業有專攻，如是而已。',
-                        '李氏子蟠，年十七，好古文，六藝經傳，皆通習之，不拘於時，學於余。余嘉其能行古道，作《師說》以貽之。'
-                    ]
+                        '古之學者必有師。'                    ]
                 },
 
                 '岳陽樓記': {
@@ -970,11 +915,7 @@
                     author: '范仲淹',
                     category: '指定文言', 
                     paragraphs: [
-                        '慶曆四年春，滕子京謫守巴陵郡。越明年，政通人和，百廢具興，乃重修岳陽樓，增其舊制，刻唐賢今人詩賦於其上；屬予作文以記之。',
-                        '予觀夫巴陵勝狀，在洞庭一湖。銜遠山，吞長江，浩浩湯湯，橫無際涯；朝暉夕陰，氣象萬千；此則岳陽樓之大觀也，前人之述備矣。然則北通巫峽，南極瀟湘，遷客騷人，多會於此，覽物之情，得無異乎？',
-                        '若夫霪雨霏霏，連月不開；陰風怒號，濁浪排空；日星隱曜，山嶽潛形；商旅不行，檣傾楫摧；薄暮冥冥，虎嘯猿啼。登斯樓也，則有去國懷鄉，憂讒畏譏，滿目蕭然，感極而悲者矣。',
-                        '至若春和景明，波瀾不驚，上下天光，一碧萬頃；沙鷗翔集，錦鱗游泳，岸芷汀蘭，郁郁青青。而或長煙一空，皓月千里，浮光躍金，靜影沉璧，漁歌互答，此樂何極。登斯樓也，則有心曠神怡，寵辱皆忘，把酒臨風，其喜洋洋者矣。',
-                        '嗟夫！予嘗求古仁人之心，或異二者之為，何哉？不以物喜，不以己悲。居廟堂之高，則憂其民；處江湖之遠，則憂其君。是進亦憂，退亦憂；然則何時而樂耶？其必曰：「先天下之憂而憂，後天下之樂而樂」歟！噫！微斯人，吾誰與歸？'
+                        '慶曆四年春，。'
                     ]
                 },
 
@@ -983,11 +924,7 @@
                     author: '蘇洵',
                     category: '指定文言', 
                     paragraphs: [
-                        '六國破滅，非兵不利，戰不善，弊在賂秦。賂秦而力虧，破滅之道也。或曰：「六國互喪，率賂秦耶？」曰：「不賂者以賂者喪。蓋失強援，不能獨完，故曰『弊在賂秦』也。」',
-                        '秦以攻取之外，小則獲邑，大則得城，較秦之所得與戰勝而得者，其實百倍；諸侯之所亡與戰敗而亡者，其實亦百倍。則秦之所大欲，諸侯之所大患，固不在戰矣。思厥先祖父，暴霜露，斬荊棘，以有尺寸之地。子孫視之不甚惜，舉以予人，如棄草芥。今日割五城，明日割十城，然後得一夕安寢，起視四境，而秦兵又至矣。然則諸侯之地有限，暴秦之欲無厭，奉之彌繁，侵之愈急，故不戰而強弱勝負已判矣。至於顛覆，理固宜然。古人云：「以地事秦，猶抱薪救火，薪不盡，火不滅。」此言得之。',
-                        '齊人未嘗賂秦，終繼五國遷滅，何哉？與嬴而不助五國也。五國既喪，齊亦不免矣。燕趙之君，始有遠略，能守其土，義不賂秦。是故燕雖小國而後亡，斯用兵之效也。至丹以荊卿為計，始速禍焉。趙嘗五戰于秦，二敗而三勝，後秦擊趙者再，李牧連卻之；洎牧以讒誅，邯鄲為郡，惜其用武而不終也。且燕趙處秦革滅殆盡之際，可謂智力孤危，戰敗而亡，誠不得已。向使三國各愛其地，齊人勿附於秦，刺客不行，良將猶在，則勝負之數，存亡之理，當與秦相較，或未易量。',
-                        '嗚呼！以賂秦之地，封天下之謀臣；以事秦之心，禮天下之奇才；幷力西嚮，則吾恐秦人食之不得下嚥也。悲夫！有如此之勢，而為秦人積威之所劫，日削月割，以趨於亡。為國者無使為積威之所劫哉！',
-                        '夫六國與秦皆諸侯，其勢弱於秦，而猶有可以不賂而勝之之勢；茍以天下之大，而從六國破亡之故事，是又在六國下矣！'
+                        '六國破滅，非兵不利。'
                     ]
                 },
 
@@ -1007,6 +944,9 @@
                 */
             };
             
+            // 重新生成篇章列表
+            generatePassageItems();
+
             // 自動生成內容和初始化
             initializePassages();
             
@@ -2723,7 +2663,7 @@ if (passageHeader && passageToggle && passageContent) {
                                 ${achievementsHTML}
                                 
                                 <div class="mt-3 text-center text-xs text-gray-400">
-                                    文言文背誦大師之旅 © ${new Date().getFullYear()}
+                                    文言大師之旅 © ${new Date().getFullYear()}
                                 </div>
                             </div>
                         `;
@@ -2760,7 +2700,7 @@ if (passageHeader && passageToggle && passageContent) {
                     // 手機分享方式
                     navigator.share({
                         files: [new File([dataURItoBlob(imageData)], 'result.png', { type: 'image/png' })],
-                        title: '文言文背誦大師之旅',
+                        title: '文言大師之旅',
                         text: '我剛剛完成了文言文背誦挑戰！'
                     }).catch(err => {
                         console.log('分享失敗:', err);
@@ -3369,22 +3309,21 @@ if (passageHeader && passageToggle && passageContent) {
                                 infoModalTitle.textContent = '遊玩說明';
                                 infoModalContent.innerHTML = `
                                     <div class="space-y-4">
-                                        <p class="mb-2"><strong>遊玩說明:</strong></p>
                                         <ol class="list-decimal pl-5 space-y-1">
                                             <li>螢幕將顯示文章的當前字元；</li>
                                             <li>從三個選項中選擇正確的下一個字；</li>
                                             <li>初始擁有3點生命值，每次錯誤扣除1點；</li>
-                                            <li>成功背誦每50個字元可恢復1點生命值（最多3點）；</li>
+                                            <li>每完成50個字元可恢復1點生命值（最多3點）；</li>
                                             <li>以最快的時間完成挑戰，爭取獲得成就！</li>
                                         </ol>
                                         <div class="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
                                             <p class="text-amber-800 dark:text-amber-400 font-medium">成就系統：</p>
                                             <ul class="list-disc pl-5 mt-2 text-gray-700 dark:text-gray-300">
-                                                <li><strong>完美無瑕</strong> - 無錯誤完成挑戰</li>
-                                                <li><strong>閃電俠</strong> - 以超快速度完成挑戰</li>
-                                                <li><strong>記憶大師</strong> - 成功背誦300字以上的長篇</li>
-                                                <li><strong>蝸牛</strong> - 慢工出細活</li>
-                                                <li><strong>不知疲倦</strong> - 全程未使用暫停功能</li>
+                                                <li><strong>完美無瑕</strong></li>
+                                                <li><strong>閃電俠</strong></li>
+                                                <li><strong>記憶大師</strong></li>
+                                                <li><strong>不知疲倦</strong></li>
+                                                <li><strong>隱藏成就等待你發掘！</strong></li>
                                             </ul>
                                         </div>
                                         <p class="mt-2">更多功能，敬請期待！</p>
@@ -3459,37 +3398,38 @@ if (passageHeader && passageToggle && passageContent) {
                                 infoModalTitle.textContent = '版本資訊';
                                 infoModalContent.innerHTML = `
                                     <div class="space-y-4">
+
                                         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                             <h4 class="text-lg font-medium text-primary mb-3">v1.3 更新資訊</h4>
-                                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-2">
-                                                <li>添加本地儲存功能，用戶資料和成就在不同會話間保留</li>
-                                                <li>自動適應系統深色模式</li>
+                                            <ul class="list-disc pl-4 text-gray-700 dark:text-gray-300 space-y-2">
+                                                <li>添加本地儲存功能，儲存用戶資料和成就</li>
                                                 <li>記錄功能改進：只在完成全文時才計入記錄</li>
-                                                <li>界面優化與穩定性改進</li>
+                                                <li>修復已知問題，提升遊戲穩定性</li>
                                             </ul>
                                         </div>
+
                                         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-90">
-                                            <h4 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-3">v1.2 更新資訊</h4>
-                                            <ul class="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
-                                                <li>新增設置中心，包含遊玩說明、記錄查詢和版本資訊</li>
+                                            <h4 class="text-lg font-medium text-primary mb-3">v1.2 更新資訊</h4>
+                                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-2">
+                                                <li>新增設置中心，包含遊玩說明、記錄和成就查詢、版本資訊等</li>
                                                 <li>新增用戶記錄功能，可查看各篇章通關次數和最佳成績</li>
-                                                <li>新增「不知疲倦」成就，獎勵全程不使用暫停功能的玩家</li>
-                                                <li>優化遊戲介面，提升視覺效果和用戶體驗</li>
-                                                <li>修復若干已知問題，提升遊戲穩定性</li>
+                                                <li>新增若干成就</li>
+                                                <li>改善遊戲介面，提升視覺效果和用戶體驗</li>
+                                                <li>修復已知問題，提升遊戲穩定性</li>
                                             </ul>
                                         </div>
                                         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-70">
-                                            <h4 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-3">v1.1 更新資訊</h4>
-                                            <ul class="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
-                                                <li>新增暫停功能，允許玩家暫時中斷遊戲</li>
+                                            <h4 class="text-lg font-medium text-primary mb-3">v1.1 更新資訊</h4>
+                                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-2">
+                                                <li>新增暫停功能</li>
                                                 <li>新增多種成就獎勵</li>
-                                                <li>優化選擇篇章界面</li>
+                                                <li>改善選擇篇章界面</li>
                                                 <li>新增生命恢復機制</li>
                                             </ul>
                                         </div>
                                         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-50">
-                                            <h4 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-3">v1.0 初始版本</h4>
-                                            <ul class="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
+                                            <h4 class="text-lg font-medium text-primary mb-3">v1.0 初始版本</h4>
+                                            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-2">
                                                 <li>基礎遊戲功能上線</li>
                                                 <li>支持多篇文言文背誦</li>
                                                 <li>支持分段練習</li>
@@ -3551,22 +3491,21 @@ if (passageHeader && passageToggle && passageContent) {
                                             <div class="w-20 h-20 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center text-2xl text-amber-800 dark:text-amber-100 mb-2">
                                                 <i class="fas fa-user"></i>
                                             </div>
-                                            <h3 class="text-lg font-medium">@chl____chl</h3>
-                                            <p class="text-gray-500 dark:text-gray-400 text-sm">文言文背誦大師之旅 開發者</p>
+                                            <h3 class="text-lg font-medium">IG：@chl____chl</h3>
+                                            <p class="text-gray-500 dark:text-gray-400 text-sm">瀝源邨校 中文科老師</p>
                                         </div>
                                         
                                         <p class="text-gray-700 dark:text-gray-300">
-                                            熱愛中國傳統文化，致力於設計能夠幫助學生輕鬆記憶文言文的學習工具。本應用旨在通過遊戲化方式，讓背誦文言文變得有趣且富有成就感。
+                                            最近沉迷用POE製作教學工具，早前跟同事展示文言文翻譯bot時，有同事提了一句：「我們是不是讓學習文言文變得枯燥了。」枯燥、枯燥……我驀然想起我中學時，一個名為《範文爭霸戰》的遊戲風靡一時，卻不知何時消失於歷史中。於是，我用相同的概念，自己做了一個小遊戲。
                                         </p>
                                         
                                         <p class="text-gray-700 dark:text-gray-300">
-                                            期望通過這款應用，能夠讓更多同學愛上中國文學經典，感受文言文的魅力。未來將持續更新內容，歡迎提供寶貴建議！
+                                            知之者不如好之者，好之者不如樂之者。如果熱愛一件事，總能把它做好的。
                                         </p>
                                         
                                         <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                             <p class="text-gray-600 dark:text-gray-400 text-sm text-center">
-                                                "學而時習之，不亦說乎？" <br>
-                                                ---- 《論語·學而》
+                                                沒什麼事情是做不到的，除了數學。
                                             </p>
                                         </div>
                                     </div>
