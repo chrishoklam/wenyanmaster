@@ -713,7 +713,7 @@
             const passages = {
 
                 '測試': {
-                    title: '《測試》（節錄）',
+                    title: '《測試》',
                     author: '小明',
                     category: '中一',
                     paragraphs: [
@@ -853,6 +853,9 @@
                 */
             };
             
+            // 重新生成篇章列表
+            generatePassageItems();
+
             // 自動生成內容和初始化
             initializePassages();
             
