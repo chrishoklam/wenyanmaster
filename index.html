@@ -2213,7 +2213,8 @@ if (passageHeader && passageToggle && passageContent) {
                 // 檢查是否過半後失敗並更新成就
                 const progressBar = document.getElementById('progress-bar');
                 if (progressBar) {
-                    const progressPercent = parseFloat(progressBar.style.width);
+                    const progressWidth = progressBar.style.width || '0%';
+                    const progressPercent = parseFloat(progressWidth);
                     
                     // 如果進度超過50%，記錄為過半後失敗
                     if (progressPercent >= 50) {
@@ -2243,7 +2244,10 @@ if (passageHeader && passageToggle && passageContent) {
                 }
                 
                 // 清空选项容器并修改布局为flex布局
-                if (!optionsContainer) return;
+                if (!optionsContainer) {
+                    console.error("選項容器未找到，無法顯示遊戲結束界面");
+                    return;
+                }
                 
                 optionsContainer.innerHTML = '';
                 optionsContainer.className = 'flex justify-center items-center mb-4';
@@ -2453,16 +2457,18 @@ if (passageHeader && passageToggle && passageContent) {
             }
             
             function completePassage() {
+                // 停止遊戲内容顯示
                 if (gameContent) {
                     gameContent.classList.add('hidden');
                 }
                 
-                // 清空选项容器并修改布局为flex布局
-                if (!optionsContainer) return;
+                // 如果指定的DOM元素不存在，則記錄錯誤並中止
+                if (!optionsContainer) {
+                    console.error("optionsContainer未找到，無法顯示遊戲完成界面");
+                    return;
+                }
                 
-                optionsContainer.innerHTML = '';
-                optionsContainer.className = 'flex flex-col justify-center items-center mb-4';
-                
+                // 清空当前字符显示
                 if (currentChar) {
                     currentChar.textContent = '';
                 }
@@ -2641,6 +2647,10 @@ if (passageHeader && passageToggle && passageContent) {
                 
                 // 保存更新的統計和成就
                 saveStats();
+                
+                // 清空選項容器並修改布局為flex布局
+                optionsContainer.innerHTML = '';
+                optionsContainer.className = 'flex flex-col justify-center items-center mb-4';
                 
                 const completionMessage = document.createElement('div');
                 completionMessage.className = 'text-center bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md w-full sm:w-4/5';
@@ -3116,8 +3126,14 @@ if (passageHeader && passageToggle && passageContent) {
                 try {
                     // 從localStorage載入用戶記錄
                     if (localStorage.getItem('userRecords')) {
-                        userRecordsMemory = JSON.parse(localStorage.getItem('userRecords'));
-                        console.log("從localStorage載入記錄成功:", Object.keys(userRecordsMemory).length, "個記錄");
+                        try {
+                            userRecordsMemory = JSON.parse(localStorage.getItem('userRecords'));
+                            console.log("從localStorage載入記錄成功:", Object.keys(userRecordsMemory).length, "個記錄");
+                        } catch (e) {
+                            console.error("解析userRecords時出錯:", e);
+                            userRecordsMemory = {};
+                            localStorage.setItem('userRecords', JSON.stringify({}));
+                        }
                     } else {
                         userRecordsMemory = {};
                         localStorage.setItem('userRecords', JSON.stringify({}));
@@ -3126,61 +3142,55 @@ if (passageHeader && passageToggle && passageContent) {
                     
                     // 從localStorage載入全局統計數據
                     if (localStorage.getItem('globalStats')) {
-                        globalStats = JSON.parse(localStorage.getItem('globalStats'));
-                        console.log("從localStorage載入統計數據成功");
+                        try {
+                            globalStats = JSON.parse(localStorage.getItem('globalStats'));
+                            console.log("從localStorage載入統計數據成功");
+                        } catch (e) {
+                            console.error("解析globalStats時出錯:", e);
+                            initializeDefaultStats();
+                        }
                     } else {
                         // 使用默認全局統計數據
-                        globalStats = {
-                            totalCompletionCount: 0,
-                            failAfterHalfwayCount: 0,
-                            lightningAchievementCount: 0,
-                            perfectAchievementCount: 0,
-                            memoryAchievementCount: 0,
-                            tirelessAchievementCount: 0,
-                            nightOwlAchievementCount: 0,
-                            badDigestionAchievementCount: 0,
-                            achievements: {
-                                nightOwl: false,
-                                badDigestion: false,
-                                dryEyes: false,
-                                nightOwlKing: false,
-                                focusOnEating: false,
-                                adventureLevel: 0,
-                                defeatLevel: 0,
-                                speedRouteLevel: 0,
-                                perfectRouteLevel: 0,
-                                memoryRouteLevel: 0
-                            }
-                        };
-                        localStorage.setItem('globalStats', JSON.stringify(globalStats));
+                        initializeDefaultStats();
                         console.log("初始化globalStats本地存儲");
                     }
                 } catch (error) {
                     console.error("載入本地存儲數據時出錯:", error);
                     // 初始化默認數據
                     userRecordsMemory = {};
-                    globalStats = {
-                        totalCompletionCount: 0,
-                        failAfterHalfwayCount: 0,
-                        lightningAchievementCount: 0,
-                        perfectAchievementCount: 0,
-                        memoryAchievementCount: 0,
-                        tirelessAchievementCount: 0,
-                        nightOwlAchievementCount: 0,
-                        badDigestionAchievementCount: 0,
-                        achievements: {
-                            nightOwl: false,
-                            badDigestion: false,
-                            dryEyes: false,
-                            nightOwlKing: false,
-                            focusOnEating: false,
-                            adventureLevel: 0,
-                            defeatLevel: 0,
-                            speedRouteLevel: 0,
-                            perfectRouteLevel: 0,
-                            memoryRouteLevel: 0
-                        }
-                    };
+                    initializeDefaultStats();
+                }
+            }
+            
+            // 初始化默認統計數據
+            function initializeDefaultStats() {
+                globalStats = {
+                    totalCompletionCount: 0,
+                    failAfterHalfwayCount: 0,
+                    lightningAchievementCount: 0,
+                    perfectAchievementCount: 0,
+                    memoryAchievementCount: 0,
+                    tirelessAchievementCount: 0,
+                    nightOwlAchievementCount: 0,
+                    badDigestionAchievementCount: 0,
+                    achievements: {
+                        nightOwl: false,
+                        badDigestion: false,
+                        dryEyes: false,
+                        nightOwlKing: false,
+                        focusOnEating: false,
+                        adventureLevel: 0,
+                        defeatLevel: 0,
+                        speedRouteLevel: 0,
+                        perfectRouteLevel: 0,
+                        memoryRouteLevel: 0
+                    }
+                };
+                
+                try {
+                    localStorage.setItem('globalStats', JSON.stringify(globalStats));
+                } catch (e) {
+                    console.error("保存默認統計數據時出錯:", e);
                 }
             }
             
@@ -3435,7 +3445,10 @@ if (passageHeader && passageToggle && passageContent) {
             // 記錄通關成績
             function recordCompletionStats(passageKey, completionTime, isFullPassage) {
                 // 只記錄完整篇章的成績
-                if (!isFullPassage) return;
+                if (!isFullPassage) {
+                    console.log("非完整篇章，不記錄成績");
+                    return;
+                }
                 
                 try {
                     // 確保userRecordsMemory已初始化
@@ -3446,14 +3459,7 @@ if (passageHeader && passageToggle && passageContent) {
                     
                     // 確保globalStats已初始化
                     if (typeof globalStats !== 'object' || globalStats === null) {
-                        globalStats = {
-                            totalCompletionCount: 0,
-                            achievements: {
-                                nightOwl: false,
-                                badDigestion: false,
-                                adventureLevel: 0
-                            }
-                        };
+                        initializeDefaultStats();
                     }
                     
                     // 更新記錄
@@ -3539,28 +3545,7 @@ function displayAchievements() {
     
     // 確保globalStats已初始化
     if (typeof globalStats !== 'object' || globalStats === null) {
-        globalStats = {
-            totalCompletionCount: 0,
-            failAfterHalfwayCount: 0,
-            lightningAchievementCount: 0,
-            perfectAchievementCount: 0,
-            memoryAchievementCount: 0,
-            tirelessAchievementCount: 0,
-            nightOwlAchievementCount: 0,
-            badDigestionAchievementCount: 0,
-            achievements: {
-                nightOwl: false,
-                badDigestion: false,
-                dryEyes: false,
-                nightOwlKing: false,
-                focusOnEating: false,
-                adventureLevel: 0,
-                defeatLevel: 0,
-                speedRouteLevel: 0,
-                perfectRouteLevel: 0,
-                memoryRouteLevel: 0
-            }
-        };
+        initializeDefaultStats();
     }
     
     // 創建SVG徽章
