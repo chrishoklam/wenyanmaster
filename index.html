@@ -542,7 +542,7 @@
                         </div>
                     </div>
                     
-                    <!—選擇區域段落 (默認隱藏) -->
+                    <!--選擇區域段落 (默認隱藏) -->
                     <div id="paragraph-selector" class="mt-3 bg-white dark:bg-gray-800 rounded-md p-3 hidden">
                         <p class="text-gray-700 dark:text-gray-300 mb-2 font-medium">選擇背誦段落：</p>
                         <div id="paragraph-list" class="space-y-2">
@@ -713,7 +713,7 @@
                     category: '中三',
                     paragraphs: [
                         '孟子曰：「人皆有不忍人之心。先王有不忍人之心，斯有不忍人之政矣。以不忍人之心，行不忍人之政，治天下可運之掌上。」',
-                        '所以謂人皆有不忍人之心者，今人乍見孺子將入於井，皆有怵惕惻隱之心——非所以內交於孺子之父母也，非所以要譽於鄉黨朋友也，非惡其聲而然也。由是觀之，無惻隱之心，非人也；無羞惡之心，非人也；無辭讓之心，非人也；無是非之心，非人也。惻隱之心，仁之端也；羞惡之心，義之端也；辭讓之心，禮之端也；是非之心，智之端也。',
+                        '所以謂人皆有不忍人之心者，今人乍見孺子將入於井，皆有怵惕惻隱之心----非所以內交於孺子之父母也，非所以要譽於鄉黨朋友也，非惡其聲而然也。由是觀之，無惻隱之心，非人也；無羞惡之心，非人也；無辭讓之心，非人也；無是非之心，非人也。惻隱之心，仁之端也；羞惡之心，義之端也；辭讓之心，禮之端也；是非之心，智之端也。',
                         '人之有是四端也，猶其有四體也。有是四端而自謂不能者，自賊者也；謂其君不能者，賊其君者也。凡有四端於我者，知皆擴而充之矣，若火之始然，泉之始達。苟能充之，足以保四海；苟不充之，不足以事父母。」'
                     ]
                 },
@@ -2469,8 +2469,8 @@ if (passageHeader && passageToggle && passageContent) {
                     console.log("是否為完整篇章:", isFullPassage);
                     console.log("完成時間(秒):", totalSeconds);
                     
-                    // 無論如何都記錄成績 - 為了測試
-                    recordCompletionStats(currentPassageKey, totalSeconds, true);
+                    // 只有完整篇章才記錄成績
+                    recordCompletionStats(currentPassageKey, totalSeconds, isFullPassage);
                 }
                 
                 // 播放紙屑慶祝效果
@@ -2761,7 +2761,7 @@ if (passageHeader && passageToggle && passageContent) {
                     return true;
                 }
                 // 檢查其他標點符號
-                return '「」：︰！，。；——……『』、？:'.includes(char);
+                return '「」：︰！，。；----……『』、？:'.includes(char);
             }
             
             function shuffleArray(array) {
@@ -3060,7 +3060,7 @@ if (passageHeader && passageToggle && passageContent) {
                                         <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                             <p class="text-gray-600 dark:text-gray-400 text-sm text-center">
                                                 "學而時習之，不亦說乎？" <br>
-                                                —— 《論語·學而》
+                                                ---- 《論語·學而》
                                             </p>
                                         </div>
                                     </div>
