@@ -639,11 +639,25 @@
     
     <!-- 版本號 -->
     <div class="text-center py-3 text-gray-500 dark:text-gray-400 text-sm">
-        <p>v1.2</p>
+        <p>v1.3</p>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 檢查系統深色模式並設置應用的模式
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            }
+            
+            // 監聽系統深色模式變化
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (event.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            });
+            
             // 添加視窗大小變化監聽
             window.addEventListener('resize', function() {
                 // 如果篇章選擇器已打開
@@ -2222,6 +2236,9 @@ if (passageHeader && passageToggle && passageContent) {
                         }
                         
                         console.log(`過半後失敗，總計: ${failCount}次，成就等級: ${globalStats.achievements.defeatLevel}`);
+                        
+                        // 保存更新的統計數據
+                        saveStats();
                     }
                 }
                 
@@ -2622,6 +2639,9 @@ if (passageHeader && passageToggle && passageContent) {
                     });
                 }
                 
+                // 保存更新的統計和成就
+                saveStats();
+                
                 const completionMessage = document.createElement('div');
                 completionMessage.className = 'text-center bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md w-full sm:w-4/5';
                 
@@ -2963,8 +2983,17 @@ if (passageHeader && passageToggle && passageContent) {
                                 infoModalContent.innerHTML = `
                                     <div class="space-y-4">
                                         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                            <h4 class="text-lg font-medium text-primary mb-3">v1.2 更新資訊</h4>
+                                            <h4 class="text-lg font-medium text-primary mb-3">v1.3 更新資訊</h4>
                                             <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 space-y-2">
+                                                <li>添加本地儲存功能，用戶資料和成就在不同會話間保留</li>
+                                                <li>自動適應系統深色模式</li>
+                                                <li>記錄功能改進：只在完成全文時才計入記錄</li>
+                                                <li>界面優化與穩定性改進</li>
+                                            </ul>
+                                        </div>
+                                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-90">
+                                            <h4 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-3">v1.2 更新資訊</h4>
+                                            <ul class="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
                                                 <li>新增設置中心，包含遊玩說明、記錄查詢和版本資訊</li>
                                                 <li>新增用戶記錄功能，可查看各篇章通關次數和最佳成績</li>
                                                 <li>新增「不知疲倦」成就，獎勵全程不使用暫停功能的玩家</li>
@@ -2972,7 +3001,7 @@ if (passageHeader && passageToggle && passageContent) {
                                                 <li>修復若干已知問題，提升遊戲穩定性</li>
                                             </ul>
                                         </div>
-                                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-90">
+                                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-70">
                                             <h4 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-3">v1.1 更新資訊</h4>
                                             <ul class="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
                                                 <li>新增暫停功能，允許玩家暫時中斷遊戲</li>
@@ -2981,7 +3010,7 @@ if (passageHeader && passageToggle && passageContent) {
                                                 <li>新增生命恢復機制</li>
                                             </ul>
                                         </div>
-                                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-70">
+                                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg opacity-50">
                                             <h4 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-3">v1.0 初始版本</h4>
                                             <ul class="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
                                                 <li>基礎遊戲功能上線</li>
@@ -3084,9 +3113,94 @@ if (passageHeader && passageToggle && passageContent) {
                     return;
                 }
                 
-                // 獲取或初始化用戶記錄
-                if (!localStorage.getItem('userRecords')) {
-                    localStorage.setItem('userRecords', JSON.stringify({}));
+                try {
+                    // 從localStorage載入用戶記錄
+                    if (localStorage.getItem('userRecords')) {
+                        userRecordsMemory = JSON.parse(localStorage.getItem('userRecords'));
+                        console.log("從localStorage載入記錄成功:", Object.keys(userRecordsMemory).length, "個記錄");
+                    } else {
+                        userRecordsMemory = {};
+                        localStorage.setItem('userRecords', JSON.stringify({}));
+                        console.log("初始化userRecords本地存儲");
+                    }
+                    
+                    // 從localStorage載入全局統計數據
+                    if (localStorage.getItem('globalStats')) {
+                        globalStats = JSON.parse(localStorage.getItem('globalStats'));
+                        console.log("從localStorage載入統計數據成功");
+                    } else {
+                        // 使用默認全局統計數據
+                        globalStats = {
+                            totalCompletionCount: 0,
+                            failAfterHalfwayCount: 0,
+                            lightningAchievementCount: 0,
+                            perfectAchievementCount: 0,
+                            memoryAchievementCount: 0,
+                            tirelessAchievementCount: 0,
+                            nightOwlAchievementCount: 0,
+                            badDigestionAchievementCount: 0,
+                            achievements: {
+                                nightOwl: false,
+                                badDigestion: false,
+                                dryEyes: false,
+                                nightOwlKing: false,
+                                focusOnEating: false,
+                                adventureLevel: 0,
+                                defeatLevel: 0,
+                                speedRouteLevel: 0,
+                                perfectRouteLevel: 0,
+                                memoryRouteLevel: 0
+                            }
+                        };
+                        localStorage.setItem('globalStats', JSON.stringify(globalStats));
+                        console.log("初始化globalStats本地存儲");
+                    }
+                } catch (error) {
+                    console.error("載入本地存儲數據時出錯:", error);
+                    // 初始化默認數據
+                    userRecordsMemory = {};
+                    globalStats = {
+                        totalCompletionCount: 0,
+                        failAfterHalfwayCount: 0,
+                        lightningAchievementCount: 0,
+                        perfectAchievementCount: 0,
+                        memoryAchievementCount: 0,
+                        tirelessAchievementCount: 0,
+                        nightOwlAchievementCount: 0,
+                        badDigestionAchievementCount: 0,
+                        achievements: {
+                            nightOwl: false,
+                            badDigestion: false,
+                            dryEyes: false,
+                            nightOwlKing: false,
+                            focusOnEating: false,
+                            adventureLevel: 0,
+                            defeatLevel: 0,
+                            speedRouteLevel: 0,
+                            perfectRouteLevel: 0,
+                            memoryRouteLevel: 0
+                        }
+                    };
+                }
+            }
+            
+            // 保存統計數據到localStorage
+            function saveStats() {
+                if (typeof(Storage) === "undefined") {
+                    console.log("瀏覽器不支持localStorage, 無法保存數據");
+                    return;
+                }
+                
+                try {
+                    // 保存用戶記錄
+                    localStorage.setItem('userRecords', JSON.stringify(userRecordsMemory));
+                    
+                    // 保存全局統計
+                    localStorage.setItem('globalStats', JSON.stringify(globalStats));
+                    
+                    console.log("數據已成功保存到localStorage");
+                } catch (error) {
+                    console.error("保存數據到localStorage時出錯:", error);
                 }
             }
             
@@ -3406,6 +3520,9 @@ if (passageHeader && passageToggle && passageContent) {
                     if (userRecordsMemory[passageKey].bestTime === null || completionTime < userRecordsMemory[passageKey].bestTime) {
                         userRecordsMemory[passageKey].bestTime = completionTime;
                     }
+                    
+                    // 保存更新後的數據到localStorage
+                    saveStats();
                     
                     console.log(`更新記錄：${passageKey}，完成次數: ${userRecordsMemory[passageKey].completionCount}, 最佳時間: ${userRecordsMemory[passageKey].bestTime}`);
                     console.log("當前記錄數據：", JSON.stringify(userRecordsMemory));
