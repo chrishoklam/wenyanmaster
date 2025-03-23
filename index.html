@@ -2806,6 +2806,47 @@ if (passageHeader && passageToggle && passageContent) {
             // 初始化設置按鈕及相關功能
             initializeSettings();
             
+            // 首先声明全局变量，确保它们在使用之前已完成初始化
+            // 用於替代localStorage的內存存儲
+            let userRecordsMemory = {};
+            
+            // 全局成就和統計跟踪
+            let globalStats = {
+                totalCompletionCount: 0,      // 總完成次數
+                failAfterHalfwayCount: 0,     // 遊戲過半後失敗次數
+                lightningAchievementCount: 0, // 獲得閃電俠成就次數
+                perfectAchievementCount: 0,   // 獲得完美無瑕成就次數
+                memoryAchievementCount: 0,    // 獲得記憶大師成就次數
+                tirelessAchievementCount: 0,  // 獲得不知疲倦成就次數
+                nightOwlAchievementCount: 0,  // 獲得夜貓成就次數
+                badDigestionAchievementCount: 0, // 獲得腸胃不好成就次數
+                achievements: {
+                    // 特殊時間成就
+                    nightOwl: false,         // 夜貓（01:00-03:00完成）
+                    badDigestion: false,     // 腸胃不好（11:59-12:45完成）
+                    
+                    // 特殊累積成就
+                    dryEyes: false,          // 眼乾（獲得「不知疲倦」30次）
+                    nightOwlKing: false,     // 夜貓王（獲得「夜貓」20次）
+                    focusOnEating: false,    // 請專心吃飯（獲得「腸胃不好」20次）
+                    
+                    // 冒險之路成就
+                    adventureLevel: 0,       // 0:未獲得 1:初心者 2:勇者 3:大師 4:偏執狂 5:掃地僧
+                    
+                    // 挫敗之路成就
+                    defeatLevel: 0,          // 0:未獲得 1:初嘗敗績 2:堅毅 3:鋼鐵意志 4:小強是我 5:心如止水
+                    
+                    // 極速之路成就
+                    speedRouteLevel: 0,      // 0:未獲得 1:敏捷 2:肌肉記憶 3:無影手 4:世界第一束光
+                    
+                    // 完美之路成就
+                    perfectRouteLevel: 0,     // 0:未獲得 1:如沐春風 2:完美主義 3:滿月 4:至善
+                    
+                    // 記憶之路成就
+                    memoryRouteLevel: 0       // 0:未獲得 1:激活腦細胞 2:記憶麵包 3:移動圖書館 4:流如背倒
+                }
+            };
+            
             // 初始化本地存儲功能 - 用於記錄用戶成績
             initializeLocalStorage();
             
@@ -3117,43 +3158,73 @@ if (passageHeader && passageToggle && passageContent) {
             
             // 初始化本地存儲功能
             function initializeLocalStorage() {
-                // 檢查是否支持localStorage
-                if (typeof(Storage) === "undefined") {
-                    console.log("瀏覽器不支持localStorage");
+                console.log("初始化本地存儲功能...");
+                
+                // 首先檢查瀏覽器是否支持localStorage
+                try {
+                    // 進行測試寫入和讀取以確認localStorage可用性
+                    localStorage.setItem('test', 'test');
+                    if (localStorage.getItem('test') !== 'test') {
+                        throw new Error("localStorage讀寫測試失敗");
+                    }
+                    localStorage.removeItem('test');
+                    console.log("localStorage可用性測試通過");
+                } catch (e) {
+                    console.error("localStorage不可用:", e);
+                    // 儲存功能不可用時繼續使用內存存儲
+                    userRecordsMemory = {};
+                    initializeDefaultStats();
+                    alert("注意：本地儲存功能不可用，您的記錄將不會被保存。可能原因：私隱模式瀏覽或瀏覽器限制。");
                     return;
                 }
                 
                 try {
                     // 從localStorage載入用戶記錄
-                    if (localStorage.getItem('userRecords')) {
+                    let rawUserRecords = localStorage.getItem('MemoryMaster_userRecords');
+                    // 關鍵點：修正了localStorage的鍵名，添加了應用前綴避免命名衝突
+                    
+                    console.log("原始用戶記錄數據:", rawUserRecords);
+                    
+                    if (rawUserRecords) {
                         try {
-                            userRecordsMemory = JSON.parse(localStorage.getItem('userRecords'));
+                            userRecordsMemory = JSON.parse(rawUserRecords);
+                            console.log("解析後的用戶記錄:", userRecordsMemory);
                             console.log("從localStorage載入記錄成功:", Object.keys(userRecordsMemory).length, "個記錄");
                         } catch (e) {
                             console.error("解析userRecords時出錯:", e);
+                            console.log("無效的JSON格式:", rawUserRecords);
                             userRecordsMemory = {};
-                            localStorage.setItem('userRecords', JSON.stringify({}));
+                            localStorage.setItem('MemoryMaster_userRecords', JSON.stringify({}));
                         }
                     } else {
+                        console.log("未找到現有記錄，創建新的空記錄");
                         userRecordsMemory = {};
-                        localStorage.setItem('userRecords', JSON.stringify({}));
+                        localStorage.setItem('MemoryMaster_userRecords', JSON.stringify({}));
                         console.log("初始化userRecords本地存儲");
                     }
                     
                     // 從localStorage載入全局統計數據
-                    if (localStorage.getItem('globalStats')) {
+                    let rawGlobalStats = localStorage.getItem('MemoryMaster_globalStats');
+                    console.log("原始全局統計數據:", rawGlobalStats);
+                    
+                    if (rawGlobalStats) {
                         try {
-                            globalStats = JSON.parse(localStorage.getItem('globalStats'));
+                            globalStats = JSON.parse(rawGlobalStats);
+                            console.log("解析後的全局統計:", globalStats);
                             console.log("從localStorage載入統計數據成功");
                         } catch (e) {
                             console.error("解析globalStats時出錯:", e);
+                            console.log("無效的JSON格式:", rawGlobalStats);
                             initializeDefaultStats();
                         }
                     } else {
-                        // 使用默認全局統計數據
+                        console.log("未找到現有全局統計，創建默認統計數據");
                         initializeDefaultStats();
                         console.log("初始化globalStats本地存儲");
                     }
+                    
+                    // 立即保存一次，確認數據能夠正確寫入
+                    saveStats(true);
                 } catch (error) {
                     console.error("載入本地存儲數據時出錯:", error);
                     // 初始化默認數據
@@ -3164,6 +3235,7 @@ if (passageHeader && passageToggle && passageContent) {
             
             // 初始化默認統計數據
             function initializeDefaultStats() {
+                console.log("初始化默認統計數據");
                 globalStats = {
                     totalCompletionCount: 0,
                     failAfterHalfwayCount: 0,
@@ -3188,29 +3260,59 @@ if (passageHeader && passageToggle && passageContent) {
                 };
                 
                 try {
-                    localStorage.setItem('globalStats', JSON.stringify(globalStats));
+                    localStorage.setItem('MemoryMaster_globalStats', JSON.stringify(globalStats));
+                    console.log("默認統計數據已保存到localStorage");
                 } catch (e) {
                     console.error("保存默認統計數據時出錯:", e);
                 }
             }
             
             // 保存統計數據到localStorage
-            function saveStats() {
-                if (typeof(Storage) === "undefined") {
-                    console.log("瀏覽器不支持localStorage, 無法保存數據");
-                    return;
+            function saveStats(isInitial = false) {
+                if (!isInitial) {
+                    console.log("保存統計數據到localStorage...");
+                }
+                
+                // 測試localStorage可用性
+                try {
+                    localStorage.setItem('test', 'test');
+                    localStorage.removeItem('test');
+                } catch (e) {
+                    console.error("localStorage不可用，無法保存數據:", e);
+                    return false;
                 }
                 
                 try {
-                    // 保存用戶記錄
-                    localStorage.setItem('userRecords', JSON.stringify(userRecordsMemory));
+                    // 將要保存的數據轉為JSON字符串
+                    const userRecordsJson = JSON.stringify(userRecordsMemory);
+                    const globalStatsJson = JSON.stringify(globalStats);
                     
-                    // 保存全局統計
-                    localStorage.setItem('globalStats', JSON.stringify(globalStats));
+                    // 檢查數據大小是否超過瀏覽器限制(通常約5MB)
+                    const totalSize = userRecordsJson.length + globalStatsJson.length;
+                    if (totalSize > 4 * 1024 * 1024) { // 4MB警告閾值
+                        console.warn("數據大小接近localStorage限制:", totalSize, "bytes");
+                    }
                     
-                    console.log("數據已成功保存到localStorage");
+                    // 保存用戶記錄和全局統計
+                    localStorage.setItem('MemoryMaster_userRecords', userRecordsJson);
+                    localStorage.setItem('MemoryMaster_globalStats', globalStatsJson);
+                    
+                    // 驗證保存是否成功
+                    const savedUserRecords = localStorage.getItem('MemoryMaster_userRecords');
+                    const savedGlobalStats = localStorage.getItem('MemoryMaster_globalStats');
+                    
+                    if (savedUserRecords !== userRecordsJson || savedGlobalStats !== globalStatsJson) {
+                        console.error("數據驗證失敗，保存的數據與原始數據不一致");
+                        return false;
+                    }
+                    
+                    if (!isInitial) {
+                        console.log("數據已成功保存並驗證");
+                    }
+                    return true;
                 } catch (error) {
                     console.error("保存數據到localStorage時出錯:", error);
+                    return false;
                 }
             }
             
@@ -3402,45 +3504,7 @@ if (passageHeader && passageToggle && passageContent) {
                 }, 100);
             }
             
-            // 用於替代localStorage的內存存儲
-            let userRecordsMemory = {};
-            
-            // 全局成就和統計跟踪
-            let globalStats = {
-                totalCompletionCount: 0,      // 總完成次數
-                failAfterHalfwayCount: 0,     // 遊戲過半後失敗次數
-                lightningAchievementCount: 0, // 獲得閃電俠成就次數
-                perfectAchievementCount: 0,   // 獲得完美無瑕成就次數
-                memoryAchievementCount: 0,    // 獲得記憶大師成就次數
-                tirelessAchievementCount: 0,  // 獲得不知疲倦成就次數
-                nightOwlAchievementCount: 0,  // 獲得夜貓成就次數
-                badDigestionAchievementCount: 0, // 獲得腸胃不好成就次數
-                achievements: {
-                    // 特殊時間成就
-                    nightOwl: false,         // 夜貓（01:00-03:00完成）
-                    badDigestion: false,     // 腸胃不好（11:59-12:45完成）
-                    
-                    // 特殊累積成就
-                    dryEyes: false,          // 眼乾（獲得「不知疲倦」30次）
-                    nightOwlKing: false,     // 夜貓王（獲得「夜貓」20次）
-                    focusOnEating: false,    // 請專心吃飯（獲得「腸胃不好」20次）
-                    
-                    // 冒險之路成就
-                    adventureLevel: 0,       // 0:未獲得 1:初心者 2:勇者 3:大師 4:偏執狂 5:掃地僧
-                    
-                    // 挫敗之路成就
-                    defeatLevel: 0,          // 0:未獲得 1:初嘗敗績 2:堅毅 3:鋼鐵意志 4:小強是我 5:心如止水
-                    
-                    // 極速之路成就
-                    speedRouteLevel: 0,      // 0:未獲得 1:敏捷 2:肌肉記憶 3:無影手 4:世界第一束光
-                    
-                    // 完美之路成就
-                    perfectRouteLevel: 0,     // 0:未獲得 1:如沐春風 2:完美主義 3:滿月 4:至善
-                    
-                    // 記憶之路成就
-                    memoryRouteLevel: 0       // 0:未獲得 1:激活腦細胞 2:記憶麵包 3:移動圖書館 4:流如背倒
-                }
-            };
+            // 完全移除重複的宣告和對象定義，因為這些已經在前面定義過了
             
             // 記錄通關成績
             function recordCompletionStats(passageKey, completionTime, isFullPassage) {
