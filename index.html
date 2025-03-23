@@ -362,6 +362,59 @@
             font-weight: 500;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
+        
+        /* 魔王模式樣式 */
+        #boss-mode-timer {
+            position: fixed;
+            top: 4px;
+            right: 4px;
+            background-color: #dc2626;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1.25rem;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+        }
+        
+        #boss-mode-progress {
+            position: fixed;
+            top: 4rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+        }
+        
+        #boss-mode-exit-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4B5563;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 49;
+            transition: all 0.3s;
+        }
+        
+        #boss-mode-exit-button:hover {
+            background-color: #374151;
+        }
+        
+        .boss-mode-active .page-content {
+            background-color: rgba(254, 226, 226, 0.6) !important;
+        }
+        
+        .dark .boss-mode-active .page-content {
+            background-color: rgba(185, 28, 28, 0.1) !important;
+        }
     </style>
     
     <!-- 慶祝動畫和載入動畫樣式 -->
@@ -468,27 +521,71 @@
         }
         
         .start-button {
+            position: relative;
             padding: 0.8rem 2.5rem;
-            background-color: #5D5CDE;
             color: white;
             border: none;
-            border-radius: 0.5rem;
             font-size: 1.25rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             margin-bottom: 2.5rem;
+            /* 純黑白水墨風格 */
+            background-color: rgba(0, 0, 0, 0.9);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            /* 簡潔陰影 */
+            box-shadow: 
+                0 4px 10px rgba(0, 0, 0, 0.4),
+                inset 0 0 3px rgba(255, 255, 255, 0.15);
+            /* 添加毛筆邊緣效果 */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .start-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* 輕微的黑白變化，模擬墨跡濃淡 */
+            background: 
+                radial-gradient(ellipse at top left, rgba(60, 60, 60, 0.5) 0%, transparent 70%),
+                radial-gradient(ellipse at bottom right, rgba(20, 20, 20, 0.8) 0%, transparent 70%);
+            opacity: 0.7;
+            z-index: -1;
+        }
+        
+        .start-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* 水墨紋理效果 */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.3 0"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
+            opacity: 0.07;
+            mix-blend-mode: overlay;
+            z-index: -1;
+            pointer-events: none;
         }
         
         .start-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 10px rgba(0, 0, 0, 0.4);
-            background-color: #4a49c8;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.5),
+                inset 0 0 5px rgba(255, 255, 255, 0.2);
+            /* 懸停時變暗一點，模擬墨色加深 */
+            background-color: rgba(0, 0, 0, 1);
         }
         
         .start-button:active {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+            transform: translateY(0);
+            box-shadow: 
+                0 2px 6px rgba(0, 0, 0, 0.4),
+                inset 0 0 3px rgba(255, 255, 255, 0.1);
         }
         
         .version-info {
@@ -560,6 +657,10 @@
                 <button data-section="version" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                     <i class="fas fa-code-branch text-green-500 mr-3"></i>
                     <span class="text-gray-800 dark:text-gray-200">版本資訊</span>
+                </button>
+                <button data-section="boss-mode" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <i class="fas fa-crown text-red-500 mr-3"></i>
+                    <span class="text-gray-800 dark:text-gray-200">魔王模式</span>
                 </button>
                 <button data-section="about" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                     <i class="fas fa-user text-blue-500 mr-3"></i>
@@ -1669,6 +1770,9 @@ if (passageHeader && passageToggle && passageContent) {
                     // 確保恢復秒表時重新開始計時
                     elapsedTimeBeforePause = 0;
                     
+                    // 儲存選中的段落索引，用於分享卡片顯示
+                    window.selectedParagraphIndices = paragraphIndices;
+                    
                     // 更新進度顯示 - 使用選中段落的總字數
                     const totalCharsElement = document.getElementById('total-chars');
                     const progressTextElement = document.getElementById('progress-text');
@@ -2642,8 +2746,8 @@ if (passageHeader && passageToggle && passageContent) {
                                     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
                                         ${svg}
                                     </div>
-                                    <div style="position: relative; z-index: 10; font-family: 'Noto Serif TC', serif; font-weight: bold; text-align: center; color: #fff; display: flex; flex-direction: column; align-items: center; width: 100%;">
-                                        <span style="font-size: 10px; line-height: 1.2; display: block; width: 80%; text-align: center;">${achievement.title}</span>
+                                    <div style="position: relative; z-index: 10; font-family: 'Noto Serif TC', serif; font-weight: bold; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                                        <span style="font-size: 10px; line-height: 1.2; text-align: center; width: 80%; display: block;">${achievement.title}</span>
                                     </div>
                                 </div>`;
                             });
@@ -3052,6 +3156,10 @@ if (passageHeader && passageToggle && passageContent) {
                             `;
                             document.body.appendChild(loadingOverlay);
                             
+                            // 獲取當前選擇的段落索引 - 用於在分享卡片中顯示
+                            // 檢查是否有選擇的段落索引並傳入
+                            const paragraphInfo = window.selectedParagraphIndices || [];
+                            
                             // 創建分享卡片
                             createShareCard(
                                 selectedPassage.title, 
@@ -3059,7 +3167,8 @@ if (passageHeader && passageToggle && passageContent) {
                                 finalTime, 
                                 wrongAnswersCount, 
                                 totalNonPunctChars, 
-                                achievements
+                                achievements,
+                                paragraphInfo // 傳遞段落索引
                             ).then(imageData => {
                                 // 移除加載動畫
                                 document.body.removeChild(loadingOverlay);
@@ -3313,7 +3422,733 @@ if (passageHeader && passageToggle && passageContent) {
                             }
                             
                             // 根據選項顯示不同內容
-                            if (section === 'help') {
+                            if (section === 'boss-mode') {
+                                // 魔王模式
+                                infoModalTitle.textContent = '魔王模式';
+                                
+                                // 初始化 bossMode 變數（如果尚未存在）
+                                if (!window.bossModeStats) {
+                                    window.bossModeStats = {
+                                        challengesLeft: 3,
+                                        lastResetDate: '',
+                                    };
+                                }
+                                
+                                // 檢查是否需要重置每日挑戰次數
+                                const today = new Date().toDateString();
+                                if (window.bossModeStats.lastResetDate !== today) {
+                                    window.bossModeStats.challengesLeft = 3;
+                                    window.bossModeStats.lastResetDate = today;
+                                }
+                                
+                                // 獲取最新的挑戰次數
+                                const updatedChallengesLeft = window.bossModeStats.challengesLeft;
+                                
+                                infoModalContent.innerHTML = `
+                                    <div class="space-y-5">
+                                        <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                                            <p class="text-lg font-bold text-red-800 dark:text-red-400 mb-2">
+                                                <i class="fas fa-crown mr-2"></i>魔王模式
+                                            </p>
+                                            <p class="text-gray-700 dark:text-gray-300">
+                                                魔王模式將從「中一」、「中二」、「中三」、「指定文言」中隨機抽取3篇文章的各一個段落，
+                                                你需要連續挑戰這些段落，限時完成。
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                            <p class="font-medium text-gray-800 dark:text-gray-200 mb-2">規則說明：</p>
+                                            <ul class="list-disc pl-5 space-y-1 text-gray-700 dark:text-gray-300">
+                                                <li>連續挑戰3篇文章的各一個段落</li>
+                                                <li>遊戲開始時間為10秒</li>
+                                                <li>每答對1題加2秒</li>
+                                                <li>時間歸零時遊戲失敗</li>
+                                                <li>完成一篇後進入下一篇前，時間重置</li>
+                                                <li>每天最多挑戰3次</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <p class="mb-3 text-gray-700 dark:text-gray-300">
+                                                今日剩餘挑戰次數：<span class="font-bold text-red-600 dark:text-red-400">${updatedChallengesLeft}</span>
+                                            </p>
+                                            <div class="flex justify-center gap-3">
+                                                <button id="start-boss-mode" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all" ${updatedChallengesLeft <= 0 ? 'disabled' : ''}>
+                                                    <i class="fas fa-fire mr-2"></i>進入魔王模式
+                                                </button>
+                                                <button id="cancel-boss-mode" class="px-6 py-3 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-all">
+                                                    <i class="fas fa-times mr-2"></i>退出
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                infoModal.classList.remove('hidden');
+                                console.log("已顯示魔王模式");
+                                
+                                // 添加退出按钮样式
+                                const bossExitButtonStyle = document.createElement('style');
+                                bossExitButtonStyle.id = 'boss-exit-button-style';
+                                document.head.appendChild(bossExitButtonStyle);
+                                
+                                // 添加取消按钮事件
+                                setTimeout(() => {
+                                    const cancelBossMode = document.getElementById('cancel-boss-mode');
+                                    if (cancelBossMode) {
+                                        cancelBossMode.addEventListener('click', function() {
+                                            infoModal.classList.add('hidden');
+                                            enableSettingsButton();
+                                        });
+                                    }
+                                }, 100);
+                                
+                                // 添加開始挑戰事件
+                                setTimeout(() => {
+                                    const startBossMode = document.getElementById('start-boss-mode');
+                                    if (startBossMode) {
+                                        startBossMode.addEventListener('click', function() {
+                                            if (this.disabled) return;
+                                            
+                                            // 關閉模態框
+                                            infoModal.classList.add('hidden');
+                                            enableSettingsButton();
+                                            
+                                            // 1. 將遊戲界面變為淺紅色
+                                            const gamePage = document.getElementById('game-page');
+                                            if (gamePage) {
+                                                gamePage.classList.add('boss-mode-active');
+                                            }
+                                            
+                                            // 2. 隱藏選擇篇章容器
+                                            const passageContainer = document.getElementById('passage-container');
+                                            if (passageContainer) {
+                                                passageContainer.style.display = 'none';
+                                            }
+                                            
+                                            // 3. 在遊戲界面下方添加退出按鈕
+                                            const exitButton = document.createElement('button');
+                                            exitButton.id = 'boss-mode-exit-button';
+                                            exitButton.innerHTML = '<i class="fas fa-sign-out-alt mr-2"></i>退出魔王模式';
+                                            document.body.appendChild(exitButton);
+                                            
+                                            // 添加退出按鈕事件
+                                            exitButton.addEventListener('click', function() {
+                                                // 恢復正常介面
+                                                if (gamePage) {
+                                                    gamePage.classList.remove('boss-mode-active');
+                                                }
+                                                
+                                                // 顯示選擇篇章容器
+                                                if (passageContainer) {
+                                                    passageContainer.style.display = 'block';
+                                                }
+                                                
+                                                // 移除退出按鈕
+                                                document.body.removeChild(exitButton);
+                                                
+                                                // 移除魔王模式進度條
+                                                const bossProgress = document.getElementById('boss-mode-progress');
+                                                if (bossProgress) {
+                                                    bossProgress.remove();
+                                                }
+                                                
+                                                // 移除魔王模式倒計時
+                                                const bossTimer = document.getElementById('boss-mode-timer');
+                                                if (bossTimer) {
+                                                    bossTimer.remove();
+                                                }
+                                                
+                                                // 重置遊戲狀態
+                                                window.bossMode = null;
+                                                startGameBtn.click();
+                                                resetStopwatch();
+                                                
+                                                // 啟用設置按鈕
+                                                window.enableSettingsButton();
+                                                
+                                                // 顯示通知
+                                                const notification = document.createElement('div');
+                                                notification.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-100 px-4 py-2 rounded-lg shadow-md z-50';
+                                                notification.innerHTML = '已退出魔王模式';
+                                                document.body.appendChild(notification);
+                                                
+                                                setTimeout(() => {
+                                                    document.body.removeChild(notification);
+                                                }, 2000);
+                                            });
+                                            
+                                            // 顯示魔王模式已啟動通知
+                                            const notification = document.createElement('div');
+                                            notification.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 px-4 py-2 rounded-lg shadow-md z-50';
+                                            notification.innerHTML = '<i class="fas fa-crown mr-2"></i>魔王模式已啟動';
+                                            document.body.appendChild(notification);
+                                            
+                                            setTimeout(() => {
+                                                document.body.removeChild(notification);
+                                            }, 2000);
+                                            
+                                            // 減少挑戰次數
+                                            window.bossModeStats.challengesLeft -= 1;
+                                            localStorage.setItem('MemoryMaster_bossModeStats', JSON.stringify(window.bossModeStats));
+                                            
+                                            // 啟動魔王模式
+                                            startBossModeChallenge();
+                                        });
+                                    }
+                                }, 100);
+                                
+                                // 魔王模式實現
+                                function startBossModeChallenge() {
+                                    // 可選擇的篇章分類
+                                    const bossCategories = ['中一', '中二', '中三', '指定文言'];
+                                    
+                                    // 從各分類中獲取篇章
+                                    const categorizedPassages = {};
+                                    
+                                    // 先將所有符合條件的篇章按分類整理
+                                    Object.keys(passages).forEach(passageKey => {
+                                        const passage = passages[passageKey];
+                                        const category = passage.category || '其他';
+                                        
+                                        // 只處理「中一」、「中二」、「中三」和「指定文言」分類
+                                        if (!bossCategories.includes(category)) return;
+                                        
+                                        if (!categorizedPassages[category]) {
+                                            categorizedPassages[category] = [];
+                                        }
+                                        
+                                        categorizedPassages[category].push({
+                                            key: passageKey,
+                                            passage: passage
+                                        });
+                                    });
+                                    
+                                    // 隨機選擇3篇文章
+                                    const selectedPassages = [];
+                                    
+                                    // 確保從每個分類中至少選1篇（如果有）
+                                    for (const category of bossCategories) {
+                                        if (categorizedPassages[category] && categorizedPassages[category].length > 0) {
+                                            // 隨機選擇該分類中的一篇
+                                            const randomIndex = Math.floor(Math.random() * categorizedPassages[category].length);
+                                            selectedPassages.push(categorizedPassages[category][randomIndex]);
+                                            
+                                            // 從可選列表中移除已選的篇章
+                                            categorizedPassages[category].splice(randomIndex, 1);
+                                        }
+                                    }
+                                    
+                                    // 如果選出的篇章少於3篇，則從剩餘篇章中隨機選擇
+                                    const remainingPassages = [];
+                                    for (const category of bossCategories) {
+                                        if (categorizedPassages[category]) {
+                                            remainingPassages.push(...categorizedPassages[category]);
+                                        }
+                                    }
+                                    
+                                    // 隨機抽取剩餘所需篇章
+                                    while (selectedPassages.length < 3 && remainingPassages.length > 0) {
+                                        const randomIndex = Math.floor(Math.random() * remainingPassages.length);
+                                        selectedPassages.push(remainingPassages[randomIndex]);
+                                        remainingPassages.splice(randomIndex, 1);
+                                    }
+                                    
+                                    // 如果仍然不足3篇（極少可能發生），重複使用已選篇章
+                                    while (selectedPassages.length < 3 && bossCategories.length > 0) {
+                                        // 隨機選擇任意分類中的篇章
+                                        const allAvailablePassages = [];
+                                        for (const category of bossCategories) {
+                                            Object.keys(passages).forEach(key => {
+                                                if (passages[key].category === category) {
+                                                    allAvailablePassages.push({
+                                                        key: key,
+                                                        passage: passages[key]
+                                                    });
+                                                }
+                                            });
+                                        }
+                                        
+                                        if (allAvailablePassages.length > 0) {
+                                            const randomIndex = Math.floor(Math.random() * allAvailablePassages.length);
+                                            selectedPassages.push(allAvailablePassages[randomIndex]);
+                                        } else {
+                                            // 實在沒有符合條件的篇章，跳出循環
+                                            break;
+                                        }
+                                    }
+                                    
+                                    // 如果選不到3篇文章，顯示錯誤信息
+                                    if (selectedPassages.length < 3) {
+                                        alert(`魔王模式需要至少3篇文章，但只找到了${selectedPassages.length}篇。請添加更多文章後再試。`);
+                                        return;
+                                    }
+                                    
+                                    console.log("已選擇以下篇章:", selectedPassages.map(p => p.passage.title).join(', '));
+                                    
+                                    // 選取3篇文章，每篇隨機選取1個段落
+                                    selectedPassages.forEach(passageItem => {
+                                        // 獲取所有段落索引
+                                        const allParagraphIndices = [];
+                                        for (let i = 0; i < passageItem.passage.paragraphs.length; i++) {
+                                            allParagraphIndices.push(i);
+                                        }
+                                        
+                                        // 隨機選擇1個段落
+                                        const randomIndex = Math.floor(Math.random() * allParagraphIndices.length);
+                                        const selectedParagraphIndices = [allParagraphIndices[randomIndex]];
+                                        
+                                        // 將選中的段落索引保存到篇章對象中
+                                        passageItem.selectedParagraphIndices = selectedParagraphIndices;
+                                    });
+                                    
+                                    // 創建魔王模式專用紅色進度條
+                                    const bossProgress = document.createElement('div');
+                                    bossProgress.id = 'boss-mode-progress';
+                                    bossProgress.className = 'fixed top-16 left-4 right-4 z-50 flex items-center';
+                                    bossProgress.innerHTML = `
+                                        <div class="text-white bg-red-800 rounded-l-md px-2 py-1 text-sm font-bold">魔王模式</div>
+                                        <div class="flex-grow h-6 bg-gray-200 dark:bg-gray-700 rounded-r-md overflow-hidden">
+                                            <div id="boss-progress-bar" class="h-full bg-red-600 transition-all duration-300" style="width: 0%"></div>
+                                        </div>
+                                        <div class="ml-2 text-red-600 dark:text-red-400 font-bold">0/3</div>
+                                    `;
+                                    document.body.appendChild(bossProgress);
+                                    
+                                    // 創建魔王模式倒計時
+                                    const bossTimer = document.createElement('div');
+                                    bossTimer.id = 'boss-mode-timer';
+                                    bossTimer.innerHTML = `<i class="fas fa-hourglass-half mr-2"></i><span id="boss-timer-value">10</span>`;
+                                    document.body.appendChild(bossTimer);
+                                    
+                                    // 提示用戶開始魔王模式挑戰
+                                    const bossModeModal = document.createElement('div');
+                                    bossModeModal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50';
+                                    bossModeModal.innerHTML = `
+                                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                                        <h3 class="text-xl font-bold text-red-600 dark:text-red-500 mb-4 flex items-center">
+                                            <i class="fas fa-crown text-yellow-500 mr-2"></i>魔王模式挑戰
+                                        </h3>
+                                        
+                                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-5">
+                                            <p class="text-gray-700 dark:text-gray-300 mb-2">您將連續挑戰以下3篇文章各一段：</p>
+                                            <ol class="list-decimal pl-5 space-y-1 text-gray-700 dark:text-gray-300">
+                                                ${selectedPassages.map(item => {
+                                                    const paragraphInfo = item.selectedParagraphIndices.map(idx => `第${idx+1}段`).join('、');
+                                                    return `<li>${item.passage.title} - ${item.passage.author} (${paragraphInfo})</li>`;
+                                                }).join('')}
+                                            </ol>
+                                            <div class="text-gray-700 dark:text-gray-300 mt-2 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+                                                <p class="font-bold mb-1">挑戰規則：</p>
+                                                <ul class="list-disc pl-5 space-y-1">
+                                                    <li>遊戲開始時間為10秒</li>
+                                                    <li>每答對1題加2秒</li>
+                                                    <li>時間歸零時遊戲失敗</li>
+                                                    <li>每完成一篇時間重置</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <button id="start-boss-challenge" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                                <i class="fas fa-fire mr-2"></i>開始挑戰
+                                            </button>
+                                        </div>
+                                    </div>
+                                    `;
+                                    
+                                    document.body.appendChild(bossModeModal);
+                                    
+                                    // 開始挑戰按鈕事件
+                                    setTimeout(() => {
+                                        const startChallengeBtn = document.getElementById('start-boss-challenge');
+                                        if (startChallengeBtn) {
+                                            startChallengeBtn.addEventListener('click', function() {
+                                                document.body.removeChild(bossModeModal);
+                                                
+                                                // 開始魔王模式挑戰序列
+                                                window.bossMode = {
+                                                    passages: selectedPassages,
+                                                    currentPassageIndex: 0,
+                                                    timeRemaining: 10, // 初始10秒倒計時
+                                                    timerInterval: null,
+                                                    completed: false
+                                                };
+                                                
+                                                // 更新魔王模式進度顯示
+                                                updateBossModeProgress(0);
+                                                
+                                                // 開始魔王模式倒計時
+                                                window.bossMode.timerInterval = setInterval(updateBossModeTimer, 1000);
+                                                
+                                                // 加載第一篇
+                                                loadBossModePassage(0);
+                                            });
+                                        }
+                                    }, 100);
+                                }
+                                
+                                // 更新魔王模式倒計時
+                                function updateBossModeTimer() {
+                                    if (!window.bossMode) return;
+                                    
+                                    // 減少剩餘時間
+                                    window.bossMode.timeRemaining -= 1;
+                                    
+                                    // 更新倒計時顯示
+                                    const timerValue = document.getElementById('boss-timer-value');
+                                    if (timerValue) {
+                                        timerValue.textContent = window.bossMode.timeRemaining;
+                                        
+                                        // 當剩餘時間少於5秒時，添加警告效果
+                                        if (window.bossMode.timeRemaining <= 5) {
+                                            timerValue.classList.add('animate-pulse');
+                                            timerValue.style.color = '#FFC107';
+                                        }
+                                        
+                                        // 當剩餘時間少於3秒時，加強警告效果
+                                        if (window.bossMode.timeRemaining <= 3) {
+                                            timerValue.style.color = '#FF5252';
+                                        }
+                                    }
+                                    
+                                    // 檢查是否時間用盡
+                                    if (window.bossMode.timeRemaining <= 0 && !window.bossMode.completed) {
+                                        clearInterval(window.bossMode.timerInterval);
+                                        bossModeFailure("時間已到！");
+                                    }
+                                }
+                                
+                                // 載入魔王模式篇章
+                                function loadBossModePassage(index) {
+                                    if (!window.bossMode || index >= window.bossMode.passages.length) return;
+                                    
+                                    const passageInfo = window.bossMode.passages[index];
+                                    currentPassageKey = passageInfo.key;
+                                    
+                                    // 獲取選中的段落索引
+                                    const paragraphIndices = passageInfo.selectedParagraphIndices;
+                                    
+                                    // 載入選中段落
+                                    loadSelectedParagraphs(passageInfo.key, paragraphIndices);
+                                    
+                                    // 立即開始遊戲（跳過開始界面）
+                                    setTimeout(() => {
+                                        // 顯示提示：當前第幾篇/共幾篇
+                                        const passageIndicator = document.createElement('div');
+                                        passageIndicator.className = 'absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100 px-3 py-1 rounded-full text-sm font-medium z-10';
+                                        passageIndicator.textContent = `篇章 ${index + 1}/3`;
+                                        
+                                        const gamePageContent = document.querySelector('.page-content');
+                                        if (gamePageContent) {
+                                            gamePageContent.style.position = 'relative';
+                                            gamePageContent.appendChild(passageIndicator);
+                                        }
+                                        
+                                        // 改為自動點擊開始按鈕
+                                        if (startGameBtn) {
+                                            startGameBtn.click();
+                                        }
+                                        
+                                        // 修改處理正確選擇的函數，讓它增加時間
+                                        const originalHandleCorrectAnswer = window.handleCorrectAnswer;
+                                        window.handleCorrectAnswer = function(btn) {
+                                            // 調用原始函數
+                                            originalHandleCorrectAnswer(btn);
+                                            
+                                            // 如果在魔王模式中，每答對一題加2秒
+                                            if (window.bossMode) {
+                                                window.bossMode.timeRemaining += 2;
+                                                
+                                                // 更新倒計時顯示
+                                                const timerValue = document.getElementById('boss-timer-value');
+                                                if (timerValue) {
+                                                    timerValue.textContent = window.bossMode.timeRemaining;
+                                                    
+                                                    // 重置顏色和動畫
+                                                    if (window.bossMode.timeRemaining > 5) {
+                                                        timerValue.classList.remove('animate-pulse');
+                                                        timerValue.style.color = '';
+                                                    }
+                                                }
+                                                
+                                                // 顯示+2秒的效果
+                                                const timeAddEffect = document.createElement('div');
+                                                timeAddEffect.className = 'fixed top-4 right-16 text-green-500 font-bold text-lg z-50 animate-bounce';
+                                                timeAddEffect.textContent = '+2s';
+                                                document.body.appendChild(timeAddEffect);
+                                                
+                                                // 2秒後移除效果
+                                                setTimeout(() => {
+                                                    if (timeAddEffect.parentNode) {
+                                                        timeAddEffect.parentNode.removeChild(timeAddEffect);
+                                                    }
+                                                }, 2000);
+                                            }
+                                        };
+                                        
+                                        // 新增篇章完成事件處理
+                                        const originalCompletePassage = window.completePassage;
+                                        window.completePassage = function() {
+                                            // 暫時保存原始顯示完成函數
+                                            window.originalCompletePassage = originalCompletePassage;
+                                            
+                                            // 恢復原始的正確答案處理函數
+                                            window.handleCorrectAnswer = originalHandleCorrectAnswer;
+                                            
+                                            // 進入下一篇
+                                            bossModeNextPassage();
+                                        };
+                                    }, 100);
+                                }
+                                
+                                // 進入魔王模式的下一篇文章
+                                function bossModeNextPassage() {
+                                    if (!window.bossMode) return;
+                                    
+                                    // 增加當前篇章索引
+                                    window.bossMode.currentPassageIndex++;
+                                    
+                                    // 更新魔王模式進度條
+                                    updateBossModeProgress(window.bossMode.currentPassageIndex);
+                                    
+                                    // 檢查是否完成所有篇章
+                                    if (window.bossMode.currentPassageIndex >= window.bossMode.passages.length) {
+                                        // 所有篇章都完成了，挑戰成功
+                                        bossModeSuccess();
+                                    } else {
+                                        // 重置倒計時
+                                        window.bossMode.timeRemaining = 10;
+                                        const timerValue = document.getElementById('boss-timer-value');
+                                        if (timerValue) {
+                                            timerValue.textContent = window.bossMode.timeRemaining;
+                                            timerValue.classList.remove('animate-pulse');
+                                            timerValue.style.color = '';
+                                        }
+                                        
+                                        // 顯示進入下一篇的效果
+                                        const nextPassageEffect = document.createElement('div');
+                                        nextPassageEffect.className = 'fixed inset-0 flex items-center justify-center z-[60]';
+                                        nextPassageEffect.innerHTML = `
+                                            <div class="text-3xl font-bold text-red-500 dark:text-red-400 bg-black bg-opacity-70 p-6 rounded-lg countdown-number">
+                                                進入下一篇...
+                                            </div>
+                                        `;
+                                        document.body.appendChild(nextPassageEffect);
+                                        
+                                        // 2秒後移除效果並加載下一篇
+                                        setTimeout(() => {
+                                            document.body.removeChild(nextPassageEffect);
+                                            // 加載下一篇
+                                            loadBossModePassage(window.bossMode.currentPassageIndex);
+                                        }, 2000);
+                                    }
+                                }
+                                
+                                // 更新魔王模式進度顯示
+                                function updateBossModeProgress(currentIndex) {
+                                    const progressBar = document.getElementById('boss-progress-bar');
+                                    const progressText = document.querySelector('#boss-mode-progress .ml-2');
+                                    
+                                    if (progressBar && progressText) {
+                                        const progress = ((currentIndex) / 3) * 100;
+                                        progressBar.style.width = `${progress}%`;
+                                        progressText.textContent = `${currentIndex}/3`;
+                                    }
+                                }
+                                
+                                // 魔王模式成功完成
+                                function bossModeSuccess() {
+                                    // 標記為已完成
+                                    window.bossMode.completed = true;
+                                    
+                                    // 停止計時器
+                                    clearInterval(window.bossMode.timerInterval);
+                                    
+                                    // 恢復原始的completePassage函數
+                                    if (window.originalCompletePassage) {
+                                        window.completePassage = window.originalCompletePassage;
+                                    }
+                                    
+                                    // 顯示成功信息
+                                    const bossModeResultModal = document.createElement('div');
+                                    bossModeResultModal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50';
+                                    bossModeResultModal.innerHTML = `
+                                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                                        <h3 class="text-xl font-bold text-green-600 dark:text-green-500 mb-4 flex items-center">
+                                            <i class="fas fa-crown text-yellow-500 mr-2"></i>魔王模式挑戰成功！
+                                        </h3>
+                                        
+                                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-5">
+                                            <p class="text-gray-700 dark:text-gray-300 mb-2">恭喜您完成了魔王模式挑戰！</p>
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <button id="boss-mode-complete-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                                <i class="fas fa-check-circle mr-2"></i>完成
+                                            </button>
+                                        </div>
+                                    </div>
+                                    `;
+                                    
+                                    document.body.appendChild(bossModeResultModal);
+                                    
+                                    // 完成按鈕事件
+                                    setTimeout(() => {
+                                        const completeBtn = document.getElementById('boss-mode-complete-btn');
+                                        if (completeBtn) {
+                                            completeBtn.addEventListener('click', function() {
+                                                document.body.removeChild(bossModeResultModal);
+                                                
+                                                // 恢復正常介面
+                                                const gamePage = document.getElementById('game-page');
+                                                if (gamePage) {
+                                                    gamePage.classList.remove('boss-mode-active');
+                                                }
+                                                
+                                                // 顯示選擇篇章容器
+                                                const passageContainer = document.getElementById('passage-container');
+                                                if (passageContainer) {
+                                                    passageContainer.style.display = 'block';
+                                                }
+                                                
+                                                // 移除退出按鈕
+                                                const exitButton = document.getElementById('boss-mode-exit-button');
+                                                if (exitButton) {
+                                                    document.body.removeChild(exitButton);
+                                                }
+                                                
+                                                // 移除魔王模式進度條
+                                                const bossProgress = document.getElementById('boss-mode-progress');
+                                                if (bossProgress) {
+                                                    bossProgress.remove();
+                                                }
+                                                
+                                                // 移除魔王模式倒計時
+                                                const bossTimer = document.getElementById('boss-mode-timer');
+                                                if (bossTimer) {
+                                                    bossTimer.remove();
+                                                }
+                                                
+                                                // 重置遊戲狀態
+                                                window.bossMode = null;
+                                                
+                                                // 顯示通知
+                                                const notification = document.createElement('div');
+                                                notification.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-4 py-2 rounded-lg shadow-md z-50';
+                                                notification.innerHTML = '恭喜完成魔王模式挑戰！';
+                                                document.body.appendChild(notification);
+                                                
+                                                setTimeout(() => {
+                                                    document.body.removeChild(notification);
+                                                }, 2000);
+                                            });
+                                        }
+                                    }, 100);
+                                }
+                                
+                                // 魔王模式失敗
+                                function bossModeFailure(reason) {
+                                    // 標記為已完成
+                                    if (window.bossMode) {
+                                        window.bossMode.completed = true;
+                                    }
+                                    
+                                    // 停止計時器
+                                    clearInterval(window.bossMode && window.bossMode.timerInterval);
+                                    
+                                    // 恢復原始的completePassage函數
+                                    if (window.originalCompletePassage) {
+                                        window.completePassage = window.originalCompletePassage;
+                                    }
+                                    
+                                    // 顯示失敗信息
+                                    const bossModeResultModal = document.createElement('div');
+                                    bossModeResultModal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50';
+                                    bossModeResultModal.innerHTML = `
+                                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                                        <h3 class="text-xl font-bold text-red-600 dark:text-red-500 mb-4 flex items-center">
+                                            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>魔王模式挑戰失敗
+                                        </h3>
+                                        
+                                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-5">
+                                            <p class="text-gray-700 dark:text-gray-300 mb-2">挑戰失敗：${reason}</p>
+                                            <p class="text-gray-700 dark:text-gray-300">
+                                                別灰心，下次再接再厲！
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <button id="boss-mode-failed-btn" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                                <i class="fas fa-redo mr-2"></i>返回
+                                            </button>
+                                        </div>
+                                    </div>
+                                    `;
+                                    
+                                    document.body.appendChild(bossModeResultModal);
+                                    
+                                    // 返回按鈕事件
+                                    setTimeout(() => {
+                                        const failedBtn = document.getElementById('boss-mode-failed-btn');
+                                        if (failedBtn) {
+                                            failedBtn.addEventListener('click', function() {
+                                                document.body.removeChild(bossModeResultModal);
+                                                
+                                                // 恢復正常介面
+                                                const gamePage = document.getElementById('game-page');
+                                                if (gamePage) {
+                                                    gamePage.classList.remove('boss-mode-active');
+                                                }
+                                                
+                                                // 顯示選擇篇章容器
+                                                const passageContainer = document.getElementById('passage-container');
+                                                if (passageContainer) {
+                                                    passageContainer.style.display = 'block';
+                                                }
+                                                
+                                                // 移除退出按鈕
+                                                const exitButton = document.getElementById('boss-mode-exit-button');
+                                                if (exitButton) {
+                                                    document.body.removeChild(exitButton);
+                                                }
+                                                
+                                                // 移除魔王模式進度條
+                                                const bossProgress = document.getElementById('boss-mode-progress');
+                                                if (bossProgress) {
+                                                    bossProgress.remove();
+                                                }
+                                                
+                                                // 移除魔王模式倒計時
+                                                const bossTimer = document.getElementById('boss-mode-timer');
+                                                if (bossTimer) {
+                                                    bossTimer.remove();
+                                                }
+                                                
+                                                // 重置遊戲狀態
+                                                window.bossMode = null;
+                                                
+                                                // 啟用設置按鈕
+                                                window.enableSettingsButton();
+                                                
+                                                // 顯示通知
+                                                const notification = document.createElement('div');
+                                                notification.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-100 px-4 py-2 rounded-lg shadow-md z-50';
+                                                notification.innerHTML = '已退出魔王模式';
+                                                document.body.appendChild(notification);
+                                                
+                                                setTimeout(() => {
+                                                    document.body.removeChild(notification);
+                                                }, 2000);
+                                                
+                                                // 重置遊戲界面
+                                                gameStartScreen.classList.remove('hidden');
+                                                gameContent.classList.add('hidden');
+                                            });
+                                        }
+                                    }, 100);
+                                }
+                            } else if (section === 'help') {
                                 // 遊玩說明 - 顯示遊玩說明內容
                                 infoModalTitle.textContent = '遊玩說明';
                                 infoModalContent.innerHTML = `
@@ -3596,6 +4431,34 @@ if (passageHeader && passageToggle && passageContent) {
                         console.log("未找到現有全局統計，創建默認統計數據");
                         initializeDefaultStats();
                         console.log("初始化globalStats本地存儲");
+                    }
+                    
+                    // 載入魔王模式統計
+                    let rawBossModeStats = localStorage.getItem('MemoryMaster_bossModeStats');
+                    if (rawBossModeStats) {
+                        try {
+                            window.bossModeStats = JSON.parse(rawBossModeStats);
+                            console.log("從localStorage載入魔王模式統計成功");
+                        } catch (e) {
+                            console.error("解析bossModeStats時出錯:", e);
+                            window.bossModeStats = {
+                                challengesLeft: 3,
+                                lastResetDate: new Date().toDateString()
+                            };
+                        }
+                    } else {
+                        window.bossModeStats = {
+                            challengesLeft: 3,
+                            lastResetDate: new Date().toDateString()
+                        };
+                    }
+                    
+                    // 檢查是否需要重置每日挑戰次數
+                    const today = new Date().toDateString();
+                    if (window.bossModeStats.lastResetDate !== today) {
+                        window.bossModeStats.challengesLeft = 3;
+                        window.bossModeStats.lastResetDate = today;
+                        localStorage.setItem('MemoryMaster_bossModeStats', JSON.stringify(window.bossModeStats));
                     }
                     
                     // 立即保存一次，確認數據能夠正確寫入
@@ -4536,3 +5399,4 @@ function displayAchievements() {
     </script>
 </body>
 </html>
+
