@@ -38,6 +38,44 @@
             overflow-x: hidden;
         }
         
+        /* 8-bit 像素風格頭像樣式 */
+        .pixel-avatar {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .avatar-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid transparent;
+            background-color: #f0f0f0;
+        }
+        
+        .dark .avatar-option {
+            background-color: #333;
+        }
+        
+        .avatar-option:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+        
+        .avatar-option.selected {
+            border-color: #5D5CDE;
+            box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.3);
+        }
+        
         .book {
             perspective: 1200px;
         }
@@ -634,6 +672,22 @@
             </div>
         </div>
     </div>
+    
+    <!-- 頭像選擇模態框 -->
+    <div id="avatar-selector-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">選擇頭像</h3>
+                <button id="close-avatar-selector" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-3 md:grid-cols-5 md:gap-4" id="avatar-grid">
+                <!-- 頭像會通過JS動態生成 -->
+            </div>
+        </div>
+    </div>
 
     <div class="container mx-auto px-4 py-8 max-w-2xl">
         <header class="mb-8 text-center">
@@ -688,8 +742,11 @@
             <!-- 用戶資料容器 - 修改成與遊戲頁面相似大小 -->
             <div id="user-profile-container" class="page rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-6 md:p-8 min-h-[400px] shadow-md">
                 <div class="flex flex-col h-full justify-center items-center">
-                    <div class="user-avatar-container w-24 h-24 md:w-32 md:h-32 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-user text-4xl md:text-5xl text-amber-800 dark:text-amber-100"></i>
+                    <div id="change-avatar-btn" class="user-avatar-container w-24 h-24 md:w-32 md:h-32 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center mb-6 relative cursor-pointer hover:shadow-lg transition-shadow">
+                        <div id="user-avatar" class="w-full h-full flex items-center justify-center overflow-hidden">
+                            <!-- 默認頭像 -->
+                            <i class="fas fa-user text-4xl md:text-5xl text-amber-800 dark:text-amber-100"></i>
+                        </div>
                     </div>
                     
                     <div class="text-center w-full max-w-md">
@@ -835,7 +892,81 @@
     </div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // 添加用於頭像的兩個全局變量
+        let userSelectedAvatar = null;
+        let avatarPixelData = {
+            // 定義頭像 - 部分保留，部分重新設計著重呈現物件形狀
+            'villager': { name: '普通村民', colors: ['#5D4037', '#8D6E63', '#D7CCC8', '#FFF8E1'] }, // 重新設計
+            'rabbit': { name: '兔子', colors: ['#FFEBEE', '#FFCDD2', '#9E9E9E', '#424242'] }, // 重新設計
+            'panda': { name: '熊貓', colors: ['#212121', '#424242', '#FFFFFF', '#90A4AE'] }, // 重新設計
+            'whale': { name: '鯨魚', colors: ['#0D47A1', '#1565C0', '#81D4FA', '#E1F5FE'] }, // 重新設計
+            'bread': { name: '麵包', colors: ['#AA7942', '#D2B48C', '#FFFDE7', '#FFECB3'] }, // 重新設計
+            'chicken': { name: '雞', colors: ['#FF6F00', '#FFA000', '#FFECB3', '#F44336'] }, // 保留
+            'dragon': { name: '神龍', colors: ['#00695C', '#009688', '#FFD54F', '#D32F2F'] }, // 重新設計
+            'bomb': { name: '炸彈', colors: ['#263238', '#37474F', '#546E7A', '#FF3D00'] }, // 保留
+            'fox': { name: '狐狸', colors: ['#E65100', '#FF6D00', '#FBE9E7', '#37474F'] }, // 重新設計
+            'wizard': { name: '魔法师', colors: ['#311B92', '#5E35B1', '#D1C4E9', '#FFC400'] }, // 重新設計
+            'assassin': { name: '刺客', colors: ['#212121', '#424242', '#EEE', '#D50000'] }, // 重新設計
+            'husky': { name: '哈士奇', colors: ['#455A64', '#78909C', '#CFD8DC', '#ECEFF1'] }, // 保留
+            'werewolf': { name: '狼人', colors: ['#5D4037', '#795548', '#FFC107', '#F5F5F5'] }, // 保留
+            'cat': { name: '猫', colors: ['#616161', '#9E9E9E', '#E0E0E0', '#FFC107'] }, // 保留
+            'orange': { name: '橙子', colors: ['#FF9800', '#F57C00', '#4CAF50', '#1B5E20'] }, // 保留
+            'mask': { name: '面具', colors: ['#FFFFFF', '#EEEEEE', '#9E9E9E', '#212121'] }, // 保留
+            'sparrow': { name: '麻雀', colors: ['#795548', '#8D6E63', '#A1887F', '#BCAAA4'] }, // 保留
+            'watermelon': { name: '西瓜', colors: ['#4CAF50', '#388E3C', '#E91E63', '#1B5E20'] }, // 保留
+            'capybara': { name: '卡皮巴拉', colors: ['#8D6E63', '#A1887F', '#D7CCC8', '#6D4C41'] }, // 保留
+            'sunflower': { name: '向日葵', colors: ['#FFEB3B', '#FBC02D', '#795548', '#33691E'] }, // 重新設計
+            // 重新設計的頭像 - 著重呈現物件形狀
+            'lemon': { name: '檸檬', colors: ['#FFEB3B', '#FFEE58', '#AFB42B', '#C0CA33'] }, // 重新設計
+            'angel': { name: '天使', colors: ['#FAFAFA', '#F5F5F5', '#80DEEA', '#FFEE58'] }, // 重新設計
+            'pirate': { name: '海盜', colors: ['#3E2723', '#5D4037', '#CFD8DC', '#D32F2F'] }, // 已實現
+            'unicorn': { name: '獨角獸', colors: ['#FAFAFA', '#E1BEE7', '#AB47BC', '#FFD54F'] }, // 已實現
+            'iceflower': { name: '冰花', colors: ['#E3F2FD', '#B3E5FC', '#03A9F4', '#0277BD'] }, // 已實現
+            'snowman': { name: '雪人', colors: ['#ECEFF1', '#CFD8DC', '#546E7A', '#EF5350'] }, // 保留
+            'mummy': { name: '木乃伊', colors: ['#F5F5F5', '#E0E0E0', '#BDBDBD', '#757575'] }, // 保留
+            // 重新設計的頭像
+            'candy': { name: '糖果', colors: ['#F06292', '#EC407A', '#81C784', '#4CAF50'] },
+            'butterfly': { name: '蝴蝶', colors: ['#9C27B0', '#BA68C8', '#EC407A', '#7B1FA2'] },
+            'lightning': { name: '閃電', colors: ['#FFEB3B', '#FDD835', '#FBC02D', '#F9A825'] },
+            'crown': { name: '皇冠', colors: ['#FFC107', '#FFD54F', '#F44336', '#B71C1C'] },
+            'moon': { name: '月球', colors: ['#ECEFF1', '#CFD8DC', '#B0BEC5', '#546E7A'] }
+        }
+        
+        // 定義頭像解鎖所需等級
+window.avatarUnlockLevels = {
+    'villager': 1,  // 預設解鎖「普通村民」頭像
+    'rabbit': 4,    // 4級解鎖「兔子」頭像
+    'panda': 7,     // 7級解鎖「熊貓」頭像
+    'whale': 10,    // 10級解鎖「鯨魚」頭像
+    'bread': 13,    // 13級解鎖「麵包」頭像
+    'chicken': 16,  // 16級解鎖「雞」頭像
+    'dragon': 19,   // 19級解鎖「神龍」頭像
+    'bomb': 22,     // 22級解鎖「炸彈」頭像
+    'fox': 25,      // 25級解鎖「狐狸」頭像
+    'wizard': 28,   // 28級解鎖「魔法师」頭像
+    'assassin': 31, // 31級解鎖「刺客」頭像
+    'husky': 34,    // 34級解鎖「哈士奇」頭像
+    'werewolf': 37, // 37級解鎖「狼人」頭像
+    'cat': 40,      // 40級解鎖「猫」頭像
+    'orange': 43,   // 43級解鎖「橙子」頭像
+    'mask': 46,     // 46級解鎖「面具」頭像
+    'sparrow': 49,  // 49級解鎖「麻雀」頭像
+    'watermelon': 52, // 52級解鎖「西瓜」頭像
+    'capybara': 55, // 55級解鎖「卡皮巴拉」頭像
+    'sunflower': 58, // 58級解鎖「向日葵」頭像
+    'lemon': 61,    // 61級解鎖「檸檬」頭像
+    'angel': 64,    // 64級解鎖「天使」頭像
+    'pirate': 67,   // 67級解鎖「海盜」頭像
+    'unicorn': 70,  // 70級解鎖「獨角獸」頭像
+    'iceflower': 73, // 73級解鎖「冰花」頭像
+    'candy': 76,    // 76級解鎖「糖果」頭像
+    'butterfly': 79, // 79級解鎖「蝴蝶」頭像
+    'lightning': 82, // 82級解鎖「閃電」頭像
+    'crown': 85,    // 85級解鎖「皇冠」頭像
+    'moon': 90      // 90級解鎖「月球」頭像
+};
+
+document.addEventListener('DOMContentLoaded', function() {
             // 確保移除深色模式類
             document.documentElement.classList.remove('dark');
             
@@ -1683,8 +1814,8 @@ if (passageHeader && passageToggle && passageContent) {
                 const newConfirmBtn = confirmBtn.cloneNode(true);
                 confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
                 
-                // 添加新的事件監聽器
-                newConfirmBtn.addEventListener('click', function() {
+                // 添加新的事件監聽器 - 改為異步函數以支持等待水墨過渡動畫
+                newConfirmBtn.addEventListener('click', async function() {
                     console.log("確認按鈕被點擊");
                     
                     const paragraphList = document.getElementById('paragraph-list');
@@ -1731,23 +1862,28 @@ if (passageHeader && passageToggle && passageContent) {
                         passageContainer.style.maxHeight = '46px';
                     }
                     
-                    // 載入選中的段落 (第三個參數設為true，表示顯示遊戲界面)
-                    loadSelectedParagraphs(currentPassageKey, selectedIndices, true);
-                    
-                    // 確保顯示返回主頁按鈕而非暫停按鈕
-                    const pauseBtn = document.getElementById('pause-btn');
-                    const returnHomeBtn = document.getElementById('return-home-btn-game');
-                    
-                    if (pauseBtn && returnHomeBtn) {
-                        pauseBtn.classList.add('hidden');
-                        returnHomeBtn.classList.remove('hidden');
-                        console.log("確認按鈕：已切換為返回主頁按鈕");
-                    }
-                    
-                    // 隱藏用戶資料界面 - 使用強制多層隱藏
-                    const userProfileContainer = document.getElementById('user-profile-container');
-                    if (userProfileContainer) {
-                        try {
+                    try {
+                        // 顯示水墨過渡動畫 - 等待動畫完成後再進入遊戲界面
+                        console.log("開始播放水墨過渡動畫");
+                        await showLoadingAnimation();
+                        console.log("水墨過渡動畫播放完成");
+                        
+                        // 載入選中的段落 (第三個參數設為true，表示顯示遊戲界面)
+                        loadSelectedParagraphs(currentPassageKey, selectedIndices, true);
+                        
+                        // 確保顯示返回主頁按鈕而非暫停按鈕
+                        const pauseBtn = document.getElementById('pause-btn');
+                        const returnHomeBtn = document.getElementById('return-home-btn-game');
+                        
+                        if (pauseBtn && returnHomeBtn) {
+                            pauseBtn.classList.add('hidden');
+                            returnHomeBtn.classList.remove('hidden');
+                            console.log("確認按鈕：已切換為返回主頁按鈕");
+                        }
+                        
+                        // 隱藏用戶資料界面 - 使用強制多層隱藏
+                        const userProfileContainer = document.getElementById('user-profile-container');
+                        if (userProfileContainer) {
                             // 強制徹底隱藏用戶資料表 - 使用多重方式確保隱藏
                             userProfileContainer.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;';
                             userProfileContainer.classList.add('hidden');
@@ -1756,11 +1892,10 @@ if (passageHeader && passageToggle && passageContent) {
                             userProfileContainer.classList.remove('block', 'flex', 'visible', 'opacity-100');
                             
                             console.log("用戶資料表已被強制隱藏");
-                        } catch (error) {
-                            console.error("隱藏用戶資料表時發生錯誤:", error);
-                            // 仍嘗試使用基本方法隱藏
-                            userProfileContainer.classList.add('hidden');
                         }
+                    } catch (error) {
+                        console.error("過渡到遊戲界面時發生錯誤:", error);
+                        alert("載入遊戲時發生錯誤，請重試");
                     }
                 });
             }
@@ -3709,7 +3844,7 @@ if (passageHeader && passageToggle && passageContent) {
                 completionMessage.id = 'completion-result';
                 
                 // 添加經驗值獎勵
-                const expGained = totalNonPunctChars; // 經驗值 = 該遊戲字數
+                const expGained = totalNonPunctChars*10; // 經驗值 = 該遊戲字數
                 addExperience(expGained);
                 console.log(`遊戲完成，獲得經驗值: ${expGained}`);
                 
@@ -5964,6 +6099,1965 @@ function displayAchievements() {
             // 初始化成就展示功能
             initializeAchievementsDisplay();
             
+            // 初始化頭像選擇功能
+            initializeAvatarSelector();
+            
+            // 頭像選擇功能
+            function initializeAvatarSelector() {
+                // 獲取DOM元素
+                const changeAvatarBtn = document.getElementById('change-avatar-btn');
+                const avatarSelectorModal = document.getElementById('avatar-selector-modal');
+                const closeAvatarSelector = document.getElementById('close-avatar-selector');
+                const avatarGrid = document.getElementById('avatar-grid');
+                const userAvatar = document.getElementById('user-avatar');
+                
+                // 檢查元素是否存在
+                if (!changeAvatarBtn || !avatarSelectorModal || !closeAvatarSelector || !avatarGrid || !userAvatar) {
+                    console.error("頭像選擇器初始化失敗：缺少必要元素");
+                    return;
+                }
+                
+                // 載入之前選擇的頭像
+                try {
+                    const savedAvatar = localStorage.getItem('MemoryMaster_userAvatar');
+                    if (savedAvatar) {
+                        userSelectedAvatar = savedAvatar;
+                        renderUserAvatar(userAvatar, savedAvatar);
+                    }
+                } catch (e) {
+                    console.error("加載用戶頭像出錯:", e);
+                }
+                
+                // 生成頭像選項
+                generateAvatarOptions(avatarGrid);
+                
+                // 打開頭像選擇器
+                changeAvatarBtn.addEventListener('click', function() {
+                    avatarSelectorModal.classList.remove('hidden');
+                    
+                    // 標記當前選中的頭像
+                    highlightSelectedAvatar();
+                    
+                    // 禁用設置齒輪按鈕
+                    window.disableSettingsButton();
+                });
+                
+                // 關閉頭像選擇器並重新啟用設置按鈕
+                function closeAvatarSelectorModal() {
+                    avatarSelectorModal.classList.add('hidden');
+                    window.enableSettingsButton();
+                }
+                
+                // 關閉頭像選擇器
+                closeAvatarSelector.addEventListener('click', function() {
+                    closeAvatarSelectorModal();
+                });
+                
+                // 點擊背景關閉
+                avatarSelectorModal.addEventListener('click', function(e) {
+                    if (e.target === avatarSelectorModal) {
+                        closeAvatarSelectorModal();
+                    }
+                });
+                
+                // 將關閉模態框函數設為全局，以便在選擇頭像後使用
+                window.closeAvatarSelectorModal = closeAvatarSelectorModal;
+            }
+            
+            // 檢查頭像是否已解鎖
+            function isAvatarUnlocked(avatarKey) {
+                // 默認頭像永遠解鎖
+                if (avatarKey === 'default') return true;
+                
+                // 檢查用戶等級是否達到解鎖要求
+                const requiredLevel = window.avatarUnlockLevels[avatarKey] || 1;
+                return userProfile.level >= requiredLevel;
+            }
+            
+            // 生成頭像選項
+            function generateAvatarOptions(container) {
+                if (!container) return;
+                
+                // 清空容器
+                container.innerHTML = '';
+                
+                // 添加默認頭像選項
+                const defaultOption = document.createElement('div');
+                defaultOption.className = 'avatar-option ' + (userSelectedAvatar === null ? 'selected' : '');
+                defaultOption.dataset.avatar = 'default';
+                defaultOption.innerHTML = `
+                    <div class="pixel-avatar flex items-center justify-center">
+                        <i class="fas fa-user text-2xl text-gray-800 dark:text-gray-100"></i>
+                    </div>
+                `;
+                container.appendChild(defaultOption);
+                
+                // 為默認頭像添加點擊事件
+                defaultOption.addEventListener('click', function() {
+                    selectAvatar('default');
+                });
+                
+                // 添加每個8-bit像素頭像選項
+                Object.keys(avatarPixelData).forEach(key => {
+                    const avatarData = avatarPixelData[key];
+                    const isUnlocked = isAvatarUnlocked(key);
+                    const requiredLevel = avatarUnlockLevels[key] || 1;
+                    
+                    const option = document.createElement('div');
+                    option.className = 'avatar-option ' + (userSelectedAvatar === key ? 'selected' : '');
+                    option.dataset.avatar = key;
+                    option.dataset.level = requiredLevel;
+                    option.title = isUnlocked ? avatarData.name : `${avatarData.name} (需要等級 ${requiredLevel})`;
+                    
+                    // 如果頭像未解鎖，添加禁用樣式類
+                    if (!isUnlocked) {
+                        option.classList.add('locked');
+                    }
+                    
+                    // 添加到容器
+                    container.appendChild(option);
+                    
+                    // 添加點擊事件
+                    option.addEventListener('click', function() {
+                        // 檢查頭像是否已解鎖
+                        if (isUnlocked) {
+                            selectAvatar(key);
+                        } else {
+                            // 提示用戶需要達到的等級
+                            alert(`需要達到 ${requiredLevel} 級才能解鎖「${avatarData.name}」頭像`);
+                        }
+                    });
+                    
+                    // 渲染像素頭像
+                    renderPixelAvatar(option, key, !isUnlocked);
+                    
+                    // 如果頭像未解鎖，添加等級指示器
+                    if (!isUnlocked) {
+                        const levelIndicator = document.createElement('div');
+                        levelIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg';
+                        levelIndicator.innerHTML = `<span class="text-white font-bold text-sm">Lv.${requiredLevel}</span>`;
+                        option.appendChild(levelIndicator);
+                    }
+                });
+            }
+            
+            // 選擇頭像
+            function selectAvatar(avatarKey) {
+                // 取消所有選中狀態
+                document.querySelectorAll('.avatar-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // 設置新選中狀態
+                const selectedOption = document.querySelector(`.avatar-option[data-avatar="${avatarKey}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+                
+                // 保存選擇
+                userSelectedAvatar = avatarKey === 'default' ? null : avatarKey;
+                
+                try {
+                    if (userSelectedAvatar === null) {
+                        localStorage.removeItem('MemoryMaster_userAvatar');
+                    } else {
+                        localStorage.setItem('MemoryMaster_userAvatar', userSelectedAvatar);
+                    }
+                } catch (e) {
+                    console.error("保存用戶頭像出錯:", e);
+                }
+                
+                // 更新用戶頭像顯示
+                const userAvatar = document.getElementById('user-avatar');
+                if (userAvatar) {
+                    renderUserAvatar(userAvatar, userSelectedAvatar);
+                }
+                
+                // 顯示成功提示
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 py-2 px-4 rounded-lg shadow-lg z-50';
+                notification.innerHTML = '<i class="fas fa-check-circle mr-2"></i>頭像已更新';
+                document.body.appendChild(notification);
+                
+                // 3秒後移除提示
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+                
+                // 選擇頭像後自動關閉選擇器
+                if (window.closeAvatarSelectorModal) {
+                    window.closeAvatarSelectorModal();
+                }
+            }
+            
+            // 標記當前選中的頭像
+            function highlightSelectedAvatar() {
+                document.querySelectorAll('.avatar-option').forEach(option => {
+                    option.classList.remove('selected');
+                    
+                    if ((userSelectedAvatar === null && option.dataset.avatar === 'default') || 
+                        option.dataset.avatar === userSelectedAvatar) {
+                        option.classList.add('selected');
+                    }
+                });
+            }
+            
+            // 渲染像素頭像
+            function renderPixelAvatar(container, avatarKey) {
+                if (!container) return;
+                
+                const avatarData = avatarPixelData[avatarKey];
+                if (!avatarData) return;
+                
+                // 創建像素藝術容器
+                const pixelContainer = document.createElement('div');
+                pixelContainer.className = 'pixel-avatar';
+                
+                // 創建 8x8 像素網格
+                const gridSize = 8;
+                const pixelSize = 100 / gridSize; // 百分比尺寸
+                
+                // 為每個頭像生成唯一的像素模式
+                const pixels = generatePixelPattern(avatarKey, gridSize, avatarData.colors);
+                
+                // 創建所有像素
+                for (let y = 0; y < gridSize; y++) {
+                    for (let x = 0; x < gridSize; x++) {
+                        const pixel = document.createElement('div');
+                        pixel.style.position = 'absolute';
+                        pixel.style.top = (y * pixelSize) + '%';
+                        pixel.style.left = (x * pixelSize) + '%';
+                        pixel.style.width = pixelSize + '%';
+                        pixel.style.height = pixelSize + '%';
+                        
+                        // 設置像素顏色
+                        const colorIndex = pixels[y][x];
+                        if (colorIndex >= 0) {
+                            pixel.style.backgroundColor = avatarData.colors[colorIndex];
+                        } else {
+                            pixel.style.backgroundColor = 'transparent';
+                        }
+                        
+                        pixelContainer.appendChild(pixel);
+                    }
+                }
+                
+                container.appendChild(pixelContainer);
+            }
+            
+            // 為用戶頭像渲染頭像
+            function renderUserAvatar(container, avatarKey) {
+                if (!container) return;
+                
+                // 清空容器
+                container.innerHTML = '';
+                
+                if (!avatarKey) {
+                    // 顯示默認頭像
+                    container.innerHTML = '<i class="fas fa-user text-4xl md:text-5xl text-amber-800 dark:text-amber-100"></i>';
+                    return;
+                }
+                
+                // 渲染選擇的像素頭像
+                renderPixelAvatar(container, avatarKey);
+            }
+            
+            // 生成像素模式
+            function generatePixelPattern(avatarKey, size, colors) {
+                // 使用Avatar鍵名作為種子創建一致的隨機模式
+                const seed = hashString(avatarKey);
+                const rng = mulberry32(seed);
+                
+                // 創建空白像素網格 (-1表示透明)
+                const pixels = Array(size).fill().map(() => Array(size).fill(-1));
+                
+                // 生成像素藝術人物輪廓 - 基於角色類型選擇不同的模式
+                if (avatarKey === 'villager') {
+                    // 普通村民 - 簡單的人臉
+                    drawSimpleFace(pixels, rng, colors);
+                } else if (avatarKey === 'rabbit') {
+                    // 白兔 - 兔子臉
+                    drawRabbitFace(pixels, rng, colors);
+                } else if (avatarKey === 'lumberjack') {
+                    // 樵夫 - 戴著帽子的臉
+                    drawLumberjackFace(pixels, rng, colors);
+                } else if (avatarKey === 'panda') {
+                    // 熊猫 - 熊貓臉
+                    drawPandaFace(pixels, rng, colors);
+                } else if (avatarKey === 'bomb') {
+                    // 炸彈 - 炸彈形狀
+                    drawBomb(pixels, rng, colors);
+                } else if (avatarKey === 'fox') {
+                    // 狐狸 - 狐狸臉
+                    drawFoxFace(pixels, rng, colors);
+                } else if (avatarKey === 'wizard') {
+                    // 魔法师 - 帶帽子的魔法師
+                    drawWizard(pixels, rng, colors);
+                } else if (avatarKey === 'whale') {
+                    // 鲸鱼 - 鯨魚形狀
+                    drawWhale(pixels, rng, colors);
+                } else if (avatarKey === 'radio') {
+                    // 收音機 - 收音機外形
+                    drawRadio(pixels, rng, colors);
+                } else if (avatarKey === 'chicken') {
+                    // 鸡 - 雞形狀
+                    drawChicken(pixels, rng, colors);
+                } else if (avatarKey === 'assassin') {
+                    // 刺客 - 蒙面角色
+                    drawAssassin(pixels, rng, colors);
+                } else if (avatarKey === 'husky') {
+                    // 哈士奇 - 哈士奇臉
+                    drawHusky(pixels, rng, colors);
+                } else if (avatarKey === 'bread') {
+                    // 麵包 - 麵包外形
+                    drawBread(pixels, rng, colors);
+                } else if (avatarKey === 'werewolf') {
+                    // 狼人 - 狼人形象
+                    drawWerewolf(pixels, rng, colors);
+                } else if (avatarKey === 'dragon') {
+                    // 神龙 - 龍頭
+                    drawDragon(pixels, rng, colors);
+                } else if (avatarKey === 'sushi') {
+                    // 壽司 - 壽司形狀
+                    drawSushi(pixels, rng, colors);
+                } else if (avatarKey === 'cat') {
+                    // 猫 - 貓臉
+                    drawCat(pixels, rng, colors);
+                } else if (avatarKey === 'orange') {
+                    // 橙子 - 橙子形狀
+                    drawOrange(pixels, rng, colors);
+                } else if (avatarKey === 'mask') {
+                    // 面具 - 面具形狀
+                    drawMask(pixels, rng, colors);
+                } else if (avatarKey === 'sparrow') {
+                    // 麻雀 - 麻雀形狀
+                    drawSparrow(pixels, rng, colors);
+                } else if (avatarKey === 'lemon') {
+                    // 檸檬 - 重新設計的檸檬
+                    drawLemon(pixels, rng, colors);
+                } else if (avatarKey === 'angel') {
+                    // 天使 - 重新設計的天使
+                    drawAngel(pixels, rng, colors);
+                } else if (avatarKey === 'unicorn') {
+                    // 獨角獸 - 重新設計的獨角獸
+                    drawUnicorn(pixels, rng, colors);
+                } else if (avatarKey === 'iceflower') {
+                    // 冰花 - 重新設計的冰花
+                    drawIceflower(pixels, rng, colors);
+                } else if (avatarKey === 'pirate') {
+                    // 海盜 - 重新設計的海盜
+                    drawPirate(pixels, rng, colors);
+                } else if (avatarKey === 'candy') {
+                    // 糖果 - 重新設計的糖果
+                    drawCandy(pixels, rng, colors);
+                } else if (avatarKey === 'butterfly') {
+                    // 蝴蝶 - 重新設計的蝴蝶
+                    drawButterfly(pixels, rng, colors);
+                } else if (avatarKey === 'lightning') {
+                    // 閃電 - 重新設計的閃電
+                    drawLightning(pixels, rng, colors);
+                } else if (avatarKey === 'crown') {
+                    // 皇冠 - 重新設計的皇冠
+                    drawCrown(pixels, rng, colors);
+                } else if (avatarKey === 'moon') {
+                    // 月球 - 重新設計的月球
+                    drawMoon(pixels, rng, colors);
+                } else {
+                    // 默認 - 隨機圖案
+                    drawRandomPattern(pixels, rng, colors);
+                }
+                
+                return pixels;
+            }
+            
+            // 繪製各種頭像的輔助函數
+            function drawSimpleFace(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 基本背景色
+                    }
+                }
+                
+                // 頭部輪廓 - 更自然的形狀
+                for (let y = 1; y < 6; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 1; // 膚色
+                    }
+                }
+                
+                // 增加臉部寬度
+                pixels[2][1] = 1;
+                pixels[2][6] = 1;
+                pixels[3][1] = 1;
+                pixels[3][6] = 1;
+                pixels[4][1] = 1;
+                pixels[4][6] = 1;
+                
+                // 頭髮/帽子 - 有層次感
+                for (let x = 1; x < 7; x++) {
+                    pixels[0][x] = 0; // 深色頭髮
+                }
+                for (let x = 2; x < 6; x++) {
+                    pixels[1][x] = 0; // 前額髮線
+                }
+                
+                // 側邊頭髮
+                pixels[1][1] = 0;
+                pixels[1][6] = 0;
+                pixels[2][0] = 0;
+                pixels[2][7] = 0;
+                
+                // 眼睛 - 更生動的表情
+                pixels[3][2] = 0; // 左眼
+                pixels[3][5] = 0; // 右眼
+                
+                // 嘴巴 - 友善微笑
+                pixels[5][3] = 0;
+                pixels[5][4] = 0;
+                
+                // 身體/衣服
+                for (let x = 2; x < 6; x++) {
+                    pixels[6][x] = 2; // 衣領
+                    pixels[7][x] = 2; // 上衣
+                }
+                
+                // 衣服細節
+                pixels[6][2] = 0;
+                pixels[6][5] = 0;
+            }
+            
+            function drawRabbitFace(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 背景色
+                    }
+                }
+                
+                // 兔子頭部 - 更圓潤的臉型
+                for (let y = 2; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0; // 白色主體
+                    }
+                }
+                
+                // 擴展臉部輪廓讓臉更圓
+                pixels[3][1] = 0;
+                pixels[3][6] = 0;
+                pixels[4][1] = 0;
+                pixels[4][6] = 0;
+                pixels[5][1] = 0;
+                pixels[5][6] = 0;
+                
+                // 標誌性長耳朵 - 突出特徵
+                pixels[0][2] = 0;
+                pixels[0][5] = 0;
+                pixels[1][2] = 0; 
+                pixels[1][5] = 0;
+                pixels[0][3] = 0;
+                pixels[0][4] = 0;
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                
+                // 耳朵內部粉色細節
+                pixels[1][3] = 1;
+                pixels[1][4] = 1;
+                
+                // 可愛的眼睛
+                pixels[3][3] = 2; // 左眼
+                pixels[3][4] = 2; // 右眼
+                
+                // 兔子標誌性鼻子 - 小而粉
+                pixels[4][3] = 1;
+                pixels[4][4] = 1;
+                
+                // 微笑的嘴巴
+                pixels[5][3] = 2;
+                pixels[5][4] = 2;
+                
+                // 胡須暗示
+                pixels[4][2] = 2;
+                pixels[4][5] = 2;
+            }
+            
+            function drawLumberjackFace(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 2;
+                    }
+                }
+                
+                // 臉
+                for (let y = 3; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 1;
+                    }
+                }
+                
+                // 帽子
+                for (let y = 0; y < 3; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 帽子邊緣
+                for (let x = 0; x < 8; x++) {
+                    pixels[3][x] = 0;
+                }
+                
+                // 眼睛
+                pixels[4][2] = 3;
+                pixels[4][5] = 3;
+                
+                // 嘴
+                pixels[5][3] = 3;
+                pixels[5][4] = 3;
+            }
+            
+            function drawPandaFace(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 淺灰色背景
+                    }
+                }
+                
+                // 熊貓頭 (白色部分)
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 2; // 白色
+                    }
+                }
+                
+                // 熊貓耳朵 (黑色)
+                pixels[0][1] = 0;
+                pixels[0][2] = 0;
+                pixels[1][0] = 0;
+                pixels[1][1] = 0;
+                
+                pixels[0][5] = 0;
+                pixels[0][6] = 0;
+                pixels[1][6] = 0;
+                pixels[1][7] = 0;
+                
+                // 熊貓眼睛周圍 (黑色)
+                pixels[2][1] = 0;
+                pixels[2][2] = 0;
+                pixels[3][1] = 0;
+                pixels[3][2] = 0;
+                pixels[4][2] = 0;
+                
+                pixels[2][5] = 0;
+                pixels[2][6] = 0;
+                pixels[3][5] = 0;
+                pixels[3][6] = 0;
+                pixels[4][5] = 0;
+                
+                // 眼睛
+                pixels[3][3] = 0;
+                pixels[3][4] = 0;
+                
+                // 鼻子
+                pixels[5][3] = 0;
+                pixels[5][4] = 0;
+                
+                // 嘴
+                pixels[6][3] = 0;
+                pixels[6][4] = 0;
+            }
+            
+            function drawBomb(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 2;
+                    }
+                }
+                
+                // 炸彈形狀
+                for (let y = 2; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 炸彈頂部
+                pixels[1][3] = 1;
+                pixels[1][4] = 1;
+                pixels[0][4] = 1;
+                
+                // 高光
+                pixels[3][2] = 1;
+                pixels[3][3] = 1;
+                
+                // 引信
+                pixels[0][3] = 3;
+                pixels[1][2] = 3;
+            }
+            
+            function drawFoxFace(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 狐狸頭部主色區域
+                for (let y = 2; y < 6; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0; // 橙色主體
+                    }
+                }
+                
+                // 尖三角形耳朵
+                pixels[0][1] = 0;
+                pixels[0][6] = 0;
+                pixels[1][1] = 0;
+                pixels[1][2] = 0;
+                pixels[1][5] = 0;
+                pixels[1][6] = 0;
+                
+                // 延長的狐狸嘴巴 - 尖嘴特徵
+                pixels[6][2] = 0;
+                pixels[6][3] = 0;
+                pixels[6][4] = 0;
+                pixels[6][5] = 0;
+                pixels[7][3] = 0;
+                pixels[7][4] = 0;
+                
+                // 眼睛
+                pixels[3][2] = 3;
+                pixels[3][5] = 3;
+                
+                // 鼻子
+                pixels[5][3] = 3;
+                pixels[5][4] = 3;
+                
+                // 白色面部細節
+                pixels[4][2] = 2;
+                pixels[4][3] = 2;
+                pixels[4][4] = 2;
+                pixels[4][5] = 2;
+                
+                // 耳朵內部
+                pixels[1][2] = 2;
+                pixels[1][5] = 2;
+            }
+            
+            function drawWizard(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 臉部
+                for (let y = 3; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 2;
+                    }
+                }
+                
+                // 魔法師尖頂帽
+                pixels[0][3] = 0;
+                pixels[0][4] = 0;
+                pixels[1][2] = 0;
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                pixels[1][5] = 0;
+                pixels[2][1] = 0;
+                pixels[2][2] = 0;
+                pixels[2][3] = 0;
+                pixels[2][4] = 0;
+                pixels[2][5] = 0;
+                pixels[2][6] = 0;
+                
+                // 帽子裝飾
+                pixels[1][4] = 3;
+                
+                // 眼睛
+                pixels[4][2] = 1;
+                pixels[4][5] = 1;
+                
+                // 鬍子 - 更長的白鬍子
+                pixels[5][3] = 1;
+                pixels[5][4] = 1;
+                pixels[6][2] = 1;
+                pixels[6][3] = 1;
+                pixels[6][4] = 1;
+                pixels[6][5] = 1;
+                pixels[7][3] = 1;
+                pixels[7][4] = 1;
+            }
+            
+            function drawWhale(pixels, rng, colors) {
+                // 背景 (海水)
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 淺藍色海水
+                    }
+                }
+                
+                // 鯨魚身體
+                for (let y = 2; y < 6; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0; // 深藍色身體
+                    }
+                }
+                
+                // 鯨魚頭部圓弧
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                pixels[1][5] = 0;
+                
+                // 鯨魚尾巴
+                pixels[3][0] = 0;
+                pixels[4][0] = 0;
+                
+                // 鯨魚尾鰭
+                pixels[1][1] = 0;
+                pixels[6][1] = 0;
+                
+                // 噴水
+                pixels[0][4] = 2;
+                pixels[0][3] = 2;
+                
+                // 眼睛
+                pixels[3][5] = 2;
+                
+                // 腹部細節
+                pixels[4][3] = 1;
+                pixels[4][4] = 1;
+                pixels[5][3] = 1;
+                pixels[5][4] = 1;
+            }
+            
+            function drawRadio(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 收音機主體
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 1;
+                    }
+                }
+                
+                // 收音機控制鈕
+                pixels[2][2] = 3;
+                pixels[2][5] = 3;
+                pixels[5][2] = 3;
+                pixels[5][5] = 3;
+                
+                // 收音機顯示屏
+                for (let x = 2; x < 6; x++) {
+                    pixels[3][x] = 2;
+                    pixels[4][x] = 2;
+                }
+                
+                // 天線
+                pixels[0][2] = 2;
+                pixels[0][5] = 2;
+            }
+            
+            function drawChicken(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 雞身體
+                for (let y = 2; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 1;
+                    }
+                }
+                
+                // 雞冠
+                pixels[0][3] = 2;
+                pixels[0][4] = 2;
+                pixels[1][2] = 2;
+                pixels[1][3] = 2;
+                pixels[1][4] = 2;
+                pixels[1][5] = 2;
+                
+                // 雞嘴
+                pixels[2][4] = 0;
+                pixels[2][5] = 0;
+                
+                // 眼睛
+                pixels[2][3] = 0;
+                
+                // 腿
+                pixels[7][3] = 0;
+                pixels[7][4] = 0;
+            }
+            
+            function drawAssassin(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 1; // 灰色背景
+                    }
+                }
+                
+                // 刺客頭部與身體 - 黑色
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0; // 黑色裝束
+                    }
+                }
+                
+                // 面具輪廓和頭巾 - 更加突出刺客特徵
+                pixels[0][2] = 0;
+                pixels[0][3] = 0;
+                pixels[0][4] = 0;
+                pixels[0][5] = 0;
+                
+                // 頭巾兩側
+                pixels[1][1] = 0;
+                pixels[1][6] = 0;
+                
+                // 眼睛部分 - 突出的紅色眼睛，增加神秘感
+                pixels[2][3] = 3; // 左眼
+                pixels[2][4] = 3; // 右眼
+                
+                // 面罩輪廓 - 更寬的面罩覆蓋
+                pixels[3][1] = 0;
+                pixels[3][6] = 0;
+                pixels[4][1] = 0;
+                pixels[4][6] = 0;
+                
+                // 肩部裝甲/披風痕跡
+                pixels[4][0] = 0;
+                pixels[4][7] = 0;
+                
+                // 武器特徵 - 雙刀，調整位置更具威脅性
+                // 左刀
+                pixels[5][1] = 0;
+                pixels[6][0] = 0;
+                pixels[7][0] = 0;
+                
+                // 右刀
+                pixels[5][6] = 0;
+                pixels[6][7] = 0;
+                pixels[7][7] = 0;
+                
+                // 腰帶/身體細節 - 紅色配飾增強對比
+                pixels[5][3] = 3;
+                pixels[5][4] = 3;
+                
+                // 身體下部
+                pixels[7][3] = 0;
+                pixels[7][4] = 0;
+            }
+            
+            function drawHusky(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 哈士奇頭
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 耳朵
+                pixels[0][1] = 0;
+                pixels[0][6] = 0;
+                
+                // 眼睛
+                pixels[2][2] = 1;
+                pixels[2][5] = 1;
+                
+                // 鼻子
+                pixels[4][3] = 1;
+                pixels[4][4] = 1;
+                
+                // 嘴巴
+                pixels[5][3] = 2;
+                pixels[5][4] = 2;
+                
+                // 白色部分
+                pixels[3][3] = 3;
+                pixels[3][4] = 3;
+                pixels[6][3] = 3;
+                pixels[6][4] = 3;
+            }
+            
+            function drawBread(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 麵包底部
+                for (let y = 4; y < 8; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0; // 麵包底色
+                    }
+                }
+                
+                // 麵包頂部圓弧
+                for (let x = 2; x < 6; x++) {
+                    pixels[3][x] = 0;
+                }
+                for (let x = 3; x < 5; x++) {
+                    pixels[2][x] = 0;
+                }
+                
+                // 麵包片切面
+                for (let y = 5; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 1; // 麵包內部色
+                    }
+                }
+                
+                // 麵包切片上沿
+                for (let x = 2; x < 6; x++) {
+                    pixels[4][x] = 1;
+                }
+                
+                // 麵包質感點
+                pixels[5][3] = 2;
+                pixels[5][4] = 2;
+                pixels[6][2] = 2;
+                pixels[6][5] = 2;
+                
+                // 烤過的邊緣
+                pixels[3][1] = 2;
+                pixels[3][6] = 2;
+                pixels[7][3] = 2;
+                pixels[7][4] = 2;
+            }
+            
+            function drawWerewolf(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 狼人頭
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 耳朵
+                pixels[0][1] = 0;
+                pixels[0][6] = 0;
+                
+                // 眼睛
+                pixels[3][2] = 2;
+                pixels[3][5] = 2;
+                
+                // 鼻子
+                pixels[4][3] = 1;
+                pixels[4][4] = 1;
+                
+                // 嘴和尖牙
+                pixels[5][2] = 3;
+                pixels[5][3] = 1;
+                pixels[5][4] = 1;
+                pixels[5][5] = 3;
+                pixels[6][2] = 3;
+                pixels[6][5] = 3;
+            }
+            
+            function drawDragon(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 龍頭主部
+                for (let y = 2; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0; // 基本龍色
+                    }
+                }
+                
+                // 龍角 - 更明顯且對稱
+                pixels[0][2] = 0;
+                pixels[0][5] = 0;
+                pixels[1][1] = 0;
+                pixels[1][2] = 0;
+                pixels[1][5] = 0;
+                pixels[1][6] = 0;
+                
+                // 眼睛 - 更兇猛的眼神
+                pixels[3][2] = 2; // 左眼
+                pixels[3][5] = 2; // 右眼
+                pixels[2][2] = 2; // 左眼上部
+                pixels[2][5] = 2; // 右眼上部
+                
+                // 鼻孔
+                pixels[4][3] = 1;
+                pixels[4][4] = 1;
+                
+                // 龍嘴 - 嘴巴張開的樣子
+                pixels[5][2] = 3; // 牙齒
+                pixels[5][5] = 3; // 牙齒
+                pixels[6][3] = 2; // 嘴裡
+                pixels[6][4] = 2; // 嘴裡
+                
+                // 鱗片紋理
+                pixels[3][3] = 1;
+                pixels[3][4] = 1;
+                pixels[5][3] = 1;
+                pixels[5][4] = 1;
+            }
+            
+            function drawSushi(pixels, rng, colors) {
+                // 背景(碟子)
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 壽司飯
+                for (let y = 2; y < 6; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 1;
+                    }
+                }
+                
+                // 壽司魚
+                for (let y = 1; y < 4; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 2;
+                    }
+                }
+                
+                // 海苔
+                pixels[4][1] = 3;
+                pixels[4][2] = 3;
+                pixels[4][3] = 3;
+                pixels[4][4] = 3;
+                pixels[4][5] = 3;
+                pixels[4][6] = 3;
+                
+                // 芥末
+                pixels[6][3] = 1;
+                pixels[6][4] = 1;
+            }
+            
+            function drawCat(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 貓臉
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 貓耳
+                pixels[0][1] = 0;
+                pixels[0][6] = 0;
+                
+                // 眼睛
+                pixels[3][2] = 2;
+                pixels[3][5] = 2;
+                
+                // 眼睛縫
+                pixels[2][2] = 1;
+                pixels[2][5] = 1;
+                pixels[4][2] = 1;
+                pixels[4][5] = 1;
+                
+                // 鼻子
+                pixels[4][3] = 1;
+                pixels[4][4] = 1;
+                
+                // 嘴
+                pixels[5][3] = 1;
+                pixels[5][4] = 1;
+                
+                // 鬍鬚
+                pixels[4][0] = 0;
+                pixels[4][7] = 0;
+                pixels[5][0] = 0;
+                pixels[5][7] = 0;
+            }
+            
+            function drawOrange(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 橙子主體
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                for (let y = 2; y < 6; y++) {
+                    pixels[y][1] = 0;
+                    pixels[y][6] = 0;
+                }
+                
+                // 葉子
+                pixels[0][3] = 2;
+                pixels[0][4] = 2;
+                pixels[1][3] = 2;
+                
+                // 細節紋理
+                pixels[2][3] = 1;
+                pixels[3][4] = 1;
+                pixels[4][2] = 1;
+                pixels[5][5] = 1;
+            }
+            
+            function drawMask(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 面具主體
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 面具眼睛
+                pixels[2][2] = 3;
+                pixels[2][5] = 3;
+                pixels[3][2] = 3;
+                pixels[3][5] = 3;
+                
+                // 面具嘴
+                pixels[5][3] = 3;
+                pixels[5][4] = 3;
+                
+                // 裝飾
+                pixels[1][3] = 2;
+                pixels[1][4] = 2;
+                pixels[6][2] = 1;
+                pixels[6][5] = 1;
+            }
+            
+            function drawSparrow(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 麻雀身體
+                for (let y = 2; y < 6; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 麻雀頭
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                
+                // 眼睛
+                pixels[2][3] = 2;
+                
+                // 嘴
+                pixels[2][5] = 1;
+                pixels[2][6] = 1;
+                
+                // 尾巴
+                pixels[5][1] = 0;
+                pixels[6][0] = 0;
+                
+                // 腳
+                pixels[6][3] = 1;
+                pixels[6][4] = 1;
+                pixels[7][3] = 1;
+                pixels[7][4] = 1;
+                
+                // 翅膀
+                pixels[3][1] = 0;
+                pixels[4][1] = 0;
+            }
+            
+            function drawWatermelon(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 西瓜外皮
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0;
+                    }
+                }
+                
+                // 西瓜紅肉
+                for (let y = 2; y < 6; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 2;
+                    }
+                }
+                
+                // 西瓜籽
+                pixels[2][3] = 1;
+                pixels[3][4] = 1;
+                pixels[4][2] = 1;
+                pixels[5][3] = 1;
+                pixels[3][2] = 1;
+            }
+            
+            function drawCapybara(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 背景色
+                    }
+                }
+                
+                // 卡皮巴拉身體 - 圓潤而寬的輪廓
+                for (let y = 2; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0; // 棕色主體
+                    }
+                }
+                
+                // 擴展卡皮巴拉頭部，更圓潤
+                pixels[1][2] = 0;
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                pixels[1][5] = 0;
+                
+                // 小型圓耳朵 - 卡皮巴拉特徵
+                pixels[0][2] = 0;
+                pixels[0][5] = 0;
+                
+                // 眼睛 - 黑色圓眼睛
+                pixels[2][2] = 2; // 左眼
+                pixels[2][5] = 2; // 右眼
+                
+                // 鼻子 - 寬大特徵性鼻子
+                pixels[3][3] = 1; // 深色鼻子
+                pixels[3][4] = 1;
+                pixels[3][2] = 1; // 延長鼻子寬度
+                pixels[3][5] = 1;
+                
+                // 嘴 - 友善表情
+                pixels[4][3] = 2;
+                pixels[4][4] = 2;
+                
+                // 腿和腳 - 短腿特徵
+                pixels[6][2] = 0;
+                pixels[6][5] = 0;
+                pixels[7][2] = 0;
+                pixels[7][5] = 0;
+                
+                // 毛髮質感
+                pixels[2][3] = 3; // 淺色毛髮細節
+                pixels[2][4] = 3;
+            }
+            
+            function drawSunflower(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 淺色背景
+                    }
+                }
+                
+                // 鮮明的花瓣 - 明亮的黃色
+                // 外圈花瓣 - 更加突出的放射狀
+                pixels[0][3] = 0; // 頂部花瓣
+                pixels[0][4] = 0;
+                pixels[1][1] = 0; // 左上花瓣
+                pixels[1][2] = 0;
+                pixels[1][5] = 0; // 右上花瓣
+                pixels[1][6] = 0;
+                pixels[2][0] = 0; // 左側花瓣
+                pixels[2][1] = 0;
+                pixels[2][6] = 0; // 右側花瓣
+                pixels[2][7] = 0;
+                pixels[3][0] = 0; // 極左花瓣
+                pixels[4][0] = 0;
+                pixels[3][7] = 0; // 極右花瓣
+                pixels[4][7] = 0;
+                pixels[5][1] = 0; // 左下花瓣
+                pixels[5][2] = 0;
+                pixels[5][5] = 0; // 右下花瓣
+                pixels[5][6] = 0;
+                pixels[6][2] = 0; // 下方花瓣
+                pixels[6][3] = 0;
+                pixels[6][4] = 0;
+                pixels[6][5] = 0;
+                pixels[7][3] = 0; // 底部花瓣
+                pixels[7][4] = 0;
+                
+                // 花盤 - 棕色
+                for (let y = 2; y < 6; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 2; // 深棕色花盤
+                    }
+                }
+                
+                // 花盤紋理 - 增添細節
+                pixels[2][3] = 1; // 上緣紋理
+                pixels[2][4] = 1;
+                pixels[3][2] = 1; // 左側紋理
+                pixels[4][2] = 1;
+                pixels[3][5] = 1; // 右側紋理
+                pixels[4][5] = 1;
+                pixels[5][3] = 1; // 下緣紋理
+                pixels[5][4] = 1;
+                
+                // 莖部提示 - 綠色
+                pixels[7][2] = 2;
+                pixels[7][5] = 2;
+            }
+            
+            function drawRandomPattern(pixels, rng, colors) {
+                // 先填充背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3;
+                    }
+                }
+                
+                // 對稱圖案
+                for (let y = 0; y < 4; y++) {
+                    for (let x = 0; x < 4; x++) {
+                        const colorIndex = Math.floor(rng() * 3);
+                        pixels[y][x] = colorIndex;
+                        pixels[y][7-x] = colorIndex; // 水平對稱
+                        pixels[7-y][x] = colorIndex; // 垂直對稱
+                        pixels[7-y][7-x] = colorIndex; // 對角對稱
+                    }
+                }
+            }
+
+            // 添加新設計的天使頭像函數
+            function drawAngel(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 基本背景色
+                    }
+                }
+                
+                // 天使身體 - 白色長袍
+                for (let y = 2; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0; // 純白色長袍
+                    }
+                }
+                
+                // 頭部 - 天使特徵
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                
+                // 翅膀 - 天使的標誌性特徵
+                // 左翅膀
+                pixels[2][0] = 0;
+                pixels[2][1] = 0;
+                pixels[3][0] = 0;
+                pixels[3][1] = 0;
+                pixels[4][1] = 0;
+                
+                // 右翅膀
+                pixels[2][6] = 0;
+                pixels[2][7] = 0;
+                pixels[3][6] = 0;
+                pixels[3][7] = 0;
+                pixels[4][6] = 0;
+                
+                // 光環 - 天使頭頂的金色光環
+                pixels[0][3] = 2;
+                pixels[0][4] = 2;
+                
+                // 翅膀細節 - 淺藍色羽毛紋理
+                pixels[2][1] = 3;
+                pixels[3][0] = 3;
+                pixels[2][6] = 3;
+                pixels[3][7] = 3;
+                
+                // 長袍細節 - 淺藍色裝飾
+                pixels[4][3] = 3;
+                pixels[4][4] = 3;
+                pixels[5][2] = 3;
+                pixels[5][5] = 3;
+                pixels[6][3] = 3;
+                pixels[6][4] = 3;
+                
+                // 面部特徵
+                pixels[1][3] = 1; // 溫柔的表情
+            }
+            
+            // 新設計的獨角獸頭像
+            function drawUnicorn(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 基本背景色
+                    }
+                }
+                
+                // 獨角獸頭部 - 白色
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        pixels[y][x] = 0; // 白色主體
+                    }
+                }
+                
+                // 獨角獸頭部輪廓優化
+                pixels[2][0] = 0;
+                pixels[3][0] = 0;
+                pixels[4][0] = 0;
+                pixels[2][7] = 0;
+                pixels[3][7] = 0;
+                pixels[4][7] = 0;
+                
+                // 特徵性獨角 - 獨角獸的標誌特徵
+                pixels[0][4] = 0;
+                pixels[1][3] = 0;
+                pixels[0][3] = 0;
+                
+                // 獨角獸獨角金色尖端
+                pixels[0][3] = 2;
+                
+                // 獨角獸鬃毛 - 紫色
+                pixels[0][5] = 1;
+                pixels[0][6] = 1;
+                pixels[1][6] = 1;
+                pixels[1][7] = 1;
+                pixels[2][7] = 1;
+                
+                // 獨角獸眼睛
+                pixels[3][2] = 3;
+                pixels[3][5] = 3;
+                
+                // 鼻子和嘴
+                pixels[4][3] = 1;
+                pixels[4][4] = 1;
+                pixels[5][3] = 1;
+                pixels[5][4] = 1;
+                
+                // 耳朵
+                pixels[1][1] = 0;
+                pixels[1][2] = 0;
+                
+                // 耳朵內側 - 粉色
+                pixels[1][2] = 1;
+            }
+            
+            // 新設計的冰花頭像
+            function drawIceflower(pixels, rng, colors) {
+                // 背景 - 深藍色
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 深藍色背景
+                    }
+                }
+                
+                // 冰花中心 - 最淺的藍色
+                pixels[3][3] = 0;
+                pixels[3][4] = 0;
+                pixels[4][3] = 0;
+                pixels[4][4] = 0;
+                
+                // 主體六角形冰晶形狀 - 六條射線形成雪花形狀
+                // 上射線
+                pixels[0][3] = 0;
+                pixels[1][3] = 0;
+                pixels[2][3] = 0;
+                pixels[0][4] = 0;
+                pixels[1][4] = 0;
+                pixels[2][4] = 0;
+                
+                // 下射線
+                pixels[5][3] = 0;
+                pixels[6][3] = 0;
+                pixels[7][3] = 0;
+                pixels[5][4] = 0;
+                pixels[6][4] = 0;
+                pixels[7][4] = 0;
+                
+                // 左射線
+                pixels[3][0] = 0;
+                pixels[3][1] = 0;
+                pixels[3][2] = 0;
+                pixels[4][0] = 0;
+                pixels[4][1] = 0;
+                pixels[4][2] = 0;
+                
+                // 右射線
+                pixels[3][5] = 0;
+                pixels[3][6] = 0;
+                pixels[3][7] = 0;
+                pixels[4][5] = 0;
+                pixels[4][6] = 0;
+                pixels[4][7] = 0;
+                
+                // 左上射線
+                pixels[1][1] = 0;
+                pixels[2][2] = 0;
+                
+                // 右上射線
+                pixels[1][6] = 0;
+                pixels[2][5] = 0;
+                
+                // 左下射線
+                pixels[5][1] = 0;
+                pixels[6][2] = 0;
+                
+                // 右下射線
+                pixels[5][6] = 0;
+                pixels[6][5] = 0;
+                
+                // 晶瑩冰晶細節 - 淺藍色裝飾點
+                pixels[2][3] = 1;
+                pixels[3][2] = 1;
+                pixels[5][3] = 1;
+                pixels[3][5] = 1;
+                pixels[1][1] = 1;
+                pixels[1][6] = 1;
+                pixels[6][1] = 1;
+                pixels[6][6] = 1;
+                
+                // 冰花閃光效果 - 最亮的藍色
+                pixels[0][3] = 2;
+                pixels[3][0] = 2;
+                pixels[7][4] = 2;
+                pixels[4][7] = 2;
+            }
+            
+            // 新設計的海盜頭像
+            function drawPirate(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 基本背景色
+                    }
+                }
+                
+                // 海盜面部 - 棕色
+                for (let y = 2; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0; // 深棕色臉
+                    }
+                }
+                
+                // 海盜帽 - 黑色
+                for (let x = 1; x < 7; x++) {
+                    pixels[0][x] = 1; // 帽子頂部
+                }
+                for (let x = 0; x < 8; x++) {
+                    pixels[1][x] = 1; // 帽子寬邊
+                }
+                
+                // 骷髏標誌 - 白色
+                pixels[0][4] = 2;
+                
+                // 眼罩 - 海盜特色
+                pixels[2][2] = 1;
+                pixels[2][3] = 1;
+                pixels[3][2] = 1;
+                pixels[3][3] = 1;
+                
+                // 可見的眼睛
+                pixels[3][5] = 3;
+                
+                // 嘴巴和胡子
+                pixels[5][3] = 3;
+                pixels[5][4] = 3;
+                pixels[4][2] = 1;
+                pixels[5][2] = 1;
+                pixels[6][3] = 1;
+                
+                // 耳環 - 金色
+                pixels[4][6] = 2;
+                
+                // 頭巾末端
+                pixels[2][6] = 3;
+                pixels[2][7] = 3;
+                
+                // 傷疤 - 紅色
+                pixels[4][3] = 3;
+                pixels[4][4] = 3;
+            }
+            
+            // 糖果頭像 - 新設計
+            function drawCandy(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 背景色
+                    }
+                }
+                
+                // 糖果主體 - 橢圓形包裝
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0; // 粉紅色糖果主體
+                    }
+                }
+                
+                // 包裝紙兩端的擰紋
+                pixels[0][3] = 1;
+                pixels[0][4] = 1;
+                pixels[7][3] = 1;
+                pixels[7][4] = 1;
+                
+                // 擁有更明顯的包裝紙形狀
+                pixels[0][2] = 1;
+                pixels[0][5] = 1;
+                pixels[7][2] = 1;
+                pixels[7][5] = 1;
+                
+                // 糖果條紋 - 標誌性特徵
+                pixels[2][2] = 2; // 綠色條紋
+                pixels[2][5] = 2;
+                pixels[4][2] = 2;
+                pixels[4][5] = 2;
+                pixels[6][2] = 2;
+                pixels[6][5] = 2;
+                
+                // 中央部分的花紋
+                pixels[3][3] = 1; // 深粉色的裝飾紋理
+                pixels[3][4] = 1;
+                pixels[5][3] = 1;
+                pixels[5][4] = 1;
+                
+                // 糖果反光高光
+                pixels[2][3] = 3;
+                pixels[2][4] = 3;
+            }
+            
+            // 蝴蝶頭像 - 新設計
+            function drawButterfly(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 背景色
+                    }
+                }
+                
+                // 蝴蝶身體 - 中央細長
+                pixels[3][3] = 0; // 深紫色身體
+                pixels[3][4] = 0;
+                pixels[4][3] = 0;
+                pixels[4][4] = 0;
+                pixels[5][3] = 0;
+                pixels[5][4] = 0;
+                
+                // 蝴蝶頭部
+                pixels[2][3] = 0;
+                pixels[2][4] = 0;
+                
+                // 觸角
+                pixels[1][2] = 0;
+                pixels[1][5] = 0;
+                pixels[0][1] = 0;
+                pixels[0][6] = 0;
+                
+                // 上翅膀 - 主要特徵
+                // 左上翅膀
+                pixels[1][0] = 1;
+                pixels[1][1] = 1;
+                pixels[2][0] = 1;
+                pixels[2][1] = 1;
+                pixels[2][2] = 1;
+                
+                // 右上翅膀
+                pixels[1][6] = 1;
+                pixels[1][7] = 1;
+                pixels[2][5] = 1;
+                pixels[2][6] = 1;
+                pixels[2][7] = 1;
+                
+                // 下翅膀
+                // 左下翅膀
+                pixels[3][0] = 1;
+                pixels[3][1] = 1;
+                pixels[3][2] = 1;
+                pixels[4][0] = 1;
+                pixels[4][1] = 1;
+                pixels[4][2] = 1;
+                
+                // 右下翅膀
+                pixels[3][5] = 1;
+                pixels[3][6] = 1;
+                pixels[3][7] = 1;
+                pixels[4][5] = 1;
+                pixels[4][6] = 1;
+                pixels[4][7] = 1;
+                
+                // 翅膀上的花紋
+                // 上翅膀花紋
+                pixels[2][1] = 2; // 粉色斑點
+                pixels[2][6] = 2;
+                
+                // 下翅膀花紋
+                pixels[4][1] = 2;
+                pixels[4][6] = 2;
+            }
+            
+            // 閃電頭像 - 新設計
+            function drawLightning(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 背景色
+                    }
+                }
+                
+                // 閃電主體 - 鋸齒狀Z形
+                // 上部
+                pixels[0][3] = 0;
+                pixels[0][4] = 0;
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                
+                // 中上部轉折
+                pixels[2][2] = 0;
+                pixels[2][3] = 0;
+                pixels[3][2] = 0;
+                pixels[3][3] = 0;
+                
+                // 中間部分
+                pixels[3][3] = 0;
+                pixels[3][4] = 0;
+                pixels[4][3] = 0;
+                pixels[4][4] = 0;
+                
+                // 中下部轉折
+                pixels[4][4] = 0;
+                pixels[4][5] = 0;
+                pixels[5][4] = 0;
+                pixels[5][5] = 0;
+                
+                // 底部
+                pixels[6][3] = 0;
+                pixels[6][4] = 0;
+                pixels[7][3] = 0;
+                pixels[7][4] = 0;
+                
+                // 閃電內部亮黃色核心
+                pixels[1][3] = 1;
+                pixels[2][2] = 1;
+                pixels[3][3] = 1;
+                pixels[4][4] = 1;
+                pixels[5][4] = 1;
+                pixels[6][3] = 1;
+                
+                // 閃電最亮部分 - 中央高光
+                pixels[3][3] = 2;
+                pixels[4][4] = 2;
+            }
+            
+            // 皇冠頭像 - 新設計
+            function drawCrown(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 背景色
+                    }
+                }
+                
+                // 皇冠底部 - 基礎圓環
+                for (let x = 1; x < 7; x++) {
+                    pixels[5][x] = 0; // 金黃色基底
+                    pixels[6][x] = 0;
+                }
+                
+                // 皇冠尖頂 - 主要特徵
+                // 中央大尖頂
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                pixels[2][3] = 0;
+                pixels[2][4] = 0;
+                pixels[3][3] = 0;
+                pixels[3][4] = 0;
+                pixels[4][3] = 0;
+                pixels[4][4] = 0;
+                
+                // 左側尖頂
+                pixels[2][1] = 0;
+                pixels[2][2] = 0;
+                pixels[3][1] = 0;
+                pixels[3][2] = 0;
+                pixels[4][1] = 0;
+                pixels[4][2] = 0;
+                
+                // 右側尖頂
+                pixels[2][5] = 0;
+                pixels[2][6] = 0;
+                pixels[3][5] = 0;
+                pixels[3][6] = 0;
+                pixels[4][5] = 0;
+                pixels[4][6] = 0;
+                
+                // 皇冠上的寶石裝飾
+                pixels[0][3] = 3; // 紅寶石 (在中央尖頂上)
+                pixels[0][4] = 3;
+                
+                pixels[2][1] = 1; // 尖頂上的金色細節
+                pixels[2][5] = 1;
+                
+                // 皇冠內部細節 - 亮金色
+                pixels[3][3] = 1;
+                pixels[3][4] = 1;
+                pixels[5][2] = 1;
+                pixels[5][5] = 1;
+                
+                // 皇冠底部裝飾
+                pixels[7][2] = 0;
+                pixels[7][5] = 0;
+            }
+            
+            // 月球頭像 - 新設計
+            function drawMoon(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 深色背景 (像夜空)
+                    }
+                }
+                
+                // 月球主體 - 圓形
+                for (let y = 1; y < 7; y++) {
+                    for (let x = 1; x < 7; x++) {
+                        // 創建圓形
+                        const centerX = 3.5;
+                        const centerY = 3.5;
+                        const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                        if (distance < 3) {
+                            pixels[y][x] = 0; // 淺灰色月球表面
+                        }
+                    }
+                }
+                
+                // 月球表面細節 - 環形山和陰影
+                pixels[2][2] = 1; // 較深的環形山
+                pixels[3][5] = 1;
+                pixels[5][3] = 1;
+                
+                // 更多的隕石坑和凹陷
+                pixels[2][4] = 2; // 更深的凹陷
+                pixels[4][2] = 2;
+                
+                // 月球陰影部分 - 創造三維感
+                pixels[1][1] = 3; // 恢復背景色，創造圓形輪廓
+                pixels[1][6] = 3;
+                pixels[6][1] = 3;
+                pixels[6][6] = 3;
+            }
+            
+            function drawLemon(pixels, rng, colors) {
+                // 背景
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) {
+                        pixels[y][x] = 3; // 基本背景色
+                    }
+                }
+                
+                // 檸檬主體 - 更明顯的檸檬形狀
+                // 中央部分
+                for (let y = 2; y < 6; y++) {
+                    for (let x = 2; x < 6; x++) {
+                        pixels[y][x] = 0; // 鮮豔檸檬黃色
+                    }
+                }
+                
+                // 側面延伸 - 創造橢圓形輪廓
+                pixels[3][1] = 0;
+                pixels[3][6] = 0;
+                pixels[4][1] = 0;
+                pixels[4][6] = 0;
+                
+                // 檸檬特有的尖端 - 更突出的形狀
+                // 上部尖端
+                pixels[1][3] = 0;
+                pixels[1][4] = 0;
+                pixels[0][3] = 0;
+                pixels[0][4] = 0;
+                
+                // 下部尖端
+                pixels[6][3] = 0;
+                pixels[6][4] = 0;
+                pixels[7][3] = 0;
+                pixels[7][4] = 0;
+                
+                // 檸檬表面紋理 - 增加視覺趣味性
+                pixels[2][3] = 1; // 較亮的黃色斑點
+                pixels[3][4] = 1;
+                pixels[4][2] = 1;
+                pixels[5][3] = 1;
+                pixels[5][5] = 1;
+                
+                // 檸檬綠色葉子 - 更生動的細節
+                pixels[0][2] = 2; // 頂部葉子
+                pixels[1][2] = 2; // 側葉
+                pixels[1][5] = 2; // 對稱側葉
+            }
+            
+            // 幫助函數 - 創建一個基於字符串的哈希值
+            function hashString(str) {
+                let hash = 0;
+                if (str.length === 0) return hash;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // 轉換為32位整數
+                }
+                return hash >>> 0; // 轉換為無符號整數
+            }
+            
+            // 幫助函數 - 基於種子的隨機數生成器
+            function mulberry32(seed) {
+                return function() {
+                    let t = seed += 0x6D2B79F5;
+                    t = Math.imul(t ^ t >>> 15, t | 1);
+                    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                };
+            }
+            
             // 成就展示功能
             function initializeAchievementsDisplay() {
                 // 嘗試從localStorage加載已選擇的成就
@@ -6395,5 +8489,3 @@ function displayAchievements() {
     </script>
 </body>
 </html>
-
-
