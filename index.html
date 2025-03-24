@@ -687,91 +687,63 @@
         <div class="book relative mb-8">
             <!-- 用戶資料容器 - 修改成與遊戲頁面相似大小 -->
             <div id="user-profile-container" class="page rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-6 md:p-8 min-h-[400px] shadow-md">
-                <div class="flex h-full justify-center items-center">
-                    <div class="flex flex-row w-full max-w-4xl gap-8">
-                        <!-- 左側：人物形象 -->
-                        <div class="pixel-character-container w-1/3">
-                            <div class="relative">
-                                <div id="character-display" class="w-full h-[300%] bg-amber-50 dark:bg-gray-700 rounded-lg p-2 border-4 border-amber-200 dark:border-amber-900 shadow-md flex items-center justify-center overflow-hidden">
-                                    <!-- 角色將在這裡顯示 -->
-                                </div>
-                                <button id="change-character-btn" class="absolute -bottom-3 right-0 bg-amber-500 hover:bg-amber-600 text-white w-8 h-8 rounded-full shadow-md flex items-center justify-center transition-colors">
-                                    <i class="fas fa-exchange-alt"></i>
+                <div class="flex flex-col h-full justify-center items-center">
+                    <div class="user-avatar-container w-24 h-24 md:w-32 md:h-32 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-user text-4xl md:text-5xl text-amber-800 dark:text-amber-100"></i>
+                    </div>
+                    
+                    <div class="text-center w-full max-w-md">
+                        <div class="flex justify-center items-center gap-3 mb-4">
+                            <!-- 顯示模式 -->
+                            <div id="name-display-mode" class="flex items-center">
+                                <h3 id="user-name" class="text-xl font-bold text-gray-800 dark:text-gray-100">文言大師</h3>
+                                <button id="edit-name-btn" class="ml-2 w-7 h-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary transition-colors">
+                                    <i class="fas fa-pen text-xs"></i>
                                 </button>
                             </div>
-                            <p id="character-name" class="text-center mt-4 text-amber-800 dark:text-amber-300 font-medium text-sm">普通村民</p>
+                            
+                            <!-- 編輯模式 (默認隱藏) -->
+                            <div id="name-edit-mode" class="flex flex-col items-center gap-2 hidden w-full max-w-xs mx-auto">
+                                <div class="w-full relative">
+                                    <input type="text" id="user-name-input" class="w-full text-xl font-bold text-gray-800 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 border-2 border-primary/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" maxlength="12">
+                                    <div class="absolute right-3 bottom-2 text-xs text-gray-500 dark:text-gray-400" id="char-counter">0/12</div>
+                                </div>
+                                <div class="flex gap-3 mt-1">
+                                    <button id="save-name-btn" class="w-9 h-9 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button id="cancel-name-btn" class="w-9 h-9 flex items-center justify-center bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         
-                        <!-- 右側：角色名稱、等級、經驗值 -->
-                        <div class="flex-1 flex flex-col justify-start gap-4">
-                            <!-- 角色名稱 -->
-                            <div class="bg-amber-50 dark:bg-gray-700/50 rounded-lg p-4 shadow-sm">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="text-gray-500 dark:text-gray-400 text-sm">角色名稱</h3>
-                                    <button id="edit-name-btn" class="w-6 h-6 flex items-center justify-center bg-amber-100 hover:bg-amber-200 dark:bg-amber-800/50 dark:hover:bg-amber-700 text-amber-800 dark:text-amber-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-400 transition-colors">
-                                        <i class="fas fa-pen text-xs"></i>
+                        <div class="w-full mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center">
+                                    <span id="user-level" class="bg-primary text-white text-sm py-0.5 px-2 rounded-full mr-2">Lv.1</span>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">經驗值</span>
+                                </div>
+                                <span id="exp-text" class="text-sm text-gray-600 dark:text-gray-400">0 / 100</span>
+                            </div>
+                            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div id="exp-bar" class="h-full bg-amber-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <div class="mb-4">
+                                <h4 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
+                                    成就
+                                    <button id="manage-achievements-btn" class="text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-md px-2 py-1 focus:outline-none transition-colors">
+                                        <i class="fas fa-cog text-xs"></i>
                                     </button>
-                                </div>
-                                
-                                <!-- 顯示模式 -->
-                                <div id="name-display-mode" class="flex items-center justify-between">
-                                    <h3 id="user-name" class="text-2xl font-bold text-gray-800 dark:text-gray-100">文言大師</h3>
-                                </div>
-                                
-                                <!-- 編輯模式 (默認隱藏) -->
-                                <div id="name-edit-mode" class="flex flex-col gap-3 hidden w-full">
-                                    <div class="w-full relative">
-                                        <input type="text" id="user-name-input" class="w-full text-xl font-bold text-gray-800 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 border-2 border-amber-400/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-sm" maxlength="12">
-                                        <div class="absolute right-3 bottom-2 text-xs text-gray-500 dark:text-gray-400" id="char-counter">0/12</div>
-                                    </div>
-                                    <div class="flex gap-3 mt-1">
-                                        <button id="save-name-btn" class="w-10 h-10 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                        <button id="cancel-name-btn" class="w-10 h-10 flex items-center justify-center bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
+                                </h4>
+                                <div id="achievements-display" class="flex justify-center flex-wrap gap-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 italic">從設置菜單的「歷史成就」中選擇展示</p>
                                 </div>
                             </div>
-                            
-                            <!-- 等級與經驗值 -->
-                            <div class="bg-amber-50 dark:bg-gray-700/50 rounded-lg p-4 shadow-sm">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center">
-                                        <h3 class="text-gray-500 dark:text-gray-400 text-sm">等級</h3>
-                                        <span id="user-level" class="ml-2 bg-primary text-white text-base py-1 px-3 rounded-full">Lv.1</span>
-                                    </div>
-                                    <span id="exp-text" class="text-sm text-gray-600 dark:text-gray-400">0 / 100</span>
-                                </div>
-                                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                    <div id="exp-bar" class="h-full bg-amber-500 rounded-full transition-all duration-300" style="width: 0%"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- 成就 -->
-                            <div class="bg-amber-50 dark:bg-gray-700/50 rounded-lg p-4 shadow-sm mt-4">
-                                <div class="flex items-center justify-between mb-3">
-                                    <h3 class="text-gray-500 dark:text-gray-400 text-sm">成就</h3>
-                                    <button id="manage-achievements-btn" class="text-xs text-primary hover:text-primary/80 transition-colors">
-                                        更多 <i class="fas fa-chevron-right text-xs"></i>
-                                    </button>
-                                </div>
-                                
-                                <div id="displayed-achievements" class="flex justify-center gap-2">
-                                    <div class="achievement-placeholder flex items-center justify-center bg-gray-100 dark:bg-gray-600 rounded-lg w-20 h-20 cursor-pointer">
-                                        <i class="fas fa-plus text-gray-400 dark:text-gray-500"></i>
-                                    </div>
-                                    <div class="achievement-placeholder flex items-center justify-center bg-gray-100 dark:bg-gray-600 rounded-lg w-20 h-20 cursor-pointer">
-                                        <i class="fas fa-plus text-gray-400 dark:text-gray-500"></i>
-                                    </div>
-                                    <div class="achievement-placeholder flex items-center justify-center bg-gray-100 dark:bg-gray-600 rounded-lg w-20 h-20 cursor-pointer">
-                                        <i class="fas fa-plus text-gray-400 dark:text-gray-500"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-
                         </div>
                     </div>
                 </div>
@@ -864,17 +836,8 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 支持深色模式檢測及切換
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.classList.add('dark');
-            }
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (event.matches) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            });
+            // 確保移除深色模式類
+            document.documentElement.classList.remove('dark');
             
             // 添加視窗大小變化監聽
             window.addEventListener('resize', function() {
@@ -3772,13 +3735,13 @@ if (passageHeader && passageToggle && passageContent) {
                     achievementsHTML = `
                     <div class="mb-5 mt-4">
                         <p class="text-lg font-medium text-amber-700 dark:text-amber-400 mb-3">獲得成就:</p>
-                        <div class="achievements-container">
+                        <div class="achievements-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
                     `;
                     
-                    // 添加每個成就徽章
+                    // 添加每個成就徽章，设置为一行至少显示三个
                     achievements.forEach(achievement => {
                         achievementsHTML += `
-                        <div class="achievement-seal">
+                        <div class="achievement-seal" style="width: calc(33.333% - 10px); min-width: 80px; max-width: 100px; flex-grow: 0; flex-shrink: 0;">
                             ${achievement.svg}
                             <div class="seal-text">
                                 <span class="seal-title">${achievement.title}</span>
@@ -4084,11 +4047,11 @@ if (passageHeader && passageToggle && passageContent) {
             initializeSettings();
             
             // 首先声明全局变量，确保它们在使用之前已完成初始化
-            // 立即在全局范围内定义变量，确保在任何地方使用前都已初始化
-            var userRecordsMemory = {};
+            // 用於替代localStorage的內存存儲
+            let userRecordsMemory = {};
             
-            // 全局成就和统计追踪 - 使用var确保在全局作用域中声明
-            var globalStats = {
+            // 全局成就和統計跟踪
+            let globalStats = {
                 totalCompletionCount: 0,      // 總完成次數
                 failAfterHalfwayCount: 0,     // 遊戲過半後失敗次數
                 lightningAchievementCount: 0, // 獲得閃電俠成就次數
@@ -4361,9 +4324,6 @@ if (passageHeader && passageToggle && passageContent) {
                 console.log("用戶名稱編輯器初始化完成");
             }
             
-            // 首先初始化默認統計數據
-            initializeDefaultStats();
-            
             // 初始化本地存儲功能 - 用於記錄用戶成績
             initializeLocalStorage();
             
@@ -4402,551 +4362,6 @@ if (passageHeader && passageToggle && passageContent) {
                     settingsButton.style.opacity = '1';
                     settingsButton.style.cursor = 'pointer';
                     settingsButton.style.pointerEvents = 'auto';
-                }
-                
-                // 管理成就按鈕功能
-                const manageAchievementsBtn = document.getElementById('manage-achievements-btn');
-                const displayedAchievements = document.getElementById('displayed-achievements');
-                
-                if (manageAchievementsBtn && displayedAchievements) {
-                    manageAchievementsBtn.addEventListener('click', function() {
-                        showAchievementSelector();
-                    });
-                    
-                    // 初始載入已保存的顯示成就
-                    loadDisplayedAchievements();
-                }
-                
-                // 顯示成就選擇器
-                function showAchievementSelector() {
-                    // 創建模態框內容
-                    const selectorModal = document.createElement('div');
-                    selectorModal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50';
-                    selectorModal.id = 'achievement-selector-modal';
-                    
-                    // 獲取用戶已解鎖的成就
-                    const unlockedAchievements = getAllUnlockedAchievements();
-                    
-                    // 獲取已顯示的成就
-                    const displayedAchievementIds = getDisplayedAchievementIds();
-                    
-                    let modalContent = `
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] flex flex-col">
-                            <div class="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10">
-                                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">選擇顯示的成就</h3>
-                                <button id="close-achievement-selector" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <p class="text-gray-600 dark:text-gray-400 mb-4">選擇最多三個成就在您的個人資料中展示。</p>
-                            <div class="overflow-y-auto flex-1">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    `;
-                    
-                    // 添加所有已解鎖的成就
-                    unlockedAchievements.forEach(achievement => {
-                        const isSelected = displayedAchievementIds.includes(achievement.id);
-                        
-                        modalContent += `
-                            <div class="achievement-item ${isSelected ? 'border-primary' : 'border-gray-200 dark:border-gray-700'} border-2 rounded-lg p-3 flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-id="${achievement.id}">
-                                <div class="achievement-seal-small" style="width: 50px; height: 50px; min-width: 50px;">
-                                    ${achievement.svg}
-                                </div>
-                                <div class="ml-3">
-                                    <p class="font-medium text-gray-800 dark:text-gray-200">${achievement.title}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">${achievement.desc}</p>
-                                </div>
-                                <div class="ml-auto ${isSelected ? 'visible' : 'invisible'}">
-                                    <i class="fas fa-check text-primary"></i>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    if (unlockedAchievements.length === 0) {
-                        modalContent += `
-                            <div class="col-span-2 text-center py-10">
-                                <i class="fas fa-medal text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
-                                <p class="text-gray-600 dark:text-gray-400">您尚未獲得任何成就</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">完成挑戰以獲得成就</p>
-                            </div>
-                        `;
-                    }
-                    
-                    modalContent += `
-                                </div>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">已選擇 <span id="selected-count">${displayedAchievementIds.length}</span>/3</p>
-                                <button id="save-achievements-btn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">確認</button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    selectorModal.innerHTML = modalContent;
-                    document.body.appendChild(selectorModal);
-                    
-                    // 添加事件監聽器
-                    const closeBtn = document.getElementById('close-achievement-selector');
-                    const saveBtn = document.getElementById('save-achievements-btn');
-                    const selectedCountElement = document.getElementById('selected-count');
-                    const achievementItems = selectorModal.querySelectorAll('.achievement-item');
-                    
-                    // 關閉按鈕
-                    closeBtn.addEventListener('click', function() {
-                        document.body.removeChild(selectorModal);
-                    });
-                    
-                    // 點擊背景關閉模態框
-                    selectorModal.addEventListener('click', function(e) {
-                        if (e.target === selectorModal) {
-                            document.body.removeChild(selectorModal);
-                        }
-                    });
-                    
-                    // 選擇成就
-                    achievementItems.forEach(item => {
-                        item.addEventListener('click', function() {
-                            const achievementId = this.dataset.id;
-                            const checkIcon = this.querySelector('.fa-check').parentElement;
-                            
-                            // 檢查是否已選中
-                            const isSelected = !checkIcon.classList.contains('invisible');
-                            
-                            // 如果已選中，則取消選中
-                            if (isSelected) {
-                                checkIcon.classList.add('invisible');
-                                this.classList.remove('border-primary');
-                                this.classList.add('border-gray-200', 'dark:border-gray-700');
-                                
-                                // 從顯示列表中移除
-                                const index = displayedAchievementIds.indexOf(achievementId);
-                                if (index !== -1) {
-                                    displayedAchievementIds.splice(index, 1);
-                                }
-                            } 
-                            // 如果未選中且未達到上限，則選中
-                            else if (displayedAchievementIds.length < 3) {
-                                checkIcon.classList.remove('invisible');
-                                this.classList.add('border-primary');
-                                this.classList.remove('border-gray-200', 'dark:border-gray-700');
-                                
-                                // 添加到顯示列表
-                                displayedAchievementIds.push(achievementId);
-                            }
-                            
-                            // 更新選擇計數
-                            selectedCountElement.textContent = displayedAchievementIds.length;
-                        });
-                    });
-                    
-                    // 保存按鈕
-                    saveBtn.addEventListener('click', function() {
-                        saveDisplayedAchievements(displayedAchievementIds);
-                        updateDisplayedAchievementsUI();
-                        document.body.removeChild(selectorModal);
-                    });
-                }
-                
-                // 獲取已解鎖的成就
-                function getAllUnlockedAchievements(onlyHistorical = false) {
-                    const achievements = [];
-                    
-                    // 確保globalStats已初始化
-                    if (typeof globalStats !== 'object' || globalStats === null) {
-                        initializeDefaultStats();
-                    }
-                    
-                    // 創建SVG徽章
-                    const createAchievementSVG = (colors, borderColor) => {
-                        const uniqueId = 'seal_' + Math.random().toString(36).substr(2, 9);
-                        return `
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <radialGradient id="${uniqueId}" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                                    <stop offset="0%" style="stop-color:${colors.center}" />
-                                    <stop offset="70%" style="stop-color:${colors.middle}" />
-                                    <stop offset="100%" style="stop-color:${colors.outer}" />
-                                </radialGradient>
-                            </defs>
-                            <circle cx="50" cy="50" r="45" fill="url(#${uniqueId})" />
-                            <circle cx="50" cy="50" r="42" fill="none" stroke="${borderColor}" stroke-width="1" stroke-dasharray="2,1" />
-                            <circle cx="50" cy="50" r="38" fill="none" stroke="${borderColor}" stroke-width="0.5" />
-                        </svg>
-                        `;
-                    };
-                    
-                    // 各成就顏色定義
-                    const perfectColors = { center: '#8B0000', middle: '#5C0000', outer: '#400000' };
-                    const lightningColors = { center: '#4B0082', middle: '#2A004D', outer: '#1C0033' };
-                    const masterColors = { center: '#006400', middle: '#004D00', outer: '#003300' };
-                    const tirelessColors = { center: '#1E3A8A', middle: '#1E40AF', outer: '#1D4ED8' };
-                    const nightOwlColors = { center: '#3E2723', middle: '#33211B', outer: '#2E1B15' };
-                    const badDigestionColors = { center: '#E65100', middle: '#D84315', outer: '#BF360C' };
-                    const snailColors = { center: '#8B4513', middle: '#6B3100', outer: '#4A2100' };
-                    
-                    const adventureColors = [
-                        { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, // 初心者
-                        { center: '#81C784', middle: '#66BB6A', outer: '#4CAF50' }, // 勇者
-                        { center: '#FF8A65', middle: '#FF7043', outer: '#F4511E' }, // 大師
-                        { center: '#9575CD', middle: '#7E57C2', outer: '#673AB7' }, // 偏執狂
-                        { center: '#FFD54F', middle: '#FFCA28', outer: '#FFC107' }  // 掃地僧
-                    ];
-                    
-                    const defeatColors = [
-                        { center: '#B39DDB', middle: '#9575CD', outer: '#7E57C2' }, // 初嘗敗績
-                        { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, // 堅毅
-                        { center: '#26A69A', middle: '#009688', outer: '#00796B' }, // 鋼鐵意志
-                        { center: '#FFA726', middle: '#FF9800', outer: '#F57C00' }, // 小強是我
-                        { center: '#EF5350', middle: '#F44336', outer: '#D32F2F' }  // 心如止水
-                    ];
-                    
-                    // 定義極速之路成就顏色
-                    const speedColors = [
-                        { center: '#5E35B1', middle: '#4527A0', outer: '#311B92' }, // 敏捷
-                        { center: '#3949AB', middle: '#303F9F', outer: '#283593' }, // 肌肉記憶
-                        { center: '#1E88E5', middle: '#1976D2', outer: '#1565C0' }, // 無影手
-                        { center: '#039BE5', middle: '#0288D1', outer: '#0277BD' }  // 世界第一束光
-                    ];
-                    
-                    // 定義完美之路成就顏色
-                    const perfectRouteColors = [
-                        { center: '#D81B60', middle: '#C2185B', outer: '#AD1457' }, // 如沐春風
-                        { center: '#8E24AA', middle: '#7B1FA2', outer: '#6A1B9A' }, // 完美主義
-                        { center: '#5E35B1', middle: '#512DA8', outer: '#4527A0' }, // 滿月
-                        { center: '#3949AB', middle: '#303F9F', outer: '#283593' }  // 至善
-                    ];
-                    
-                    // 定義記憶之路成就顏色
-                    const memoryColors = [
-                        { center: '#00796B', middle: '#00695C', outer: '#004D40' }, // 激活腦細胞
-                        { center: '#00ACC1', middle: '#0097A7', outer: '#00838F' }, // 記憶麵包
-                        { center: '#43A047', middle: '#388E3C', outer: '#2E7D32' }, // 移動圖書館
-                        { center: '#7CB342', middle: '#689F38', outer: '#558B2F' }  // 流如背倒
-                    ];
-                    
-                    // 特殊累積成就顏色
-                    const dryEyesColors = { center: '#0288D1', middle: '#0277BD', outer: '#01579B' }; // 眼乾
-                    const nightOwlKingColors = { center: '#3E2723', middle: '#3E2723', outer: '#3E2723' }; // 夜貓王
-                    const focusOnEatingColors = { center: '#BF360C', middle: '#BF360C', outer: '#BF360C' }; // 請專心吃飯
-                    
-                    // 添加已解鎖的成就
-                    
-                    // 冒險之路成就
-                    const adventureLevels = ['初心者', '勇者', '大師', '偏執狂', '掃地僧'];
-                    const adventureBorderColors = ['#90CAF9', '#4CAF50', '#F4511E', '#673AB7', '#FFC107'];
-                    const adventureLevel = globalStats.achievements.adventureLevel;
-                    
-                    if (adventureLevel > 0) {
-                        const levelIndex = adventureLevel - 1;
-                        achievements.push({
-                            id: `adventure_${levelIndex}`,
-                            title: adventureLevels[levelIndex],
-                            desc: '冒險之路',
-                            svg: createAchievementSVG(adventureColors[levelIndex], adventureBorderColors[levelIndex]),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 挫敗之路成就
-                    const defeatLevels = ['初嘗敗績', '堅毅', '鋼鐵意志', '小強是我', '心如止水'];
-                    const defeatBorderColors = ['#7E57C2', '#42A5F5', '#00796B', '#F57C00', '#D32F2F'];
-                    const defeatLevel = globalStats.achievements.defeatLevel;
-                    
-                    if (defeatLevel > 0) {
-                        const levelIndex = defeatLevel - 1;
-                        achievements.push({
-                            id: `defeat_${levelIndex}`,
-                            title: defeatLevels[levelIndex],
-                            desc: '挫敗之路',
-                            svg: createAchievementSVG(defeatColors[levelIndex], defeatBorderColors[levelIndex]),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 極速之路成就
-                    const speedLevels = ['敏捷', '肌肉記憶', '無影手', '世界第一束光'];
-                    const speedBorderColors = ['#311B92', '#283593', '#1565C0', '#0277BD'];
-                    const speedLevel = globalStats.achievements.speedRouteLevel;
-                    
-                    if (speedLevel > 0) {
-                        const levelIndex = speedLevel - 1;
-                        achievements.push({
-                            id: `speed_${levelIndex}`,
-                            title: speedLevels[levelIndex],
-                            desc: '極速之路',
-                            svg: createAchievementSVG(speedColors[levelIndex], speedBorderColors[levelIndex]),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 完美之路成就
-                    const perfectRouteLevels = ['如沐春風', '完美主義', '滿月', '至善'];
-                    const perfectRouteBorderColors = ['#AD1457', '#6A1B9A', '#4527A0', '#283593'];
-                    const perfectRouteLevel = globalStats.achievements.perfectRouteLevel;
-                    
-                    if (perfectRouteLevel > 0) {
-                        const levelIndex = perfectRouteLevel - 1;
-                        achievements.push({
-                            id: `perfect_route_${levelIndex}`,
-                            title: perfectRouteLevels[levelIndex],
-                            desc: '完美之路',
-                            svg: createAchievementSVG(perfectRouteColors[levelIndex], perfectRouteBorderColors[levelIndex]),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 記憶之路成就
-                    const memoryLevels = ['激活腦細胞', '記憶麵包', '移動圖書館', '流如背倒'];
-                    const memoryBorderColors = ['#004D40', '#00838F', '#2E7D32', '#558B2F'];
-                    const memoryRouteLevel = globalStats.achievements.memoryRouteLevel;
-                    
-                    if (memoryRouteLevel > 0) {
-                        const levelIndex = memoryRouteLevel - 1;
-                        achievements.push({
-                            id: `memory_route_${levelIndex}`,
-                            title: memoryLevels[levelIndex],
-                            desc: '記憶之路',
-                            svg: createAchievementSVG(memoryColors[levelIndex], memoryBorderColors[levelIndex]),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 指定文言篇章大師之路成就
-                    if (globalStats.achievements.specifiedTextRouteLevel > 0) {
-                        const specifiedTextLevels = ['新兵上陣', '唯手熟爾', '功在不舍', '四望如一'];
-                        const specifiedTextBorderColors = ['#8D6E63', '#6D4C41', '#5D4037', '#4E342E'];
-                        const specifiedTextColors = [
-                            { center: '#A1887F', middle: '#8D6E63', outer: '#795548' }, // 新兵上陣
-                            { center: '#8D6E63', middle: '#795548', outer: '#6D4C41' }, // 唯手熟爾
-                            { center: '#795548', middle: '#6D4C41', outer: '#5D4037' }, // 功在不舍
-                            { center: '#6D4C41', middle: '#5D4037', outer: '#4E342E' }  // 四望如一
-                        ];
-                        
-                        const levelIndex = globalStats.achievements.specifiedTextRouteLevel - 1;
-                        achievements.push({
-                            id: `specified_text_${levelIndex}`,
-                            title: specifiedTextLevels[levelIndex],
-                            desc: '指定文言大師',
-                            svg: createAchievementSVG(specifiedTextColors[levelIndex], specifiedTextBorderColors[levelIndex]),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 文學冒險者之路成就
-                    if (globalStats.achievements.literatureRouteLevel > 0) {
-                        const literatureLevels = ['青青子衿', '悠悠我心', '但為君故', '沉吟至今'];
-                        const literatureBorderColors = ['#9CCC65', '#8BC34A', '#7CB342', '#689F38'];
-                        const literatureColors = [
-                            { center: '#C5E1A5', middle: '#AED581', outer: '#9CCC65' }, // 青青子衿
-                            { center: '#AED581', middle: '#9CCC65', outer: '#8BC34A' }, // 悠悠我心
-                            { center: '#9CCC65', middle: '#8BC34A', outer: '#7CB342' }, // 但為君故
-                            { center: '#8BC34A', middle: '#7CB342', outer: '#689F38' }  // 沉吟至今
-                        ];
-                        
-                        const levelIndex = globalStats.achievements.literatureRouteLevel - 1;
-                        achievements.push({
-                            id: `literature_${levelIndex}`,
-                            title: literatureLevels[levelIndex],
-                            desc: '文學冒險者',
-                            svg: createAchievementSVG(literatureColors[levelIndex], literatureBorderColors[levelIndex]),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 特殊成就
-                    // 眼乾成就 (獲得不知疲倦30次)
-                    if (globalStats.achievements.dryEyes) {
-                        achievements.push({
-                            id: 'dry_eyes',
-                            title: '眼乾',
-                            desc: '不暫停成癮',
-                            svg: createAchievementSVG(dryEyesColors, '#0277BD'),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 夜貓王成就 (獲得夜貓20次)
-                    if (globalStats.achievements.nightOwlKing) {
-                        achievements.push({
-                            id: 'night_owl_king',
-                            title: '夜貓王',
-                            desc: '深夜成癮',
-                            svg: createAchievementSVG(nightOwlKingColors, '#5D4037'),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 請專心吃飯成就 (獲得腸胃不好20次)
-                    if (globalStats.achievements.focusOnEating) {
-                        achievements.push({
-                            id: 'focus_on_eating',
-                            title: '請專心吃飯',
-                            desc: '午餐時背誦',
-                            svg: createAchievementSVG(focusOnEatingColors, '#E65100'),
-                            isHistorical: true
-                        });
-                    }
-                    
-                    // 如果不只需要歷史成就，添加單局成就
-                    if (!onlyHistorical) {
-                        // 單次成就
-                        // 完美無瑕
-                        if (globalStats.perfectAchievementCount > 0) {
-                            achievements.push({
-                                id: 'perfect',
-                                title: '完美無瑕',
-                                desc: '零錯誤通關',
-                                svg: createAchievementSVG(perfectColors, '#FFD700'),
-                                isHistorical: false
-                            });
-                        }
-                        
-                        // 閃電俠
-                        if (globalStats.lightningAchievementCount > 0) {
-                            achievements.push({
-                                id: 'lightning',
-                                title: '閃電俠',
-                                desc: '神速完成',
-                                svg: createAchievementSVG(lightningColors, '#00FFFF'),
-                                isHistorical: false
-                            });
-                        }
-                        
-                        // 記憶大師
-                        if (globalStats.memoryAchievementCount > 0) {
-                            achievements.push({
-                                id: 'memory_master',
-                                title: '記憶大師',
-                                desc: '精通300字以上',
-                                svg: createAchievementSVG(masterColors, '#7CFC00'),
-                                isHistorical: false
-                            });
-                        }
-                        
-                        // 蝸牛
-                        if (globalStats.achievements.snail) {
-                            achievements.push({
-                                id: 'snail',
-                                title: '蝸牛',
-                                desc: '慢工出細活',
-                                svg: createAchievementSVG(snailColors, '#DAA520'),
-                                isHistorical: false
-                            });
-                        }
-                        
-                        // 不知疲倦
-                        if (globalStats.tirelessAchievementCount > 0) {
-                            achievements.push({
-                                id: 'tireless',
-                                title: '不知疲倦',
-                                desc: '全程不暫停',
-                                svg: createAchievementSVG(tirelessColors, '#38BDF8'),
-                                isHistorical: false
-                            });
-                        }
-                        
-                        // 夜貓
-                        if (globalStats.achievements.nightOwl) {
-                            achievements.push({
-                                id: 'night_owl',
-                                title: '夜貓',
-                                desc: '夜深時仍不休',
-                                svg: createAchievementSVG(nightOwlColors, '#4E342E'),
-                                isHistorical: false
-                            });
-                        }
-                        
-                        // 腸胃不好
-                        if (globalStats.achievements.badDigestion) {
-                            achievements.push({
-                                id: 'bad_digestion',
-                                title: '腸胃不好',
-                                desc: '用餐時間仍勤學',
-                                svg: createAchievementSVG(badDigestionColors, '#BF360C'),
-                                isHistorical: false
-                            });
-                        }
-                    }
-                    
-                    return achievements;
-                }
-                
-                // 獲取已顯示的成就ID
-                function getDisplayedAchievementIds() {
-                    try {
-                        const savedIds = localStorage.getItem('MemoryMaster_displayedAchievements');
-                        return savedIds ? JSON.parse(savedIds) : [];
-                    } catch (e) {
-                        console.error("讀取顯示成就失敗:", e);
-                        return [];
-                    }
-                }
-                
-                // 保存顯示的成就
-                function saveDisplayedAchievements(achievementIds) {
-                    try {
-                        localStorage.setItem('MemoryMaster_displayedAchievements', JSON.stringify(achievementIds));
-                        console.log("保存顯示成就成功:", achievementIds);
-                    } catch (e) {
-                        console.error("保存顯示成就失敗:", e);
-                    }
-                }
-                
-                // 更新顯示成就UI
-                function updateDisplayedAchievementsUI() {
-                    const displayedContainer = document.getElementById('displayed-achievements');
-                    if (!displayedContainer) return;
-                    
-                    // 清空容器
-                    displayedContainer.innerHTML = '';
-                    
-                    // 獲取已顯示的成就ID
-                    const displayedIds = getDisplayedAchievementIds();
-                    
-                    // 獲取所有已解鎖的歷史成就（只顯示歷史成就）
-                    const allAchievements = getAllUnlockedAchievements(true);
-                    
-                    // 篩選出要顯示的成就
-                    const achievementsToDisplay = allAchievements.filter(a => displayedIds.includes(a.id));
-                    
-                    // 添加成就或佔位符
-                    for (let i = 0; i < 3; i++) {
-                        if (i < achievementsToDisplay.length) {
-                            // 添加成就
-                            const achievement = achievementsToDisplay[i];
-                            const achievementEl = document.createElement('div');
-                            achievementEl.className = 'achievement-display bg-white dark:bg-gray-700 rounded-lg w-20 h-20 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer';
-                            achievementEl.innerHTML = `
-                                <div class="achievement-seal-small" style="width: 50px; height: 50px;">
-                                    ${achievement.svg}
-                                    <div class="seal-text">
-                                        <span class="seal-title text-[10px]">${achievement.title}</span>
-                                    </div>
-                                </div>
-                            `;
-                            displayedContainer.appendChild(achievementEl);
-                        } else {
-                            // 添加佔位符
-                            const placeholder = document.createElement('div');
-                            placeholder.className = 'achievement-placeholder flex items-center justify-center bg-gray-100 dark:bg-gray-600 rounded-lg w-20 h-20 cursor-pointer';
-                            placeholder.innerHTML = '<i class="fas fa-plus text-gray-400 dark:text-gray-500"></i>';
-                            displayedContainer.appendChild(placeholder);
-                        }
-                    }
-                    
-                    // 為所有成就和佔位符添加點擊事件
-                    const allPlaceholders = displayedContainer.querySelectorAll('.achievement-display, .achievement-placeholder');
-                    allPlaceholders.forEach(placeholder => {
-                        placeholder.addEventListener('click', function() {
-                            showAchievementSelector();
-                        });
-                    });
-                }
-                
-                // 載入顯示成就
-                function loadDisplayedAchievements() {
-                    updateDisplayedAchievementsUI();
                 }
                 
                 // 打開設置菜單
@@ -6546,503 +5961,434 @@ function displayAchievements() {
             // 初始化用戶名編輯功能
             initializeNameEditor();
             
-            // 初始化像素風格角色
-function initializePixelCharacters() {
-    const characterDisplay = document.getElementById('character-display');
-    const characterName = document.getElementById('character-name');
-    const changeCharacterBtn = document.getElementById('change-character-btn');
-    
-    if (!characterDisplay || !characterName || !changeCharacterBtn) {
-        console.error("初始化角色系統失敗: 未找到必要元素");
-        return;
-    }
-    
-    // 定義像素風格角色列表 - 使用全身形象
-    const pixelCharacters = [
-        { name: "普通村民", color: "#F9C74F", pixels: [
-            "     ###      ",
-            "    #EEE#     ",
-            "   #EEEEE#    ",
-            "   #E#E#E#    ",
-            "   #EEEEE#    ",
-            "    #EEE#     ",
-            "   ##EEE##    ",
-            "  #EEEEEEE#   ",
-            "  #E#EEE#E#   ",
-            "  #EEEEEEE#   ",
-            "    #####     ",
-            "    #BBB#     ",
-            "    #BBB#     ",
-            "   ##BBB##    ",
-            "  ##B###B##   ",
-            " ##       ##  ",
-            "##         ## "
-        ]},
-        { name: "可愛的白兔", color: "#F8EDEB", pixels: [
-            "   ##  ##   ",
-            "  #FF##FF#  ",
-            " #FFFFFFF# ",
-            "#FF#FFF#FF#",
-            "#FFFFFFFFF#",
-            "#FF#####FF#",
-            " #FFFFFFF# ",
-            "  ## # ##  ",
-            "  #FFFFF#  ",
-            " #FFFFFFF# ",
-            " # F# #F # ",
-            " # F   F # ",
-            " ## ### ## "
-        ]},
-        { name: "烤肉的廚師", color: "#E9C46A", pixels: [
-            "    ######    ",
-            "   #HHHHHH#   ",
-            "  #HHHHHHHH#  ",
-            "  ########## ",
-            "  #RRRRRRRR#  ",
-            "  #R#RRRR#R#  ",
-            "  #RRRRRRRR#  ",
-            "   ##RRRR##   ",
-            "  ###RRRR###  ",
-            " #RRRRRRRRRR# ",
-            " #R########R# ",
-            " #R#      #R# ",
-            " ### #### ### ",
-            "     #  #     ",
-            "    ##  ##    "
-        ]},
-        { name: "吃竹子的熊貓", color: "#283618", pixels: [
-            "    #####    ",
-            "   #FFFFF#   ",
-            "  #FFBBBFF#  ",
-            "  #FBBBBBF#  ",
-            "  #FB#B#BF#  ",
-            "  #FBBBBBF#  ",
-            "   #FBBBF#   ",
-            "  #FFBBBFF#  ",
-            " #FF#####FF# ",
-            "#FF#BBBBB#FF#",
-            "#F#BB###BB#F#",
-            " #BBB# #BBB# ",
-            " #BBB   BBB# ",
-            " ### ### ### "
-        ]},
-        { name: "拿獵槍的獵人", color: "#606C38", pixels: [
-            "     ###     ",
-            "    #HHH#    ",
-            "   #HHHHH#   ",
-            "   #H#H#H#   ",
-            "   #HHHHH#   ",
-            "    #####    ",
-            "  ###GGG###  ",
-            " #GGGGGGGGG# ",
-            " #G#GGGGG#G# ",
-            " #GGGGGGGGG# ",
-            "   ##GGG##   ",
-            "   #######   ",
-            "   # === #   ",
-            "  ##     ##  ",
-            "  #  ### #   ",
-            " ##  # #  ## ",
-            "     # #     ",
-            "    ## ##    "
-        ]},
-        { name: "睡覺的狐狸", color: "#E07A5F", pixels: [
-            "    ##      ",
-            "   #OO#     ",
-            "  #OOOO#    ",
-            " #OO##OO#   ",
-            " #OOOOOO#   ",
-            " #O####O#   ",
-            "  #OOOO#    ",
-            "   ####     ",
-            "  #OOOO#    ",
-            " #OOOOOO#   ",
-            " #O#OO#O#   ",
-            " #O#  #O#   ",
-            " ###  ###  z",
-            "          z ",
-            "         z  "
-        ]},
-        { name: "施法的魔法師", color: "#3D405B", pixels: [
-            "      *      ",
-            "     ***     ",
-            "    * P *    ",
-            "   ** P **   ",
-            "  *********  ",
-            "     #P#     ",
-            "    #PPP#    ",
-            "   #PPPPP#   ",
-            "   #P#P#P#   ",
-            "   #PPPPP#   ",
-            "    #PPP#    ",
-            "   ##PPP##   ",
-            "  #PPPPPPP#  ",
-            " #P##PPP##P# ",
-            " #P#     #P# ",
-            " ### ### ### "
-        ]},
-        { name: "發出聲納的鯨魚", color: "#457B9D", pixels: [
-            "        ~    ",
-            "       ~ ~   ",
-            "      ~   ~  ",
-            "     ~     ~ ",
-            "    ~       ~",
-            "     ~     ~ ",
-            "      ~   ~  ",
-            "       ~ ~   ",
-            "        ~    ",
-            "       ###   ",
-            "    #####    ",
-            "   #######   ",
-            "  #########  ",
-            " ########### ",
-            "#############",
-            " ########### ",
-            "  ######### ~",
-            "   ####### ~~",
-            "    ##### ~~~"
-        ]},
-        { name: "高舉巫杖的薩滿", color: "#7F5539", pixels: [
-            "      *      ",
-            "     /|\\     ",
-            "      |      ",
-            "      |      ",
-            "    #####    ",
-            "   #TTTTT#   ",
-            "  #TTTTTTT#  ",
-            "  #T#TTT#T#  ",
-            "  #TTTTTTT#  ",
-            "   #TTTTT#   ",
-            "   #######   ",
-            "   ## # ##   ",
-            "  #T     T#  ",
-            "  #       #  ",
-            "  ## ### ##  ",
-            "     # #     ",
-            "    ## ##    "
-        ]},
-        { name: "強壯的雞", color: "#FF9500", pixels: [
-            "   ^       ",
-            "  /C\\      ",
-            " #CCCC#    ",
-            "#CC##CC#   ",
-            "#CCCCCC#   ",
-            " #CCCC##   ",
-            "  #####    ",
-            "  #CCC#    ",
-            " #CCCCC#   ",
-            "#C#CCC#C#  ",
-            "#C#   #C#  ",
-            "###   ###  ",
-            " #     #   ",
-            "##     ##  "
-        ]},
-        { name: "隱形的刺客", color: "#6C757D", pixels: [
-            "    ####     ",
-            "   #SSSS#    ",
-            "  #SSSSSS#   ",
-            "  #S#SS#S#   ",
-            "  #SSSSSS#   ",
-            "   #SSSS#    ",
-            "  ##SSSS##   ",
-            " #SSSSSSSS#  ",
-            " #S#SSSS#S#  ",
-            " #SSSSSSSS#  ",
-            "   #######   ",
-            "   # === #   ",
-            "  #  | |  #  ",
-            " ##  | |  ## ",
-            " #   | |   # ",
-            " ##  | |  ## ",
-            "     ###     "
-        ]},
-        { name: "超級強壯的白兔", color: "#F8EDEB", pixels: [
-            "   ##  ##    ",
-            "  #FF##FF#   ",
-            " #FFFFFFF#   ",
-            "#FF#FFF#FF#  ",
-            "#FFFFFFFFF#  ",
-            "#FF#####FF#  ",
-            " #FFFFFFF#   ",
-            "  #FFFFF#    ",
-            " #FFFFFFF#   ",
-            "#FF#####FF#  ",
-            "#F##   ##F#  ",
-            "#F#     #F#  ",
-            "###     ###  ",
-            "#         #  ",
-            "##       ##  "
-        ]},
-        { name: "原子武士", color: "#E63946", pixels: [
-            "     ###     ",
-            "    #AAA#    ",
-            "   #AAAAA#   ",
-            "   #A#A#A#   ",
-            "   #AAAAA#   ",
-            "    #AAA#    ",
-            "   ##AAA##   ",
-            "  #AAAAAAA#  ",
-            "  #A#AAA#A#  ",
-            "  #AAAAAAA#  ",
-            "    #####    ",
-            "  ###AAA###  ",
-            " #AAAAAAAAA# ",
-            " #A#AAAAA#A# ",
-            " #A#     #A# ",
-            " ###     ### "
-        ]},
-        { name: "戴著面具的狼人", color: "#264653", pixels: [
-            "   #######   ",
-            "  #WWWWWWW#  ",
-            " #WWWWWWWWW# ",
-            " #W#WWW#W#W# ",
-            " #WWWWWWWWW# ",
-            " #W#WWWWW#W# ",
-            "  #WWWWWWW#  ",
-            "  #########  ",
-            "  #WWWWWWW#  ",
-            " #WWWWWWWWW# ",
-            " #W#W###W#W# ",
-            " #W#     #W# ",
-            " ###     ### ",
-            " #         # ",
-            "###       ###"
-        ]},
-        { name: "咆哮的神龍", color: "#9D0208", pixels: [
-            "   ###       ",
-            "  #DDD##     ",
-            " #DDDDDD#    ",
-            "#DD####DD#   ",
-            "#DDDDDDDD#   ",
-            "#D######D#   ",
-            " #DDDDDD#    ",
-            "  ######     ",
-            "  #DDDD#     ",
-            " #D####D#    ",
-            "#DDDDDDDD#  ~",
-            "#DD####DD# ~ ",
-            " #DD  DD# ~  ",
-            "  ##  ##~    ",
-            "      ~      "
-        ]},
-        { name: "撕裂天空的魔龍", color: "#7400B8", pixels: [
-            "      ##     ",
-            "    ##MM##   ",
-            "   #MMMMM#   ",
-            "  #MM##MM#   ",
-            "  #MMMMMMM## ",
-            "  #M####MMM##",
-            "   #MMMMMMMMM",
-            "    #MMMMMMMM",
-            "   #MM#######",
-            "  #MMM#      ",
-            " #M#MM#      ",
-            "#MM#MM#      ",
-            "#M# ###      ",
-            "##           "
-        ]},
-        { name: "睡覺的貓", color: "#FF8FA3", pixels: [
-            "   ###      ",
-            "  #NNN#     ",
-            " #NNNNN#    ",
-            "#NN###NN#   ",
-            "#NNNNNNN#   ",
-            "#NN###NN#   ",
-            " #NNNNN#    ",
-            "  #####     ",
-            "  #NNN#  zzz",
-            " #NNNNN# z  ",
-            " #N#N#N#z   ",
-            " #N# #N#    ",
-            " ###  ##    "
-        ]},
-        { name: "一顆剝開的橙子", color: "#FB8500", pixels: [
-            "    ######    ",
-            "  ##OOOOOO##  ",
-            " #OOOOOOOOOO# ",
-            "#OOOOOOOOOOOO#",
-            "#OO########OO#",
-            "#OO#OOOOOO#OO#",
-            "#OO#OOOOOO#OO#",
-            "#OO#OOOOOO#OO#",
-            "#OO#OOOOOO#OO#",
-            "#OO########OO#",
-            "#OOOOOOOOOOOO#",
-            " #OOOOOOOOOO# ",
-            "  ##OOOOOO##  ",
-            "    ######    "
-        ]},
-        { name: "一隻以月亮為背景的麻雀", color: "#8E9AAF", pixels: [
-            "       @@@     ",
-            "     @@@@@@@   ",
-            "    @@@@@@@@@  ",
-            "   @@@@@@@@@   ",
-            "    @@@@@@@    ",
-            "      @@@      ",
-            "   ##          ",
-            "  #JJ#         ",
-            " #JJJJ#        ",
-            "#JJ##JJ#       ",
-            "#JJJJJJ#       ",
-            " #JJJJ#        ",
-            "  ####         ",
-            "  #JJ#         ",
-            " #J##J#        ",
-            " #J  J#        ",
-            " ##  ##        "
-        ]},
-        { name: "一個掃地的僧人", color: "#606C38", pixels: [
-            "     ###     ",
-            "    #XXX#    ",
-            "   #XXXXX#   ",
-            "   #X#X#X#   ",
-            "   #XXXXX#   ",
-            "    #XXX#    ",
-            "    #####    ",
-            "    #XXX#    ",
-            "   #XXXXX#   ",
-            "   #X#X#X#   ",
-            "   ##XXX##   ",
-            "     ###     ",
-            "      |      ",
-            "      |      ",
-            "     /T\\     ",
-            "    /TTT\\    ",
-            "    #####    "
-        ]}
-    ];
-    
-    // 設置渲染像素風格角色的函數
-    function renderPixelCharacter(character) {
-        // 首先清空容器
-        characterDisplay.innerHTML = '';
-        
-        // 創建像素畫布 - 不再使用固定框
-        const canvas = document.createElement('canvas');
-        const size = character.pixels[0].length;
-        
-        // 計算合適的像素尺寸，讓角色顯示為合理大小
-        const pixelSize = Math.min(6, Math.floor(180 / Math.max(size, character.pixels.length))); 
-        
-        canvas.width = size * pixelSize;
-        canvas.height = character.pixels.length * pixelSize;
-        canvas.style.imageRendering = 'pixelated'; // 確保像素風格清晰
-        
-        // 移除邊框和背景 - 更像真實遊戲角色
-        canvas.style.margin = 'auto';
-        canvas.style.display = 'block';
-        
-        const ctx = canvas.getContext('2d');
-        
-        // 定義顏色映射，將字符映射到顏色
-        const colorMap = {
-            '#': '#000000', // 黑色輪廓
-            'F': '#FFFFFF', // 白色
-            'E': '#FFFFDB', // 膚色
-            'H': '#FFE0BD', // 淺膚色
-            'G': '#3D6B3D', // 獵人綠
-            'O': '#FF6B35', // 狐狸橙色
-            'B': '#8B4513', // 棕色
-            'T': '#6B3E26', // 棕褐色
-            'C': '#FFD700', // 金黃色
-            'P': '#9370DB', // 紫色
-            'R': '#B22222', // 紅色
-            'S': '#4B0082', // 暗藍色
-            'W': '#778899', // 狼灰色
-            'D': '#FF0000', // 龍紅色
-            'M': '#800080', // 紫色魔龍
-            'N': '#FFA07A', // 淺橙色貓
-            'Z': 'rgba(100, 100, 255, 0.5)', // 半透明藍色睡覺符號
-            'J': '#4A4A4A', // 麻雀灰色
-            'X': '#FFA500', // 僧人橙色
-            'A': '#D62828', // 紅色原子武士
-            '|': '#8B4513', // 棕色線條
-            '/': '#8B4513', // 棕色斜線
-            '\\': '#8B4513', // 棕色反斜線
-            '^': '#FF0000', // 紅色
-            '=': '#8B4513', // 棕色
-            '+': '#696969', // 灰色
-            '~': '#ADD8E6', // 淺藍色水波紋
-            '@': '#C0C0C0', // 銀灰色月亮
-            '*': '#FFD700', // 金色魔法
-            ' ': 'transparent' // 透明
-        };
-        
-        // 不再填充背景，只繪製像素
-        for (let y = 0; y < character.pixels.length; y++) {
-            const row = character.pixels[y];
-            for (let x = 0; x < row.length; x++) {
-                const pixel = row[x];
-                if (pixel !== ' ') {
-                    ctx.fillStyle = colorMap[pixel] || '#000';
-                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+            // 初始化成就展示功能
+            initializeAchievementsDisplay();
+            
+            // 成就展示功能
+            function initializeAchievementsDisplay() {
+                // 嘗試從localStorage加載已選擇的成就
+                let selectedAchievements = [];
+                try {
+                    const saved = localStorage.getItem('MemoryMaster_selectedAchievements');
+                    if (saved) {
+                        selectedAchievements = JSON.parse(saved);
+                    }
+                } catch (e) {
+                    console.error("加載選擇的成就出錯:", e);
+                }
+                
+                // 更新成就展示
+                updateAchievementsDisplay(selectedAchievements);
+                
+                // 管理成就按鈕點擊事件
+                const manageAchievementsBtn = document.getElementById('manage-achievements-btn');
+                if (manageAchievementsBtn) {
+                    manageAchievementsBtn.addEventListener('click', function() {
+                        showAchievementSelector(selectedAchievements);
+                    });
                 }
             }
-        }
-        
-        // 創建角色容器，讓角色顯示在中心
-        const characterContainer = document.createElement('div');
-        characterContainer.className = 'flex items-center justify-center h-full';
-        characterContainer.appendChild(canvas);
-        
-        // 添加到顯示容器
-        characterDisplay.appendChild(characterContainer);
-        
-        // 更新顯示的角色名稱
-        characterName.textContent = character.name;
-    }
-    
-    // 儲存當前選中的角色索引
-    let currentCharacterIndex = 0;
-    
-    // 為按鈕添加切換角色的功能
-    changeCharacterBtn.addEventListener('click', function() {
-        // 切換到下一個角色
-        currentCharacterIndex = (currentCharacterIndex + 1) % pixelCharacters.length;
-        
-        // 渲染新角色
-        renderPixelCharacter(pixelCharacters[currentCharacterIndex]);
-        
-        // 儲存用戶選擇
-        saveCharacterSelection(currentCharacterIndex);
-    });
-    
-    // 保存用戶的角色選擇
-    function saveCharacterSelection(index) {
-        try {
-            // 保存到本地存儲
-            localStorage.setItem('MemoryMaster_characterIndex', index.toString());
-            console.log(`已保存角色選擇：${pixelCharacters[index].name}`);
-        } catch (error) {
-            console.error("保存角色選擇失敗:", error);
-        }
-    }
-    
-    // 讀取用戶之前的角色選擇
-    function loadCharacterSelection() {
-        try {
-            const savedIndex = localStorage.getItem('MemoryMaster_characterIndex');
-            if (savedIndex !== null) {
-                currentCharacterIndex = parseInt(savedIndex);
-                if (isNaN(currentCharacterIndex) || currentCharacterIndex < 0 || currentCharacterIndex >= pixelCharacters.length) {
-                    currentCharacterIndex = 0; // 如果無效則使用默認值
+            
+            // 更新成就展示
+            function updateAchievementsDisplay(selectedAchievements) {
+                const achievementsDisplay = document.getElementById('achievements-display');
+                if (!achievementsDisplay) return;
+                
+                // 如果沒有選擇任何成就，顯示提示信息
+                if (!selectedAchievements || selectedAchievements.length === 0) {
+                    achievementsDisplay.innerHTML = `
+                        <p class="text-sm text-gray-500 dark:text-gray-400 italic">從設置菜單的「歷史成就」中選擇展示</p>
+                    `;
+                    return;
                 }
-                console.log(`已讀取角色選擇：${pixelCharacters[currentCharacterIndex].name}`);
+                
+                // 清空現有內容
+                achievementsDisplay.innerHTML = '';
+                
+                // 創建SVG徽章
+                const createAchievementSVG = (colors, borderColor) => {
+                    const uniqueId = 'seal_' + Math.random().toString(36).substr(2, 9);
+                    return `
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="${uniqueId}" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                                <stop offset="0%" style="stop-color:${colors.center}" />
+                                <stop offset="70%" style="stop-color:${colors.middle}" />
+                                <stop offset="100%" style="stop-color:${colors.outer}" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="45" fill="url(#${uniqueId})" />
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="${borderColor}" stroke-width="1" stroke-dasharray="2,1" />
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="${borderColor}" stroke-width="0.5" />
+                    </svg>
+                    `;
+                };
+                
+                // 定義各成就色彩
+                const achievementColors = {
+                    'complete': { colors: { center: '#8B0000', middle: '#5C0000', outer: '#400000' }, border: '#FFD700' },
+                    'lightning': { colors: { center: '#4B0082', middle: '#2A004D', outer: '#1C0033' }, border: '#00FFFF' },
+                    'master': { colors: { center: '#006400', middle: '#004D00', outer: '#003300' }, border: '#7CFC00' },
+                    'snail': { colors: { center: '#8B4513', middle: '#6B3100', outer: '#4A2100' }, border: '#DAA520' },
+                    'tireless': { colors: { center: '#1E3A8A', middle: '#1E40AF', outer: '#1D4ED8' }, border: '#38BDF8' },
+                    'nightOwl': { colors: { center: '#3E2723', middle: '#33211B', outer: '#2E1B15' }, border: '#4E342E' },
+                    'badDigestion': { colors: { center: '#E65100', middle: '#D84315', outer: '#BF360C' }, border: '#BF360C' },
+                    'dryEyes': { colors: { center: '#0288D1', middle: '#0277BD', outer: '#01579B' }, border: '#0277BD' },
+                    'nightOwlKing': { colors: { center: '#3E2723', middle: '#3E2723', outer: '#3E2723' }, border: '#5D4037' },
+                    'focusOnEating': { colors: { center: '#BF360C', middle: '#BF360C', outer: '#BF360C' }, border: '#E65100' },
+                    
+                    // 冒險之路
+                    'adventure1': { colors: { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, border: '#90CAF9' },
+                    'adventure2': { colors: { center: '#81C784', middle: '#66BB6A', outer: '#4CAF50' }, border: '#4CAF50' },
+                    'adventure3': { colors: { center: '#FF8A65', middle: '#FF7043', outer: '#F4511E' }, border: '#F4511E' },
+                    'adventure4': { colors: { center: '#9575CD', middle: '#7E57C2', outer: '#673AB7' }, border: '#673AB7' },
+                    'adventure5': { colors: { center: '#FFD54F', middle: '#FFCA28', outer: '#FFC107' }, border: '#FFC107' },
+                    
+                    // 挫敗之路
+                    'defeat1': { colors: { center: '#B39DDB', middle: '#9575CD', outer: '#7E57C2' }, border: '#7E57C2' },
+                    'defeat2': { colors: { center: '#90CAF9', middle: '#64B5F6', outer: '#42A5F5' }, border: '#42A5F5' },
+                    'defeat3': { colors: { center: '#26A69A', middle: '#009688', outer: '#00796B' }, border: '#00796B' },
+                    'defeat4': { colors: { center: '#FFA726', middle: '#FF9800', outer: '#F57C00' }, border: '#F57C00' },
+                    'defeat5': { colors: { center: '#EF5350', middle: '#F44336', outer: '#D32F2F' }, border: '#D32F2F' },
+                    
+                    // 極速之路
+                    'speed1': { colors: { center: '#5E35B1', middle: '#4527A0', outer: '#311B92' }, border: '#311B92' },
+                    'speed2': { colors: { center: '#3949AB', middle: '#303F9F', outer: '#283593' }, border: '#283593' },
+                    'speed3': { colors: { center: '#1E88E5', middle: '#1976D2', outer: '#1565C0' }, border: '#1565C0' },
+                    'speed4': { colors: { center: '#039BE5', middle: '#0288D1', outer: '#0277BD' }, border: '#0277BD' },
+                    
+                    // 完美之路
+                    'perfect1': { colors: { center: '#D81B60', middle: '#C2185B', outer: '#AD1457' }, border: '#AD1457' },
+                    'perfect2': { colors: { center: '#8E24AA', middle: '#7B1FA2', outer: '#6A1B9A' }, border: '#6A1B9A' },
+                    'perfect3': { colors: { center: '#5E35B1', middle: '#512DA8', outer: '#4527A0' }, border: '#4527A0' },
+                    'perfect4': { colors: { center: '#3949AB', middle: '#303F9F', outer: '#283593' }, border: '#283593' },
+                    
+                    // 記憶之路
+                    'memory1': { colors: { center: '#00796B', middle: '#00695C', outer: '#004D40' }, border: '#004D40' },
+                    'memory2': { colors: { center: '#00ACC1', middle: '#0097A7', outer: '#00838F' }, border: '#00838F' },
+                    'memory3': { colors: { center: '#43A047', middle: '#388E3C', outer: '#2E7D32' }, border: '#2E7D32' },
+                    'memory4': { colors: { center: '#7CB342', middle: '#689F38', outer: '#558B2F' }, border: '#558B2F' }
+                };
+                
+                // 顯示選擇的成就
+                selectedAchievements.forEach(achievement => {
+                    const colorInfo = achievementColors[achievement.id];
+                    if (!colorInfo) return;
+                    
+                    const achievementElement = document.createElement('div');
+                    achievementElement.className = 'achievement-seal relative';
+                    achievementElement.style.width = '70px';
+                    achievementElement.style.height = '70px';
+                    achievementElement.style.margin = '0 5px';
+                    achievementElement.style.transform = 'rotate(-5deg)';
+                    
+                    achievementElement.innerHTML = `
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                            ${createAchievementSVG(colorInfo.colors, colorInfo.border)}
+                        </div>
+                        <div style="position: relative; z-index: 10; font-family: 'Noto Serif TC', serif; font-weight: bold; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                            <span style="font-size: 10px; line-height: 1.2; text-align: center; width: 80%; display: block;">${achievement.title}</span>
+                        </div>
+                    `;
+                    
+                    achievementsDisplay.appendChild(achievementElement);
+                });
             }
-        } catch (error) {
-            console.error("讀取角色選擇失敗:", error);
-            currentCharacterIndex = 0; // 錯誤時使用默認值
-        }
-    }
-    
-    // 初始化時載入用戶選擇並渲染角色
-    loadCharacterSelection();
-    renderPixelCharacter(pixelCharacters[currentCharacterIndex]);
-    console.log("像素風格角色系統初始化完成");
-}
-
-// 初始化像素風格角色
-initializePixelCharacters();
+            
+            // 顯示成就選擇器
+            function showAchievementSelector(currentSelected) {
+                // 確保globalStats已初始化
+                if (typeof globalStats !== 'object' || globalStats === null) {
+                    initializeDefaultStats();
+                }
+                
+                // 創建模態框
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]';
+                modal.id = 'achievement-selector-modal';
+                
+                // 獲取可供選擇的成就
+                const availableAchievements = getAvailableAchievements();
+                
+                // 創建模態框內容
+                modal.innerHTML = `
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">選擇展示成就</h3>
+                            <button id="close-achievement-selector" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">從您獲得的成就中選擇最多三個在資料頁面展示</p>
+                        
+                        <div id="achievement-list" class="space-y-4">
+                            <!-- 成就列表將在這裡生成 -->
+                        </div>
+                        
+                        <div class="flex justify-end mt-6">
+                            <button id="save-achievements-btn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">保存選擇</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // 填充成就列表
+                const achievementList = document.getElementById('achievement-list');
+                if (achievementList) {
+                    // 組織成就為類別
+                    const categories = [
+                        {
+                            name: '遊戲成就',
+                            achievements: availableAchievements.filter(a => ['complete', 'lightning', 'master', 'snail', 'tireless', 'nightOwl', 'badDigestion'].includes(a.id))
+                        },
+                        {
+                            name: '冒險之路',
+                            achievements: availableAchievements.filter(a => a.id.startsWith('adventure'))
+                        },
+                        {
+                            name: '挫敗之路',
+                            achievements: availableAchievements.filter(a => a.id.startsWith('defeat'))
+                        },
+                        {
+                            name: '極速之路',
+                            achievements: availableAchievements.filter(a => a.id.startsWith('speed'))
+                        },
+                        {
+                            name: '完美之路',
+                            achievements: availableAchievements.filter(a => a.id.startsWith('perfect'))
+                        },
+                        {
+                            name: '記憶之路',
+                            achievements: availableAchievements.filter(a => a.id.startsWith('memory'))
+                        },
+                        {
+                            name: '特殊成就',
+                            achievements: availableAchievements.filter(a => ['dryEyes', 'nightOwlKing', 'focusOnEating'].includes(a.id))
+                        }
+                    ];
+                    
+                    // 只顯示有成就的類別
+                    categories.forEach(category => {
+                        if (category.achievements.length > 0) {
+                            const categoryElement = document.createElement('div');
+                            categoryElement.className = 'mb-6';
+                            categoryElement.innerHTML = `
+                                <h4 class="text-lg font-medium text-amber-700 dark:text-amber-400 mb-3">${category.name}</h4>
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 grid grid-cols-1 md:grid-cols-2 gap-3 category-achievements">
+                                    <!-- 成就將在這裡添加 -->
+                                </div>
+                            `;
+                            
+                            const achievementsContainer = categoryElement.querySelector('.category-achievements');
+                            
+                            category.achievements.forEach(achievement => {
+                                const isSelected = currentSelected.some(a => a.id === achievement.id);
+                                
+                                const achievementItem = document.createElement('div');
+                                achievementItem.className = `p-3 border ${isSelected ? 'border-primary' : 'border-gray-200 dark:border-gray-600'} rounded-lg flex items-center achievement-item ${isSelected ? 'selected' : ''}`;
+                                achievementItem.dataset.id = achievement.id;
+                                achievementItem.dataset.title = achievement.title;
+                                
+                                achievementItem.innerHTML = `
+                                    <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                                        <i class="${achievement.icon} text-2xl ${isSelected ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}"></i>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <p class="font-medium text-gray-800 dark:text-gray-200">${achievement.title}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">${achievement.description}</p>
+                                    </div>
+                                    <div class="ml-2">
+                                        <input type="checkbox" class="h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary" ${isSelected ? 'checked' : ''}>
+                                    </div>
+                                `;
+                                
+                                achievementsContainer.appendChild(achievementItem);
+                                
+                                // 添加點擊事件
+                                achievementItem.addEventListener('click', function() {
+                                    const checkbox = this.querySelector('input[type="checkbox"]');
+                                    const isNowSelected = !checkbox.checked;
+                                    
+                                    // 獲取當前選中的成就數量
+                                    const selectedCount = document.querySelectorAll('.achievement-item.selected').length;
+                                    
+                                    // 如果選中數量已經達到3個且當前操作是選中，則不進行操作
+                                    if (selectedCount >= 3 && isNowSelected && !this.classList.contains('selected')) {
+                                        alert('最多只能選擇3個成就');
+                                        return;
+                                    }
+                                    
+                                    // 更新選中狀態
+                                    checkbox.checked = isNowSelected;
+                                    if (isNowSelected) {
+                                        this.classList.add('selected');
+                                        this.classList.remove('border-gray-200', 'dark:border-gray-600');
+                                        this.classList.add('border-primary');
+                                        this.querySelector('i').classList.remove('text-gray-500', 'dark:text-gray-400');
+                                        this.querySelector('i').classList.add('text-primary');
+                                    } else {
+                                        this.classList.remove('selected');
+                                        this.classList.add('border-gray-200', 'dark:border-gray-600');
+                                        this.classList.remove('border-primary');
+                                        this.querySelector('i').classList.add('text-gray-500', 'dark:text-gray-400');
+                                        this.querySelector('i').classList.remove('text-primary');
+                                    }
+                                });
+                            });
+                            
+                            achievementList.appendChild(categoryElement);
+                        }
+                    });
+                    
+                    // 如果沒有可用成就
+                    if (availableAchievements.length === 0) {
+                        achievementList.innerHTML = `
+                            <div class="text-center p-6">
+                                <i class="fas fa-medal text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+                                <p class="text-gray-600 dark:text-gray-400">您還沒有獲得任何成就</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">完成更多挑戰來獲得成就！</p>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // 關閉按鈕事件
+                const closeBtn = document.getElementById('close-achievement-selector');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        document.body.removeChild(modal);
+                    });
+                }
+                
+                // 點擊背景關閉
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+                
+                // 保存按鈕事件
+                const saveBtn = document.getElementById('save-achievements-btn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', function() {
+                        // 獲取選中的成就
+                        const selectedItems = document.querySelectorAll('.achievement-item.selected');
+                        const selected = [];
+                        
+                        selectedItems.forEach(item => {
+                            selected.push({
+                                id: item.dataset.id,
+                                title: item.dataset.title
+                            });
+                        });
+                        
+                        // 保存到localStorage
+                        try {
+                            localStorage.setItem('MemoryMaster_selectedAchievements', JSON.stringify(selected));
+                        } catch (e) {
+                            console.error("保存選擇的成就出錯:", e);
+                        }
+                        
+                        // 更新顯示
+                        updateAchievementsDisplay(selected);
+                        
+                        // 關閉模態框
+                        document.body.removeChild(modal);
+                    });
+                }
+            }
+            
+            // 獲取可用成就
+            function getAvailableAchievements() {
+                const achievements = [];
+                
+                // 特殊累積成就
+                if (globalStats.achievements.dryEyes) {
+                    achievements.push({ id: 'dryEyes', title: '眼乾', description: '獲得不知疲倦30次', icon: 'fas fa-eye' });
+                }
+                
+                if (globalStats.achievements.nightOwlKing) {
+                    achievements.push({ id: 'nightOwlKing', title: '夜貓王', description: '獲得夜貓20次', icon: 'fas fa-crown' });
+                }
+                
+                if (globalStats.achievements.focusOnEating) {
+                    achievements.push({ id: 'focusOnEating', title: '請專心吃飯', description: '獲得腸胃不好20次', icon: 'fas fa-drumstick-bite' });
+                }
+                
+                // 冒險之路成就
+                const adventureLevels = ['初心者', '勇者', '大師', '偏執狂', '掃地僧'];
+                const adventureRequirements = [1, 10, 100, 300, 500];
+                const adventureIcons = ['fas fa-hiking', 'fas fa-running', 'fas fa-dragon', 'fas fa-atom', 'fas fa-broom'];
+                
+                for (let i = 0; i < globalStats.achievements.adventureLevel; i++) {
+                    achievements.push({
+                        id: `adventure${i+1}`,
+                        title: adventureLevels[i],
+                        description: `完成${adventureRequirements[i]}次挑戰`,
+                        icon: adventureIcons[i]
+                    });
+                }
+                
+                // 挫敗之路成就
+                const defeatLevels = ['初嘗敗績', '堅毅', '鋼鐵意志', '小強是我', '心如止水'];
+                const defeatRequirements = [1, 10, 50, 100, 200];
+                const defeatIcons = ['fas fa-dizzy', 'fas fa-fist-raised', 'fas fa-shield-alt', 'fas fa-bug', 'fas fa-water'];
+                
+                for (let i = 0; i < globalStats.achievements.defeatLevel; i++) {
+                    achievements.push({
+                        id: `defeat${i+1}`,
+                        title: defeatLevels[i],
+                        description: `失敗${defeatRequirements[i]}次`,
+                        icon: defeatIcons[i]
+                    });
+                }
+                
+                // 極速之路成就
+                const speedLevels = ['敏捷', '肌肉記憶', '無影手', '世界第一束光'];
+                const speedRequirements = [1, 10, 50, 100];
+                const speedIcons = ['fas fa-tachometer-alt', 'fas fa-dumbbell', 'fas fa-hand-paper', 'fas fa-lightbulb'];
+                
+                for (let i = 0; i < globalStats.achievements.speedRouteLevel; i++) {
+                    achievements.push({
+                        id: `speed${i+1}`,
+                        title: speedLevels[i],
+                        description: `獲得閃電俠${speedRequirements[i]}次`,
+                        icon: speedIcons[i]
+                    });
+                }
+                
+                // 完美之路成就
+                const perfectLevels = ['如沐春風', '完美主義', '滿月', '至善'];
+                const perfectRequirements = [1, 10, 50, 100];
+                const perfectIcons = ['fas fa-wind', 'fas fa-ruler', 'fas fa-circle', 'fas fa-dove'];
+                
+                for (let i = 0; i < globalStats.achievements.perfectRouteLevel; i++) {
+                    achievements.push({
+                        id: `perfect${i+1}`,
+                        title: perfectLevels[i],
+                        description: `獲得完美無瑕${perfectRequirements[i]}次`,
+                        icon: perfectIcons[i]
+                    });
+                }
+                
+                // 記憶之路成就
+                const memoryLevels = ['激活腦細胞', '記憶麵包', '移動圖書館', '流如背倒'];
+                const memoryRequirements = [1, 20, 50, 80];
+                const memoryIcons = ['fas fa-brain', 'fas fa-bread-slice', 'fas fa-book', 'fas fa-stream'];
+                
+                for (let i = 0; i < globalStats.achievements.memoryRouteLevel; i++) {
+                    achievements.push({
+                        id: `memory${i+1}`,
+                        title: memoryLevels[i],
+                        description: `獲得記憶大師${memoryRequirements[i]}次`,
+                        icon: memoryIcons[i]
+                    });
+                }
+                
+                return achievements;
+            }
             
             console.log("初始化完成");
         });
