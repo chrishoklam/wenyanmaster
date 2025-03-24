@@ -117,6 +117,7 @@
             perspective: 1000px;
             position: relative;
             overflow: hidden;
+            will-change: transform;
         }
         
         .option-btn:nth-child(1) { animation-delay: 0s; }
@@ -2115,6 +2116,17 @@ if (passageHeader && passageToggle && passageContent) {
                                     returnHomeBtn.classList.remove('hidden');
                                 }
                             }
+                            
+                            // 再次確認按鈕顯示狀態
+                            if (pauseBtn && returnHomeBtn) {
+                                if (!returnHomeBtn.classList.contains('hidden')) {
+                                    console.log("確認返回主頁按鈕顯示正常");
+                                } else {
+                                    console.warn("返回主頁按鈕仍然隱藏，重新設置...");
+                                    pauseBtn.classList.add('hidden');
+                                    returnHomeBtn.classList.remove('hidden');
+                                }
+                            }
                         }, 50);
                         
                         // 同時強制隱藏用戶資料容器
@@ -2800,7 +2812,33 @@ if (passageHeader && passageToggle && passageContent) {
                 // 更新已回答字符显示
                 const lastAnsweredCharsElem = document.getElementById('last-answered-chars');
                 if (lastAnsweredCharsElem) {
-                    lastAnsweredCharsElem.textContent = lastAnsweredChars.join('');
+                    // 构建HTML内容，最后一个非标点符号字符使用特殊样式
+                    if (lastAnsweredChars.length > 0) {
+                        let htmlContent = '';
+                        
+                        // 找出最后一个非标点符号字符的索引
+                        let lastNonPunctIndex = -1;
+                        for (let i = lastAnsweredChars.length - 1; i >= 0; i--) {
+                            if (!isPunctuation(lastAnsweredChars[i])) {
+                                lastNonPunctIndex = i;
+                                break;
+                            }
+                        }
+                        
+                        // 构建HTML内容
+                        for (let i = 0; i < lastAnsweredChars.length; i++) {
+                            // 如果是最后一个非标点符号字符，加粗放大
+                            if (i === lastNonPunctIndex) {
+                                htmlContent += `<span class="text-2xl md:text-3xl font-bold">${lastAnsweredChars[i]}</span>`;
+                            } else {
+                                htmlContent += lastAnsweredChars[i];
+                            }
+                        }
+                        
+                        lastAnsweredCharsElem.innerHTML = htmlContent;
+                    } else {
+                        lastAnsweredCharsElem.innerHTML = '';
+                    }
                 }
                 
                 // 增加成功背誦字數計數
@@ -2886,6 +2924,9 @@ if (passageHeader && passageToggle && passageContent) {
                 // 停止遊戲
                 canSelect = false;
                 stopStopwatch();
+                
+                // 更新按鈕狀態為「失敗」，顯示返回主頁按鈕
+                updateGameControlButtons('failed');
                 
                 // 隱藏遊戲內容
                 if (gameContent) {
@@ -3593,6 +3634,9 @@ if (passageHeader && passageToggle && passageContent) {
                     gameContent.classList.add('hidden');
                 }
                 
+                // 更新按鈕狀態為「完成」，顯示返回主頁按鈕
+                updateGameControlButtons('completed');
+                
                 // 如果指定的DOM元素不存在，則記錄錯誤並中止
                 if (!optionsContainer) {
                     console.error("optionsContainer未找到，無法顯示遊戲完成界面");
@@ -4145,8 +4189,7 @@ if (passageHeader && passageToggle && passageContent) {
                 inkDrop.style.left = `${x}px`;
                 inkDrop.style.top = `${y}px`;
                 
-                element.style.position = 'relative';
-                element.style.overflow = 'hidden';
+                // 不再設置position和overflow，因為已經在CSS中預設了
                 element.appendChild(inkDrop);
                 
                 // 移除元素
@@ -6286,14 +6329,35 @@ function displayAchievements() {
                     // 添加到容器
                     container.appendChild(option);
                     
+                    // 添加頭像震動樣式
+                    const avatarShakeStyle = document.createElement('style');
+                    avatarShakeStyle.textContent = `
+                        @keyframes avatar-shake {
+                            0%, 100% { transform: translateX(0); }
+                            25% { transform: translateX(-5px); }
+                            50% { transform: translateX(5px); }
+                            75% { transform: translateX(-5px); }
+                        }
+                        
+                        .avatar-shake {
+                            animation: avatar-shake 0.4s ease-in-out;
+                        }
+                    `;
+                    document.head.appendChild(avatarShakeStyle);
+                    
                     // 添加點擊事件
                     option.addEventListener('click', function() {
                         // 檢查頭像是否已解鎖
                         if (isUnlocked) {
                             selectAvatar(key);
                         } else {
-                            // 提示用戶需要達到的等級
-                            alert(`需要達到 ${requiredLevel} 級才能解鎖「${avatarData.name}」頭像`);
+                            // 未解鎖時輕微震動而不是顯示提醒文字
+                            this.classList.add('avatar-shake');
+                            
+                            // 震動結束後移除類
+                            setTimeout(() => {
+                                this.classList.remove('avatar-shake');
+                            }, 400); // 與動畫持續時間相同
                         }
                     });
                     
@@ -8558,6 +8622,3 @@ function displayAchievements() {
     </script>
 </body>
 </html>
-
-
-
