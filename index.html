@@ -4494,7 +4494,7 @@ passageHeader.addEventListener('click', function() {
                 
                 Object.keys(window.avatarUnlockLevels).forEach(avatarKey => {
                     const requiredLevel = window.avatarUnlockLevels[avatarKey];
-                    if (requiredLevel === newLevel) {
+                    if (requiredLevel <= newLevel) {
                         // 找到此等級解鎖的頭像
                         const avatarData = avatarPixelData[avatarKey];
                         if (avatarData) {
