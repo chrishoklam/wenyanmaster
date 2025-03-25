@@ -6792,6 +6792,22 @@ function displayAchievements() {
                 
                 // 渲染選擇的像素頭像
                 renderPixelAvatar(container, avatarKey);
+
+             // 為特定ID的容器渲染指定頭像
+             function renderSpecificAvatar(elementId, avatarKey) {
+              const container = document.getElementById(elementId);
+              if (container) {
+     renderPixelAvatar(container, avatarKey);
+              }
+             }
+             // 頁面載入後渲染特定頭像
+             document.addEventListener('DOMContentLoaded', function() {
+             // 渲染特定的冰花頭像
+              setTimeout(() => {
+              renderSpecificAvatar('iceflower-avatar', 'iceflower');
+              }, 500);
+             });
+             
             }
             
             // 生成像素模式
