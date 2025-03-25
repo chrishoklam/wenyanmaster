@@ -1,3 +1,8 @@
+<!--
+ * WenyanMaster - 文言大師之旅 © 2025
+ * All rights reserved. Unauthorized copying or reproduction is prohibited.
+ -->
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -5,7 +10,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文言大師之旅</title>
     <link rel="manifest" href="manifest.json"> 
-    <meta name="theme-color" content="#4CAF50">
+    <!-- iOS 额外配置 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ 
+    <meta name="theme-color" content="#ffffff">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- 添加html2canvas库 - 用于截图功能 -->
@@ -287,13 +296,13 @@
         
         /* 成就徽章樣式 */
         .achievement-seal {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             position: relative;
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            margin: 0 10px 15px;
+            margin: 0 0px 0px;
             transform: rotate(-5deg);
         }
         
@@ -635,23 +644,23 @@
             <div class="flex flex-col gap-3">
                 <button data-section="help" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                     <i class="fas fa-question-circle text-primary mr-3"></i>
-                    <span class="text-gray-800 dark:text-gray-200">遊玩說明</span>
+                    <span class="text-gray-800 dark:text-gray-200 font-semibold">遊玩說明</span>
                 </button>
                 <button data-section="records" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                     <i class="fas fa-trophy text-amber-500 mr-3"></i>
-                    <span class="text-gray-800 dark:text-gray-200">我的記錄</span>
+                    <span class="text-gray-800 dark:text-gray-200 font-semibold">我的記錄</span>
                 </button>
                 <button data-section="achievements" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                     <i class="fas fa-medal text-yellow-500 mr-3"></i>
-                    <span class="text-gray-800 dark:text-gray-200">歷史成就</span>
+                    <span class="text-gray-800 dark:text-gray-200 font-semibold">歷史成就</span>
                 </button>
                 <button data-section="version" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                     <i class="fas fa-code-branch text-green-500 mr-3"></i>
-                    <span class="text-gray-800 dark:text-gray-200">版本資訊</span>
+                    <span class="text-gray-800 dark:text-gray-200 font-semibold">版本資訊</span>
                 </button>
                 <button data-section="about" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                     <i class="fas fa-user text-blue-500 mr-3"></i>
-                    <span class="text-gray-800 dark:text-gray-200">關於製作者</span>
+                    <span class="text-gray-800 dark:text-gray-200 font-semibold">關於製作者</span>
                 </button>
             </div>
         </div>
@@ -690,7 +699,7 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="container mx-auto px-4 pt-16 pb-8 max-w-2xl">
         <header class="mb-8 text-center">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">文言大師之旅</h1>
             <p class="text-gray-600 dark:text-gray-300 text-m">踏上屬於自己的征途</p>
@@ -711,7 +720,7 @@
                         <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="文學">文學</button>
                         <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="其他">其他</button>
                     </div>
-                    <div id="passage-list" class="bg-white dark:bg-gray-800 rounded-md p-2 max-h-48 overflow-y-auto">
+                    <div id="passage-list" class="bg-white dark:bg-gray-800 rounded-md p-2 max-h-60 overflow-y-auto">
                         <!-- 篇章項目會在初始化時自動生成 -->
                         
                         <!-- 空分類提示信息 -->
@@ -889,7 +898,8 @@
     
     <!-- 版本號 -->
     <div class="text-center py-3 text-gray-500 dark:text-gray-400 text-sm">
-        <p>v1.3</p>
+        <p>v1.4</p>
+        <p>WenyanMaster - 文言大師之旅 © 2025</p>
     </div>
     
     <script>
@@ -979,7 +989,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (passageContent && !passageContent.classList.contains('hidden')) {
                     const passageList = document.getElementById('passage-list');
                     if (passageList) {
-                        passageList.style.maxHeight = Math.max(200, window.innerHeight * 0.4) + 'px';
+                        passageList.style.maxHeight = Math.max(60, window.innerHeight * 0.2) + 'px';
                     }
                     
                     // 如果段落選擇器也打開
@@ -1087,12 +1097,43 @@ document.addEventListener('DOMContentLoaded', function() {
             // 文言文數據 - 您可以在此處添加更多篇章
             const passages = {
 
+                '人間詞話': {
+                    title: '《人間詞話》（節錄）',
+                    author: '王國維',
+                    category: '中三',
+                    paragraphs: [
+                        '古今之成大事業、大學問者'
+                    ]
+                },
+
+                '論四端': {
+                    title: '《論四端》',
+                    author: '孟子',
+                    category: '中三',
+                    paragraphs: [
+                        '孟子曰：「人皆有不忍人之心。先王有不忍人之心，斯有不忍人之政矣。以不忍人之心，行不忍人之政，治天下可運之掌上。」',
+                        '所以謂人皆有不忍人之心者，今人乍見孺子將入於井，皆有怵惕惻隱之心----非所以內交於孺子之父母也，非所以要譽於鄉黨朋友也，非惡其聲而然也。由是觀之，無惻隱之心，非人也；無羞惡之心，非人也；無辭讓之心，非人也；無是非之心，非人也。惻隱之心，仁之端也；羞惡之心，義之端也；辭讓之心，禮之端也；是非之心，智之端也。',
+                        '人之有是四端也，猶其有四體也。有是四端而自謂不能者，自賊者也；謂其君不能者，賊其君者也。凡有四端於我者，知皆擴而充之矣，若火之始然，泉之始達。苟能充之，足以保四海；苟不充之，不足以事父母。」'
+                    ]
+                },
+
+                '鄒忌諷齊王納諫': {
+                    title: '《鄒忌諷齊王納諫》',
+                    author: '戰國策',
+                    category: '中三', 
+                    paragraphs: [
+                        '鄒忌脩八尺有餘，而形貌昳麗。朝服衣冠，窺鏡，謂其妻曰：「我孰與城北徐公美？」其妻曰：「君美甚，徐公何能及君也！」城北徐公，齊國之美麗者也。忌不自信，而復問其妾曰：「吾孰與徐公美？」妾曰：「徐公何能及君也！」旦日，客從外來，與坐談，問之客曰：「吾與徐公孰美？」客曰：「徐公不若君之美也。」明日，徐公來，孰視之，自以為不如；窺鏡而自視，又弗如遠甚。暮寢而思之，曰：「吾妻之美我者，私我也；妾之美我者，畏我也；客之美我者，欲有求於我也。」',
+                        '於是入朝見威王，曰：「臣誠知不如徐公美。臣之妻私臣，臣之妾畏臣，臣之客欲有求於臣，皆以美於徐公。今齊地方千里，百二十城，宮婦左右，莫不私王；朝廷之臣，莫不畏王，四境之內，莫不有求於王。由此觀之，王之蔽甚矣。」王曰：「善。」乃下令：「羣臣吏民能面刺寡人之過者，受上賞；上書諫寡人者，受中賞；能謗議於市朝，聞寡人之耳者，受下賞。」',
+                        '令初下，羣臣進諫，門庭若市；數月之後，時時而間進；期年之後，雖欲言，無可進者。燕、趙、韓、魏聞之，皆朝於齊。此所謂戰勝於朝廷。'
+                    ]
+                },
+
                 '論仁論孝論君子': {
                     title: '《論仁論孝論君子》',
                     author: '論語',
                     category: '指定文言',
                     paragraphs: [
-                        '子曰：「不仁者，'
+                        '子曰：「君子求諸己，小人求諸人。」'
                     ]
                 },
 
@@ -1101,9 +1142,103 @@ document.addEventListener('DOMContentLoaded', function() {
                     author: '孟子',
                     category: '指定文言',
                     paragraphs: [
-                        '孟子曰：「魚，我所欲也，'
+                        '孟子曰：「魚，我所欲也'
                     ]
                 },
+
+                '關雎': {
+                    title: '《國風．關雎》',
+                    author: '詩經',
+                    category: '其他', 
+                    paragraphs: [
+                        '關關雎鳩，在河之洲。窈窕淑女，君子好逑。參差荇菜，左右流之。窈窕淑女，寤寐求之。求之不得，寤寐思服。悠哉悠哉，輾轉反側。參差荇菜，左右采之。窈窕淑女，琴瑟友之。參差荇菜，左右芼之。窈窕淑女，鐘鼓樂之。'
+                    ]
+                },
+
+                '曹劌論戰': {
+                    title: '《曹劌論戰》',
+                    author: '左傳',
+                    category: '其他', 
+                    paragraphs: [
+                        '十年春，齊師伐我，公將戰，曹劌請見。其鄉人曰：「肉食者謀之，又何間焉？」劌曰：「肉食者鄙，未能遠謀。」乃入見，問：「何以戰。」公曰：「衣食所安，弗敢專也，必以分人。」對曰：「小惠未徧，民弗從也。」公曰：「犧牲玉帛，弗敢加也，必以信。」對曰：「小信未孚，神弗福也。」公曰：「小大之獄，雖不能察，必以情。」對曰：「忠之屬也，可以一戰。戰則請從。」',
+                        '公與之乘，戰於長勺。公將鼓之。劌曰：「未可。」齊人三鼓，劌曰：「可矣。」齊師敗績。公將馳之。劌曰：「未可。」下視其轍，登軾而望之，曰：「可矣。」遂逐齊師。',
+                        '既克，公問其故。對曰：「夫戰，勇氣也。一鼓作氣，再而衰，三而竭。彼竭我盈，故克之。夫大國，難測也，懼有伏焉。吾視其轍亂，望其旗靡，故逐之。」'
+                    ]
+                },
+                '大學': {
+                    title: '《大學》（節錄）',
+                    author: '禮記',
+                    category: '其他', 
+                    paragraphs: [
+                        '大學之道，在明明德，在親民，在止於至善。知止而後有定，定而後能靜，靜而後能安，安而後能慮，慮而後能得。物有本末，事有終始，知所先後，則近道矣。',
+                        '古之欲明明德於天下者，先治其國；欲治其國者，先齊其家；欲齊其家者，先修其身；欲修其身者，先正其心；欲正其心者，先誠其意；欲誠其意者，先致其知；致知在格物。物格而后知至，知至而后意誠，意誠而后心正，心正而后身修，身修而后家齊，家齊而后國治，國治而后天下平。'
+                    ]
+                },
+
+                '陳情表': {
+                    title: '《陳情表》',
+                    author: '李密',
+                    category: '其他', 
+                    paragraphs: [
+                        '臣密言︰臣以險釁，夙遭閔凶，生孩六月，慈父見背，行年四歲，舅奪母志。祖母劉，愍臣孤弱，躬親撫養。臣少多疾病，九歲不行；零丁孤苦，至于成立。既無叔伯，終鮮兄弟，門衰祚薄，晚有兒息。外無期功彊近之親，內無應門五尺之童。煢煢獨立，形影相弔。而劉夙嬰疾病，常在牀蓐。臣侍湯藥，未曾廢離。',
+                        '逮奉聖朝，沐浴清化。前太守臣逵，察臣孝廉；後刺史臣榮，舉臣秀才；臣以供養無主，辭不赴命。詔書特下，拜臣郎中；尋蒙國恩，除臣洗馬。猥以微賤，當侍東宮，非臣隕首所能上報。臣具以表聞，辭不就職。詔書切峻，責臣逋慢；郡縣逼迫，催臣上道；州司臨門，急於星火。臣欲奉詔奔馳，則劉病日篤；欲苟順私情，則告訴不許。臣之進退，實為狼狽。',
+                        '伏惟聖朝以孝治天下，凡在故老，猶蒙矜育，況臣孤苦，特為尤甚。且臣少仕偽朝，歷職郎署，本圖宦達，不矜名節。今臣亡國賤俘，至微至陋，過蒙拔擢，寵命優渥，豈敢盤桓，有所希冀？但以劉日薄西山，氣息奄奄，人命危淺，朝不慮夕。臣無祖母，無以至今日；祖母無臣，無以終餘年。母孫二人，更相為命，是以區區不能廢遠。',
+                        '臣密今年四十有四，祖母劉今年九十有六。是臣盡節於陛下之日長，報養劉之日短也。烏鳥私情，願乞終養。臣之辛苦，非獨蜀之人士，及二州牧伯，所見明知；皇天后土，實所共鑒。願陛下矜愍愚誠，聽臣微志。庶劉僥倖，卒保餘年。臣生當隕首，死當結草。臣不勝犬馬怖懼之情，謹拜表以聞。'
+                    ]
+                },
+
+                '滿井遊記': {
+                    title: '《滿井遊記》',
+                    author: '袁宏道',
+                    category: '其他', 
+                    paragraphs: [
+                        '燕地寒，花朝節後，餘寒猶厲。凍風時作，作則飛沙走礫。局促一室之內，欲出不得。每冒風馳行，未百步輒返。',
+                        '廿二日，天稍和，偕數友出東直。至滿井，高柳夾堤，土膏微潤，一望空闊，若脫籠之鵠。於時冰皮始解，波色乍明，鱗浪層層，清徹見底，晶晶然如鏡之新開而冷光之乍出於匣也。山巒為晴雪所洗，娟然如拭，鮮妍明媚，如倩女之靧面而髻鬟之始掠也。柳條將舒未舒，柔梢披風，麥田淺鬣寸許。遊人雖未盛，泉而茗者，罍而歌者，紅裝而蹇者，亦時時有。風力雖尚勁，然徒步則汗出浹背。凡曝沙之鳥，呷浪之鱗，悠然自得，毛羽鱗鬣之間皆有喜氣。始知郊田之外，未始無春，而城居者未之知也。',
+                        '夫能不以遊墮事，而瀟然於山石草木之間者，惟此官也。而此地適與余近，余之遊將自此始，惡能無紀？己亥之二月也。'
+                    ]
+                },
+
+                '左忠毅公軼事': {
+                    title: '《左忠毅公軼事》',
+                    author: '方苞',
+                    category: '其他', 
+                    paragraphs: [
+                        '先君子嘗言，鄉先輩左忠毅公視學京畿。一日，風雪嚴寒，從數騎出，微行，入古寺。廡下一生伏案臥，文方成草。公閱畢，即解貂覆生，為掩戶，叩之寺僧，則史公可法也。及試，吏呼名，至史公，公瞿然注視。呈卷，即面署第一；召入，使拜夫人，曰：「吾諸兒碌碌，他日繼吾志事，惟此生耳。」',
+                        '及左公下廠獄，史朝夕窺獄門外。逆閹防伺甚嚴，雖家僕不得近。久之，聞左公被炮烙，旦夕且死，持五十金，涕泣謀於禁卒，卒感焉。一日，使史公更敝衣草屨，背筐，手長鑱，為除不潔者，引入，微指左公處，則席地倚牆而坐，面額焦爛不可辨，左膝以下，筋骨盡脫矣。史前跪，抱公膝而嗚咽。公辨其聲，而目不可開，乃奮臂以指撥眥，目光如炬。怒曰：「庸奴！此何地也，而汝前來！國家之事，糜爛至此。老夫已矣，汝復輕身而昧大義，天下事誰可支拄者！不速去，無俟姦人構陷，吾今即撲殺汝。」因摸地上刑械，作投擊勢。史噤不敢發聲，趨而出。後常流涕述其事以語人曰：「吾師肺肝，皆鐵石所鑄造也！」',
+                        '崇禎末，流賊張獻忠出沒蘄、黃、潛、桐間，史公以鳳廬道奉檄守禦，每有警，輒數月不就寢，使將士更休，而自坐幄幕外，擇健卒十人，令二人蹲踞，而背倚之，漏鼓移，則番代。每寒夜起立，振衣裳，甲上冰霜迸落，鏗然有聲。或勸以少休，公曰：「吾上恐負朝廷，下恐愧吾師也。」史公治兵，往來桐城，必躬造左公弟，候太公、太母起居，拜夫人於堂上。',
+                        '余宗老塗山，左公甥也，與先君子善，謂獄中語乃親得之於史公云。'
+                    ]
+                },
+
+
+                '飲酒': {
+                    title: '《飲酒》（其五）',
+                    author: '陶潛',
+                    category: '其他', 
+                    paragraphs: [
+                        '結廬在人境，而無車馬喧。問君何能爾？心遠地自偏。採菊東籬下，悠然見南山。山氣日夕佳，飛鳥相與還。此中有真意，欲辨已忘言。'
+                    ]
+                },
+
+                '四塊玉': {
+                    title: '《四塊玉．閒適》',
+                    author: '關漢卿',
+                    category: '其他', 
+                    paragraphs: [
+                        '南畝耕，東山卧。世態人情經歷多。閒將往事思量過，賢的是他，愚的是我，爭甚麼？'
+                    ]
+                },
+
+                '沉醉東風': {
+                    title: '《沉醉東風．漁父詞》',
+                    author: '白樸',
+                    category: '其他', 
+                    paragraphs: [
+                        '黃蘆岸白蘋渡口。綠楊堤紅蓼灘頭。雖無刎頸交，卻有忘機友。點秋江白鷺沙鷗。傲煞人間萬戶侯，不識字煙波釣叟。'
+                    ]
+                },
+
+
 
                 // 在這裡添加更多篇章...
                 // 新增篇章格式:
@@ -1134,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const gamePage = document.getElementById('game-page');
             
             // 当前选择的篇章键值，初始设定为一个随機篇章
-            let currentPassageKey = '';
+             /*let currentPassageKey = '';
             
             // 函數：隨機選擇篇章並加載
             function loadRandomPassage() {
@@ -1156,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 加載選中的篇章（所有段落）
                 loadSelectedParagraphs(randomPassageKey, paragraphIndices);
-            }
+            }*/
             
             // 初始化默認篇章資料但不顯示遊戲界面的函數
             function initializePassageData() {
@@ -1436,82 +1571,94 @@ if (passageHeader && passageToggle && passageContent) {
     // 篇章選擇器默認關閉
     // 用戶需要點擊才會打開
     
-    // 切换篇章选择器
-    passageHeader.addEventListener('click', function() {
-        console.log("篇章標頭被點擊");
+// 在全局變量區域添加一個標記
+let isFirstTimeOpeningSelector = true; // 標記是否是首次打開篇章選擇器
+
+// 切换篇章選擇器
+passageHeader.addEventListener('click', function() {
+    console.log("篇章標頭被點擊");
+    
+    if (passageContent.classList.contains('hidden')) {
+        // 打開篇章選擇器
+        console.log("打開篇章選擇器");
+        passageContent.classList.remove('hidden');
+        passageToggle.style.transform = 'rotate(180deg)';
         
-        if (passageContent.classList.contains('hidden')) {
-            // 打開篇章選擇器
-            console.log("打開篇章選擇器");
-            passageContent.classList.remove('hidden');
-            passageToggle.style.transform = 'rotate(180deg)';
-            
-            // 添加更自然的開啟動畫效果
-            passageContent.style.opacity = '0';
-            passageContent.style.transform = 'translateY(-20px)';
-            passageContent.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-            passageContainer.style.transition = 'max-height 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
-            passageContainer.style.maxHeight = '500px'; // 立即設置足夠的高度
-            
-            // 觸發重繪並應用動畫
-            setTimeout(() => {
-                passageContent.style.opacity = '1';
-                passageContent.style.transform = 'translateY(0)';
-            }, 50);
-            
-            // 首次打開時不默認選中任何分類，篇章列表為空
-            const hasSelectedBefore = currentPassageKey && currentPassageKey.length > 0;
-            
-            if (hasSelectedBefore) {
-                // 如果已有選擇的篇章，則自動打開段落選擇器
-                // 找到並激活當前選擇的篇章項目
-                const passageItems = document.querySelectorAll('.passage-item');
-                passageItems.forEach(item => {
-                    if (item.dataset.value === currentPassageKey) {
-                        // 移除所有篇章的active樣式
-                        passageItems.forEach(i => 
-                            i.classList.remove('active', 'bg-amber-100', 'dark:bg-amber-900'));
-                        
-                        // 添加當前篇章的active樣式
-                        item.classList.add('active', 'bg-amber-100', 'dark:bg-amber-900');
-                        
-                        // 顯示該篇章的段落選擇器
-                        const paragraphSelector = document.getElementById('paragraph-selector');
-                        if (paragraphSelector && paragraphSelector.classList.contains('hidden')) {
-                            // 只有在段落選擇器隱藏時才調用，避免重複加載
-                            showParagraphSelector(currentPassageKey);
-                        }
-                        
-                        // 如果篇章項目當前是隱藏的，則打開其所屬的分類
-                        if (item.classList.contains('hidden')) {
-                            const category = item.dataset.category;
-                            // 找到並激活對應的分類按鈕
-                            categoryBtns.forEach(btn => {
-                                if (btn.dataset.category === category) {
-                                    // 移除所有按鈕的active樣式
-                                    categoryBtns.forEach(b => b.classList.remove('active', 'bg-amber-200', 'dark:bg-amber-700'));
-                                    
-                                    // 添加當前按鈕的active樣式
-                                    btn.classList.add('active', 'bg-amber-200', 'dark:bg-amber-700');
-                                    
-                                    // 顯示該分類下的所有篇章
-                                    passageItems.forEach(i => {
-                                        if (i.dataset.category === category) {
-                                            i.classList.remove('hidden');
-                                        } else {
-                                            i.classList.add('hidden');
-                                        }
-                                    });
-                                }
-                            });
-                        }
+        // 添加更自然的開啟動畫效果
+        passageContent.style.opacity = '0';
+        passageContent.style.transform = 'translateY(-20px)';
+        passageContent.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        passageContainer.style.transition = 'max-height 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
+        passageContainer.style.maxHeight = '500px'; // 立即設置足夠的高度
+        
+        // 觸發重繪並應用動畫
+        setTimeout(() => {
+            passageContent.style.opacity = '1';
+            passageContent.style.transform = 'translateY(0)';
+        }, 50);
+        
+        // 自動關閉段落選擇器
+        const paragraphSelector = document.getElementById('paragraph-selector');
+        if (paragraphSelector) {
+            console.log("自動關閉段落選擇器");
+            paragraphSelector.classList.add('hidden');
+        }
+        
+        // 首次打開時不預設任何篇章，但再次打開時加載上次的篇章
+        const shouldPreselect = !isFirstTimeOpeningSelector && currentPassageKey && currentPassageKey.length > 0;
+        
+        if (shouldPreselect) {
+            // 如果不是首次打開並且有上次選擇的篇章，則自動打開該篇章
+            const passageItems = document.querySelectorAll('.passage-item');
+            passageItems.forEach(item => {
+                if (item.dataset.value === currentPassageKey) {
+                    // 移除所有篇章的active樣式
+                    passageItems.forEach(i => 
+                        i.classList.remove('active', 'bg-amber-100', 'dark:bg-amber-900'));
+                    
+                    // 添加當前篇章的active樣式
+                    item.classList.add('active', 'bg-amber-100', 'dark:bg-amber-900');
+                    
+                    // 顯示該篇章的段落選擇器
+                    if (paragraphSelector && paragraphSelector.classList.contains('hidden')) {
+                        // 只有在段落選擇器隱藏時才調用，避免重複加載
+                        showParagraphSelector(currentPassageKey);
                     }
-                });
-            }
-        } else {
-            // 關閉篇章選擇器 - 添加收縮動畫
-            console.log("關閉篇章選擇器");
-            passageToggle.style.transform = 'rotate(0deg)';
+                    
+                    // 如果篇章項目當前是隱藏的，則打開其所屬的分類
+                    if (item.classList.contains('hidden')) {
+                        const category = item.dataset.category;
+                        // 找到並激活對應的分類按鈕
+                        categoryBtns.forEach(btn => {
+                            if (btn.dataset.category === category) {
+                                // 移除所有按鈕的active樣式
+                                categoryBtns.forEach(b => b.classList.remove('active', 'bg-amber-200', 'dark:bg-amber-700'));
+                                
+                                // 添加當前按鈕的active樣式
+                                btn.classList.add('active', 'bg-amber-200', 'dark:bg-amber-700');
+                                
+                                // 顯示該分類下的所有篇章
+                                passageItems.forEach(i => {
+                                    if (i.dataset.category === category) {
+                                        i.classList.remove('hidden');
+                                    } else {
+                                        i.classList.add('hidden');
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        
+        // 更新標記，表示篇章選擇器已被打開過
+        isFirstTimeOpeningSelector = false;
+        
+    } else {
+        // 關閉篇章選擇器 - 添加收縮動畫
+        console.log("關閉篇章選擇器");
+        passageToggle.style.transform = 'rotate(0deg)';
             
             // 添加淡出動畫效果
             passageContent.style.opacity = '0';
@@ -1599,8 +1746,8 @@ if (passageHeader && passageToggle && passageContent) {
                     // 確保篇章列表容器有足夠高度並可滾動
                     const passageList = document.getElementById('passage-list');
                     if (passageList) {
-                        // 計算合適的最大高度 (視口高度的40%)
-                        const maxHeight = Math.max(200, window.innerHeight * 0.4) + 'px';
+                        // 計算合適的最大高度 (視口高度的20%)
+                        const maxHeight = Math.max(60, window.innerHeight * 0.2) + 'px';
                         passageList.style.maxHeight = maxHeight;
                         
                         // 確保容器可滾動
@@ -3012,13 +3159,7 @@ if (passageHeader && passageToggle && passageContent) {
                 restartButton.className = 'w-12 h-12 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors flex items-center justify-center text-xl';
                 restartButton.innerHTML = '<i class="fas fa-redo"></i>';
                 buttonsContainer.appendChild(restartButton);
-                
-                // 3. 返回按鈕
-                const returnButton = document.createElement('button');
-                returnButton.id = 'return-start-btn';
-                returnButton.className = 'w-12 h-12 bg-primary text-white rounded-full hover:bg-opacity-90 flex items-center justify-center text-xl';
-                returnButton.innerHTML = '<i class="fas fa-home"></i>';
-                buttonsContainer.appendChild(returnButton);
+               
                 
                 // 添加震動效果
                 document.body.classList.add('game-over-shake');
@@ -3275,38 +3416,35 @@ if (passageHeader && passageToggle && passageContent) {
             
             // 顯示墨水擴散載入動畫
             function showLoadingAnimation() {
-                // 先隱藏所有頁面元素
-                document.querySelectorAll('.container > *').forEach(el => {
-                    if (el.style) {
-                        el.style.visibility = 'hidden';
-                    }
-                });
-                
-                // 創建僅包含中央墨點的動畫容器
+                // 創建全屏覆蓋層和墨點容器
                 const loadingContainer = document.createElement('div');
                 loadingContainer.id = 'loading-container';
+                loadingContainer.style.position = 'fixed';
+                loadingContainer.style.top = '0';
+                loadingContainer.style.left = '0';
+                loadingContainer.style.width = '100%';
+                loadingContainer.style.height = '100%';
+                loadingContainer.style.backgroundColor = 'rgba(245, 242, 234, 1)'; // 完全不透明背景
+                loadingContainer.style.zIndex = '9999'; // 確保在最上層
+                loadingContainer.style.display = 'flex';
+                loadingContainer.style.justifyContent = 'center';
+                loadingContainer.style.alignItems = 'center';
+                loadingContainer.style.opacity = '0';
+                loadingContainer.style.animation = 'fadeIn 0.15s ease forwards';
                 loadingContainer.innerHTML = `
                     <div id="main-splash"></div>
                 `;
                 document.body.appendChild(loadingContainer);
-                
-                // 減少等待時間至0.9秒
+    
+                // 動畫結束後返回
                 return new Promise(resolve => {
                     setTimeout(function() {
                         hideLoadingAnimation();
-                        
-                        // 顯示頁面元素
-                        document.querySelectorAll('.container > *').forEach(el => {
-                            if (el.style) {
-                                el.style.visibility = 'visible';
-                            }
-                        });
-                        
                         resolve();
                     }, 900);
                 });
             }
-            
+
             function hideLoadingAnimation() {
                 const container = document.getElementById('loading-container');
                 if (container) {
@@ -3316,8 +3454,8 @@ if (passageHeader && passageToggle && passageContent) {
                         container.remove();
                     }, 200);
                 }
-            }
-            
+            }            
+
             // 創建紙屑慶祝效果
             function createConfetti() {
                 // 加載 canvas-confetti 庫
@@ -3890,7 +4028,7 @@ if (passageHeader && passageToggle && passageContent) {
                 completionMessage.id = 'completion-result';
                 
                 // 添加經驗值獎勵
-                const expGained = totalNonPunctChars*10; // 經驗值 = 該遊戲字數
+                const expGained = totalNonPunctChars*100; // 經驗值 = 該遊戲字數
                 addExperience(expGained);
                 console.log(`遊戲完成，獲得經驗值: ${expGained}`);
                 
@@ -3916,13 +4054,13 @@ if (passageHeader && passageToggle && passageContent) {
                     achievementsHTML = `
                     <div class="mb-5 mt-4">
                         <p class="text-lg font-medium text-amber-700 dark:text-amber-400 mb-3">獲得成就:</p>
-                        <div class="achievements-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+                        <div class="achievements-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0px;">
                     `;
                     
                     // 添加每個成就徽章，设置为一行至少显示三个
                     achievements.forEach(achievement => {
                         achievementsHTML += `
-                        <div class="achievement-seal" style="width: calc(33.333% - 10px); min-width: 80px; max-width: 100px; flex-grow: 0; flex-shrink: 0;">
+                        <div class="achievement-seal" style="width: calc(33.333% - 0px); min-width: 70px; max-width: 100px; flex-grow: 0; flex-shrink: 0;">
                             ${achievement.svg}
                             <div class="seal-text">
                                 <span class="seal-title">${achievement.title}</span>
@@ -3942,9 +4080,6 @@ if (passageHeader && passageToggle && passageContent) {
                         </button>
                         <button id="restart-result-btn" class="w-12 h-12 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors flex items-center justify-center text-xl">
                             <i class="fas fa-redo"></i>
-                        </button>
-                        <button id="completion-return-btn" class="w-12 h-12 bg-primary text-white rounded-full hover:bg-opacity-90 flex items-center justify-center text-xl">
-                            <i class="fas fa-home"></i>
                         </button>
                     </div>
                 `;
@@ -4278,27 +4413,28 @@ if (passageHeader && passageToggle && passageContent) {
             // 計算升級所需經驗值
             function calculateExpForNextLevel(level) {
                 if (level <= 10) return 100;
-                if (level <= 20) return 200;
-                if (level <= 30) return 300;
-                if (level <= 40) return 400;
-                if (level <= 50) return 500;
-                if (level <= 60) return 600;
-                if (level <= 70) return 700;
-                if (level <= 80) return 800;
-                if (level <= 90) return 900;
-                if (level <= 99) return 1000;
-                return Infinity; // 100級為滿級
+                if (level <= 20) return 180;
+                if (level <= 30) return 260;
+                if (level <= 40) return 320;
+                if (level <= 50) return 400;
+                if (level <= 60) return 480;
+                if (level <= 70) return 560;
+                if (level <= 80) return 640;
+                if (level <= 90) return 720;
+                if (level <= 100) return 800;
+                if (level <= 999) return 500;             
+                return Infinity; // 1000級為滿級
             }
             
             // 添加經驗值
             function addExperience(amount) {
-                if (userProfile.level >= 100) return; // 已達到滿級
+                if (userProfile.level >= 1000) return; // 已達到滿級
                 
                 userProfile.exp += amount;
                 console.log(`添加經驗值: ${amount}, 當前經驗值: ${userProfile.exp}/${userProfile.nextLevelExp}`);
                 
                 // 檢查是否升級
-                while (userProfile.exp >= userProfile.nextLevelExp && userProfile.level < 100) {
+                while (userProfile.exp >= userProfile.nextLevelExp && userProfile.level < 1000) {
                     userProfile.level++;
                     userProfile.exp -= userProfile.nextLevelExp;
                     userProfile.nextLevelExp = calculateExpForNextLevel(userProfile.level);
@@ -4687,7 +4823,7 @@ if (passageHeader && passageToggle && passageContent) {
                                                 <li><strong>閃電俠</strong></li>
                                                 <li><strong>記憶大師</strong></li>
                                                 <li><strong>不知疲倦</strong></li>
-                                                <li><strong>隱藏成就等待你發掘！</strong></li>
+                                                <li><strong>更多隱藏成就！</strong></li>
                                             </ul>
                                         </div>
                                         <p class="mt-2">更多功能，敬請期待！</p>
@@ -4699,7 +4835,7 @@ if (passageHeader && passageToggle && passageContent) {
                             } else if (section === 'records') {
                                 try {
                                     // 我的記錄 - 顯示用戶的記錄
-                                    infoModalTitle.textContent = '我的記錄';
+                                    infoModalTitle.textContent = '我的記錄（只計算完整篇章）';
                                     
                                     // 檢查userRecordsMemory是否已初始化
                                     if (typeof userRecordsMemory !== 'object' || userRecordsMemory === null) {
@@ -4806,7 +4942,7 @@ if (passageHeader && passageToggle && passageContent) {
                                 
                             } else if (section === 'achievements') {
                                 // 顯示歷史成就
-                                infoModalTitle.textContent = '歷史成就';
+                                infoModalTitle.textContent = '歷史成就（只計算完整篇章）';
                                 
                                 // 確保顯示成就函數已定義
                                 if (typeof displayAchievements !== 'function') {
@@ -4860,7 +4996,7 @@ if (passageHeader && passageToggle && passageContent) {
                                         </div>
                                         
                                         <p class="text-gray-700 dark:text-gray-300">
-                                            最近沉迷用POE製作教學工具，早前跟同事展示文言文翻譯bot時，有同事提了一句：「我們是不是讓學習文言文變得枯燥了。」我驀然想起《範文爭霸戰》，一款我中學時風靡一時，卻不知何時消失於歷史的遊戲。於是，我用相同的概念做了《文言大師之旅》。
+                                            最近沉迷用POE製作教學工具。早前跟同事展示文言文翻譯bot時，有同事提了一句：「我們是不是讓學習文言文變得枯燥了？」我驀然想起《範文爭霸戰》，一款我中學時風靡一時，卻不知何時消失於歷史的遊戲。於是，我用相同的概念做了《文言大師之旅》。
                                         </p>
                                         
                                         <p class="text-gray-700 dark:text-gray-300">
@@ -5372,7 +5508,7 @@ if (passageHeader && passageToggle && passageContent) {
             // 檢查並更新指定文言篇章大師之路成就
             function updateSpecifiedTextAchievement() {
                 // 要求的完成次數對應每個等級
-                const requirements = [1, 5, 10, 25];
+                const requirements = [1, 2, 3, 4];
                 
                 // 獲取所有指定文言類別的篇章
                 const specifiedTextPassages = Object.keys(passages).filter(key => 
@@ -5406,7 +5542,7 @@ if (passageHeader && passageToggle && passageContent) {
             // 檢查並更新文學冒險者之路成就
             function updateLiteratureAchievement() {
                 // 要求的完成次數對應每個等級
-                const requirements = [1, 5, 10, 25];
+                const requirements = [1, 3, 10, 20];
                 
                 // 獲取所有文學類別的篇章
                 const literaturePassages = Object.keys(passages).filter(key => 
@@ -5524,7 +5660,7 @@ function displayAchievements() {
     
     // 冒險之路成就等級名稱
     const adventureLevels = ['初心者', '勇者', '大師', '偏執狂', '掃地僧'];
-    const adventureRequirements = [1, 10, 100, 300, 500];
+    const adventureRequirements = [1, 2, 3, 4, 5];
     const adventureBorderColors = ['#90CAF9', '#4CAF50', '#F4511E', '#673AB7', '#FFC107'];
     
     // 當前冒險等級
@@ -5969,7 +6105,7 @@ function displayAchievements() {
             <div class="text-center py-8">
                 <i class="fas fa-book-open text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
                 <p class="text-gray-600 dark:text-gray-400">尚未獲得指定文言篇章大師成就</p>
-                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">完成所有指定文言篇章各1次解鎖「新兵上陣」成就</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">完成所有「指定文言篇章」各1次解鎖「新兵上陣」成就</p>
             </div>
         `;
     }
@@ -8341,13 +8477,13 @@ function displayAchievements() {
                 modal.innerHTML = `
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-xl w-full mx-4 max-h-[80vh] overflow-y-auto">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">選擇展示成就</h3>
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">展示歷史成就</h3>
                             <button id="close-achievement-selector" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                         
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">從您獲得的成就中選擇最多三個在資料頁面展示</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">可選擇最多三個歷史成就</p>
                         
                         <div id="achievement-list" class="space-y-4">
                             <!-- 成就列表將在這裡生成 -->
@@ -8426,29 +8562,25 @@ function displayAchievements() {
                                         <p class="font-medium text-gray-800 dark:text-gray-200">${achievement.title}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">${achievement.description}</p>
                                     </div>
-                                    <div class="ml-2">
-                                        <input type="checkbox" class="h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary" ${isSelected ? 'checked' : ''}>
-                                    </div>
                                 `;
                                 
                                 achievementsContainer.appendChild(achievementItem);
                                 
                                 // 添加點擊事件
-                                achievementItem.addEventListener('click', function() {
-                                    const checkbox = this.querySelector('input[type="checkbox"]');
-                                    const isNowSelected = !checkbox.checked;
+                                    achievementItem.addEventListener('click', function() {
+                                    const isCurrentlySelected = this.classList.contains('selected');
+                                    const isNowSelected = !isCurrentlySelected;
                                     
                                     // 獲取當前選中的成就數量
                                     const selectedCount = document.querySelectorAll('.achievement-item.selected').length;
                                     
                                     // 如果選中數量已經達到3個且當前操作是選中，則不進行操作
-                                    if (selectedCount >= 3 && isNowSelected && !this.classList.contains('selected')) {
+                                    if (selectedCount >= 3 && isNowSelected && !isCurrentlySelected) {
                                         alert('最多只能選擇3個成就');
                                         return;
                                     }
                                     
-                                    // 更新選中狀態
-                                    checkbox.checked = isNowSelected;
+                                // 更新選中狀態
                                     if (isNowSelected) {
                                         this.classList.add('selected');
                                         this.classList.remove('border-gray-200', 'dark:border-gray-600');
@@ -8466,6 +8598,7 @@ function displayAchievements() {
                             });
                             
                             achievementList.appendChild(categoryElement);
+
                         }
                     });
                     
@@ -8620,5 +8753,25 @@ function displayAchievements() {
             console.log("初始化完成");
         });
     </script>
+
+  <script>
+    // 全屏控制逻辑
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    
+    // 监听全屏变化
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        // 退出全屏后的处理
+        console.log('已退出全屏模式');
+      }
+    });
+  </script>
+ 
 </body>
 </html>
