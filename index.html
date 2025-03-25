@@ -5444,15 +5444,15 @@ passageHeader.addEventListener('click', function() {
                     }
                     
                     // 更新冒險之路成就
-                    if (globalStats.totalCompletionCount >= 5 && globalStats.achievements.adventureLevel < 5) {
+                    if (globalStats.totalCompletionCount >= 9) {
                         globalStats.achievements.adventureLevel = 5; // 掃地僧
-                    } else if (globalStats.totalCompletionCount >= 4 && globalStats.achievements.adventureLevel < 4) {
+                    } else if (globalStats.totalCompletionCount >= 7) {
                         globalStats.achievements.adventureLevel = 4; // 偏執狂
-                    } else if (globalStats.totalCompletionCount >= 3 && globalStats.achievements.adventureLevel < 3) {
+                    } else if (globalStats.totalCompletionCount >= 5) {
                         globalStats.achievements.adventureLevel = 3; // 大師
-                    } else if (globalStats.totalCompletionCount >= 2 && globalStats.achievements.adventureLevel < 2) {
+                    } else if (globalStats.totalCompletionCount >= 3) {
                         globalStats.achievements.adventureLevel = 2; // 勇者
-                    } else if (globalStats.totalCompletionCount >= 1 && globalStats.achievements.adventureLevel < 1) {
+                    } else if (globalStats.totalCompletionCount >= 1) {
                         globalStats.achievements.adventureLevel = 1; // 初心者
                     }
                     
