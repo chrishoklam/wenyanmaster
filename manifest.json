@@ -1,7 +1,7 @@
 {
     "name": "文言大師之旅",
     "short_name": "文言大師之旅測試版",
-    "start_url": "/wenyanmaster_test/",
+    "start_url": "/wenyanmaster_test/index.html",
     "display": "standalone",
     
     "icons": [
