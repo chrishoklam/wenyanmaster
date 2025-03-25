@@ -1,17 +1,17 @@
 {
-    "name": "文言文背誦大師之旅",
-    "short_name": "文言大師",
-    "start_url": "/wenyanmaster/",
+    "name": "文言大師之旅",
+    "short_name": "文言大師之旅測試版",
+    "start_url": "/wenyanmaster_test/",
     "display": "standalone",
     
     "icons": [
         {
-            "src": "/wenyanmaster/icons/icon-192x192.png",
+            "src": "/wenyanmaster_test/icons/icon-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/wenyanmaster/icons/icon-512x512.png",
+            "src": "/wenyanmaster_test/icons/icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
         }
