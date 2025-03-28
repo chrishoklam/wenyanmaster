@@ -1097,6 +1097,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const timerElement = document.getElementById('timer');
             
             // 文言文數據 - 您可以在此處添加更多篇章
+            const passages = {
             <script>
             fetch('passages.json')
               .then(response => response.json())
@@ -1106,7 +1107,9 @@ document.addEventListener('DOMContentLoaded', function() {
               })
               .catch(error => console.error('載入失敗:', error));
             </script>
-            
+                
+             };
+
             // 重新生成篇章列表
             generatePassageItems();
 
