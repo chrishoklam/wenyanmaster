@@ -1098,40 +1098,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 文言文數據 - 您可以在此處添加更多篇章
 
-             let passages = {};
-             fetch('passages.json')
-                 .then(response => response.json())
-                 .then(data => {
-                     passages = data;
-                     // 初始化選擇器
-                     initializeSelectors();
-                 })
-                 .catch(error => console.error('Error loading passages:', error));
-
-             // 初始化選擇器函數
-             function initializeSelectors() {
-                 const passageSelect = document.getElementById('passageSelect');
-                 const categorySelect = document.getElementById('categorySelect');
-                 
-                 // 清空現有選項
-                 passageSelect.innerHTML = '';
-                 categorySelect.innerHTML = '';
-                 
-                 // 添加默認選項
-                 passageSelect.add(new Option('請選擇篇章', ''));
-                 categorySelect.add(new Option('請選擇年級', ''));
-                 
-                 // 收集所有類別
-                 const categories = new Set();
-                 Object.values(passages).forEach(passage => {
-                     categories.add(passage.category);
-                 });
-                 
-                 // 添加類別選項
-                 categories.forEach(category => {
-                     categorySelect.add(new Option(category, category));
-                 });
-             }
+            const passages = {
+                '四塊玉': {
+                    title: '《四塊玉．閒適》',
+                    author: '關漢卿',
+                    category: '其他', 
+                    paragraphs: [
+                        '南畝耕，東山卧。世態人情經歷多。閒將往事思量過，賢的是他，愚的是我，爭甚麼？'
+                    ]
+                },
+            };
             
             // 重新生成篇章列表
             generatePassageItems();
