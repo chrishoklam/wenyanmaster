@@ -2966,6 +2966,33 @@ passageHeader.addEventListener('click', function() {
                     }
                 }
                 
+                // 計算已完成字符的經驗值獎勵
+                const progressText = document.getElementById('progress-text');
+                if (progressText) {
+                    const progressInfo = progressText.textContent.split('/');
+                    if (progressInfo.length === 2) {
+                        const completedChars = parseInt(progressInfo[0].trim());
+                        if (!isNaN(completedChars) && completedChars > 0) {
+                            const expGained = completedChars * 2;
+                            addExperience(expGained);
+                            console.log(`遊戲失敗，獲得經驗值: ${expGained} (已完成${completedChars}字符)`);
+                            
+                            // 顯示獲得的經驗值訊息
+                            const expNotification = document.createElement('div');
+                            expNotification.className = 'fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 py-2 px-4 rounded-lg shadow-lg z-[9999] flex items-center';
+                            expNotification.style.animation = 'fadeInOut 3s ease-in-out forwards';
+                            expNotification.innerHTML = `
+                                <i class="fas fa-star text-amber-500 dark:text-amber-300 mr-2"></i>
+                                <div>獲得 <span class="font-bold">${expGained}</span> 經驗值</div>
+                            `;
+                            document.body.appendChild(expNotification);
+                            setTimeout(() => {
+                                expNotification.remove();
+                            }, 3000);
+                        }
+                    }
+                }
+                
                 // 清空選項容器
                 if (!optionsContainer) {
                     console.error("選項容器未找到，無法顯示遊戲結束界面");
