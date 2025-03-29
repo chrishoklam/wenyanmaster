@@ -595,7 +595,7 @@
             <button id="start-journey-btn" class="start-button text-xl font-medium px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transform transition hover:scale-105">
             進入
             </button>
-            <p class="version-info mt-10 text-white/70 text-sm">v1.4.3</p>
+            <p class="version-info mt-10 text-white/70 text-sm">v1.5</p>
          </div>
       </div>
       <!-- 暫停菜單覆蓋層 - 改進按鈕垂直居中 -->
@@ -651,7 +651,7 @@
                </button>
                <button data-section="version" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                <i class="fas fa-code-branch text-green-500 mr-3"></i>
-               <span class="text-gray-800 dark:text-gray-200 font-semibold">版本資訊</span>
+               <span class="text-gray-800 dark:text-gray-200 font-semibold">版本資訊（v1.5重大更新！）</span>
                </button>
                <button data-section="about" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
                <i class="fas fa-user text-blue-500 mr-3"></i>
@@ -987,7 +987,7 @@
       </div>
       <!-- 版本號 -->
       <div class="text-center py-3 text-gray-500 dark:text-gray-400 text-sm">
-         <p>v1.4.3</p>
+         <p>v1.5</p>
          <p>WenyanMaster - 文言大師之旅 © 2025</p>
       </div>
       <script>
@@ -2087,7 +2087,7 @@
                  confirmDialog.innerHTML = `
                      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
                          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">雙人對戰模式</h3>
-                         <p class="text-gray-600 dark:text-gray-300 mb-5">準備開始雙人對戰！上方玩家（螢幕上半部）和下方玩家（螢幕下半部）將同時挑戰。</p>
+                         <p class="text-gray-600 dark:text-gray-300 mb-5">兩位玩家分別使用螢幕上半和下半部分同臺競技！。</p>
                          <div class="flex justify-center gap-6">
                              <button id="start-multi-btn" class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">開始</button>
                              <button id="cancel-multi-btn" class="px-5 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">返回</button>
@@ -4682,7 +4682,7 @@
                      if (progressInfo.length === 2) {
                          const completedChars = parseInt(progressInfo[0].trim());
                          if (!isNaN(completedChars) && completedChars > 0) {
-                             const expGained = completedChars * 2;
+                             const expGained = completedChars *1.5;
                              addExperience(expGained);
                              console.log(`遊戲失敗，獲得經驗值: ${expGained} (已完成${completedChars}字符)`);
                              
@@ -6743,6 +6743,16 @@
                                  infoModalContent.innerHTML = `
                                      <div class="space-y-4">
          
+                                         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                             <h4 class="text-lg font-medium text-primary mb-3">v1.5 更新資訊（重大更新！）</h4>
+                                             <ul class="list-disc pl-4 text-gray-700 dark:text-gray-300 space-y-2">
+                                                 <li>新增雙人競技模式！</li>
+                                                 <li>新增保存及載入進度功能！轉換裝置無煩惱！</li>
+                                                 <li>調整經驗獲取公式！遊戲失敗也可獲得經驗！</li>
+                                                 <li>稍微加快遊戲節奏。</li>
+                                             </ul>
+                                         </div>
+
                                          <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                              <h4 class="text-lg font-medium text-primary mb-3">v1.4 更新資訊</h4>
                                              <ul class="list-disc pl-4 text-gray-700 dark:text-gray-300 space-y-2">
@@ -10642,5 +10652,20 @@
            }
          });
       </script>
+
+<script> 
+// 禁用右键菜单 
+document.addEventListener('contextmenu', function(e) {
+ e.preventDefault(); 
+}); 
+
+// 禁用开发者工具的 F12 键
+ document.addEventListener('keydown', function(e) { 
+if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) { 
+e.preventDefault(); 
+} 
+}); 
+</script>
+
    </body>
 </html>
