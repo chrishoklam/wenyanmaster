@@ -5950,8 +5950,9 @@
                                                  // 將數據轉換為JSON字符串
                                                  const jsonData = JSON.stringify(saveData);
                                                  
-                                                 // 簡單加密數據（僅為混淆，非真正加密）
-                                                 const encodedData = btoa(jsonData);
+                                                 // 使用 UTF-8 安全的 Base64 編碼方式，以支持中文等非 Latin1 字符
+                                                 // 通過 encodeURIComponent 先轉換為 URL 編碼，再進行 Base64 編碼
+                                                 const encodedData = btoa(encodeURIComponent(jsonData));
                                                  
                                                  // 生成隨機字符前綴和後綴，增加代碼複雜度
                                                  const prefix = Math.random().toString(36).substring(2, 8);
@@ -6039,8 +6040,8 @@
                                                  const parts = inputCode.split('-');
                                                  const encodedData = parts.slice(2, -1).join('-');
                                                  
-                                                 // 解碼數據
-                                                 const jsonData = atob(encodedData);
+                                                 // 解碼數據 - 先進行 Base64 解碼，再進行 URL 解碼以支持中文等非 Latin1 字符
+                                                 const jsonData = decodeURIComponent(atob(encodedData));
                                                  
                                                  // 解析JSON
                                                  const saveData = JSON.parse(jsonData);
@@ -8286,3 +8287,5 @@
       </script>
    </body>
 </html>
+
+
