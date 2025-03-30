@@ -1457,6 +1457,17 @@
                          // 切换到双人模式
                          window.gameMode = 'multi';
                          console.log("切換到雙人模式");
+                         
+                         // 重置雙人模式狀態，確保狀態乾淨
+                         window.multiplayerMode = {
+                             active: false,
+                             players: [
+                                 { currentPosition: 0, correctAnswers: 0, lastAnsweredChars: [], canSelect: true, errorTimer: null },
+                                 { currentPosition: 0, correctAnswers: 0, lastAnsweredChars: [], canSelect: true, errorTimer: null }
+                             ],
+                             winner: null,
+                             gameStarted: false
+                         };
                      } else {
                          // 切换到单人模式
                          window.gameMode = 'single';
@@ -2147,18 +2158,43 @@
                      btn.className = 'option-btn h-16 md:h-20 text-2xl md:text-3xl bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none';
                      btn.textContent = option;
                      
-                     btn.addEventListener('click', function() {
+                     // 為按鈕添加數據屬性，跟踪所屬玩家和選擇選項
+                     btn.dataset.playerIndex = playerIndex;
+                     btn.dataset.option = option;
+                     btn.dataset.correctAnswer = correctAnswer;
+                     
+                     btn.addEventListener('click', function(event) {
+                         // 阻止事件冒泡，確保不影響其他玩家
+                         event.stopPropagation();
+                         
+                         // 獲取當前玩家狀態，確保使用最新的狀態
                          const playerObj = window.multiplayerMode.players[playerIndex];
-                         if (!playerObj.canSelect || !window.multiplayerMode.gameStarted) return;
                          
-                         // 重要：立即禁用點擊，防止連點
-                         playerObj.canSelect = false;
-                         
-                         if (option === correctAnswer) {
-                             handleMultiplayerCorrectAnswer(playerIndex, btn);
-                         } else {
-                             handleMultiplayerIncorrectAnswer(playerIndex, btn);
+                         // 檢查玩家是否可以點擊
+                         if (!playerObj.canSelect || !window.multiplayerMode.gameStarted) {
+                             console.log(`玩家${playerIndex+1}不能點擊，canSelect=${playerObj.canSelect}, gameStarted=${window.multiplayerMode.gameStarted}`);
+                             return;
                          }
+                         
+                         // 立即禁用該玩家的點擊能力，並在該按鈕上標記處理中狀態
+                         playerObj.canSelect = false;
+                         btn.disabled = true;
+                         btn.dataset.processing = "true";
+                         
+                         console.log(`玩家${playerIndex+1}點擊選項: ${option}, 正確答案: ${correctAnswer}`);
+                         
+                         // 使用setTimeout確保異步處理，避免阻塞UI
+                         setTimeout(() => {
+                             if (option === correctAnswer) {
+                                 handleMultiplayerCorrectAnswer(playerIndex, btn);
+                             } else {
+                                 handleMultiplayerIncorrectAnswer(playerIndex, btn);
+                             }
+                             
+                             // 清除處理中狀態
+                             btn.disabled = false;
+                             btn.dataset.processing = "false";
+                         }, 0);
                      });
                      
                      optionsContainer.appendChild(btn);
@@ -2200,8 +2236,14 @@
                  //雙人模式節奏快速
                  setTimeout(() => {
                      updatePlayerDisplay(playerIndex);
-                     // 重要：更新顯示後重新啟用點擊
-                     player.canSelect = true;
+                     // 重要：更新顯示後重新啟用點擊，使用setTimeout確保異步執行
+                     setTimeout(() => {
+                         // 雙重確認當前遊戲仍在進行中
+                         if (window.multiplayerMode.gameStarted && !window.multiplayerMode.winner) {
+                             player.canSelect = true;
+                             console.log(`玩家${playerIndex+1}可以再次選擇`);
+                         }
+                     }, 10);
                  }, 10); 
              }
              
@@ -2214,7 +2256,7 @@
                  // 添加错误效果
                  btn.classList.add('incorrect');
                  
-                 // 禁用选择3秒
+                 // 禁用選擇3秒
                  player.canSelect = false;
                  
                  // 显示错误覆盖层和红点计时器
@@ -2250,7 +2292,15 @@
                              errorOverlay.classList.add('hidden');
                              // 確保錯誤覆蓋層完全隱藏
                              errorOverlay.style.display = 'none';
-                             player.canSelect = true;
+                             
+                             // 重新啟用點擊，使用setTimeout確保異步執行
+                             setTimeout(() => {
+                                // 雙重確認當前遊戲仍在進行中
+                                if (window.multiplayerMode.gameStarted && !window.multiplayerMode.winner) {
+                                    player.canSelect = true;
+                                    console.log(`玩家${playerIndex+1}錯誤後可以再次選擇`);
+                                }
+                             }, 10);
                              
                              // 移除按钮错误效果
                              btn.classList.remove('incorrect');
@@ -8341,3 +8391,6 @@
       </script>
    </body>
 </html>
+
+
+
