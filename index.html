@@ -1121,7 +1121,7 @@
              
              // 開始旅程按鈕事件
              if (startJourneyBtn && startScreen && mainContainer) {
-                 startJourneyBtn.addEventListener('touchstart', function() {
+                 startJourneyBtn.addEventListener('click', function() {
                      // 先禁用按鈕防止重複點擊
                      startJourneyBtn.disabled = true;
                      
@@ -1947,7 +1947,7 @@
              // 為遊戲界面中的返回主頁按鈕添加點擊事件
              const returnHomeGameBtn = document.getElementById('return-home-btn-game');
              if (returnHomeGameBtn) {
-                 returnHomeGameBtn.addEventListener('touchstart', async function() {
+                 returnHomeGameBtn.addEventListener('click', async function() {
                      console.log("遊戲界面中的返回主頁按鈕被點擊");
                      
                      try {
@@ -2098,15 +2098,15 @@
                  document.body.appendChild(confirmDialog);
                  
                  // 添加按钮事件
-                 document.getElementById('start-multi-btn').addEventListener('touchstart', function() {
+                 document.getElementById('start-multi-btn').addEventListener('click', function() {
                      document.body.removeChild(confirmDialog);
                      startMultiplayerGame();
                  });
                  
-                 document.getElementById('cancel-multi-btn').addEventListener('touchstart', function() {
+                 document.getElementById('cancel-multi-btn').addEventListener('click', function() {
                      document.body.removeChild(confirmDialog);
                      // 切换回单人模式
-                     if (singleModeBtn) singleModeBtn.touchstart();
+                     if (singleModeBtn) singleModeBtn.click();
                  });
              }
              
@@ -2323,7 +2323,7 @@
                  
                  // 上方玩家暫停按鈕
                  if (pauseBtnTop) {
-                     pauseBtnTop.addEventListener('touchstart', function() {
+                     pauseBtnTop.addEventListener('click', function() {
                          if (!window.multiplayerMode.gameStarted || window.multiplayerMode.winner !== null) return;
                          pauseMultiplayerGame();
                      });
@@ -2331,7 +2331,7 @@
                  
                  // 下方玩家暫停按鈕
                  if (pauseBtnBottom) {
-                     pauseBtnBottom.addEventListener('touchstart', function() {
+                     pauseBtnBottom.addEventListener('click', function() {
                          if (!window.multiplayerMode.gameStarted || window.multiplayerMode.winner !== null) return;
                          pauseMultiplayerGame();
                      });
@@ -2339,7 +2339,7 @@
                  
                  // 繼續遊戲按鈕
                  if (multiplayerContinueBtn) {
-                     multiplayerContinueBtn.addEventListener('touchstart', function() {
+                     multiplayerContinueBtn.addEventListener('click', function() {
                          // 隱藏按鈕，顯示倒計時
                          const pauseButtons = document.getElementById('multiplayer-pause-buttons');
                          if (pauseButtons) {
@@ -2392,7 +2392,7 @@
                  
                  // 返回主頁按鈕 - 修改為直接返回遊戲開始界面
                  if (multiplayerReturnBtn) {
-                     multiplayerReturnBtn.addEventListener('touchstart', function() {
+                     multiplayerReturnBtn.addEventListener('click', function() {
                          // 隱藏暫停覆蓋層
                          if (multiplayerPauseOverlay) {
                              multiplayerPauseOverlay.classList.add('hidden');
@@ -2515,7 +2515,7 @@
                          if (isMultiplayerPaused) {
                              // 如果已暫停，按ESC將觸發繼續按鈕
                              if (multiplayerContinueBtn) {
-                                 multiplayerContinueBtn.touchstart();
+                                 multiplayerContinueBtn.click();
                              }
                          } else {
                              // 如果未暫停，按ESC將暫停遊戲
@@ -2920,14 +2920,14 @@
                  document.body.appendChild(victoryOverlay);
                  
                  // 添加按鈕事件
-                 document.getElementById('restart-multi-btn').addEventListener('touchstart', function() {
+                 document.getElementById('restart-multi-btn').addEventListener('click', function() {
                      // 移除勝利提示
                      document.body.removeChild(victoryOverlay);
                      // 重新開始雙人遊戲
                      startMultiplayerGame();
                  });
                  
-                 document.getElementById('return-home-multi-btn').addEventListener('touchstart', function() {
+                 document.getElementById('return-home-multi-btn').addEventListener('click', function() {
                      // 移除勝利提示
                      document.body.removeChild(victoryOverlay);
                      
@@ -3037,7 +3037,7 @@
              
              // 开始游戏按钮事件
              if (startGameBtn) {
-                 startGameBtn.addEventListener('touchstart', function() {
+                 startGameBtn.addEventListener('click', function() {
                      // 根据当前模式进入相应游戏
                      if (window.gameMode === 'multi') {
                          // 显示双人模式确认对话框
@@ -3131,7 +3131,7 @@
          let isFirstTimeOpeningSelector = true; // 標記是否是首次打開篇章選擇器
          
          // 切换篇章選擇器
-         passageHeader.addEventListener('touchstart', function() {
+         passageHeader.addEventListener('click', function() {
          console.log("篇章標頭被點擊");
          
          if (passageContent.classList.contains('hidden')) {
@@ -3256,7 +3256,7 @@
          }            
              // 分类按钮点击事件
              categoryBtns.forEach(btn => {
-                 btn.addEventListener('touchstart', function() {
+                 btn.addEventListener('click', function() {
                      // 移除所有按钮的active样式
                      categoryBtns.forEach(b => b.classList.remove('active', 'bg-amber-200', 'dark:bg-amber-700'));
                      
@@ -3363,7 +3363,7 @@
              // 为篇章项添加点击事件监听
              function addPassageItemListeners() {
                  document.querySelectorAll('.passage-item').forEach(item => {
-                     item.addEventListener('touchstart', function() {
+                     item.addEventListener('click', function() {
                          // 移除所有篇章的active样式
                          document.querySelectorAll('.passage-item').forEach(i => 
                              i.classList.remove('active', 'bg-amber-100', 'dark:bg-amber-900'));
@@ -3521,7 +3521,7 @@
                  confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
                  
                  // 添加新的事件監聽器 - 改為異步函數以支持等待水墨過渡動畫
-                 newConfirmBtn.addEventListener('touchstart', async function() {
+                 newConfirmBtn.addEventListener('click', async function() {
                      console.log("確認按鈕被點擊");
                      
                      const paragraphList = document.getElementById('paragraph-list');
@@ -3960,7 +3960,7 @@
              
              // 帮助按钮 - 添加自動滾動功能
              if (helpBtn && helpText) {
-                 helpBtn.addEventListener('touchstart', function() {
+                 helpBtn.addEventListener('click', function() {
                      helpText.classList.toggle('hidden');
                      
                      // 如果幫助文本顯示，滾動頁面使其完全可見
@@ -3987,7 +3987,7 @@
                  }
                  
                  // 暫停按鈕點擊事件
-                 pauseBtn.addEventListener('touchstart', function() {
+                 pauseBtn.addEventListener('click', function() {
                      // 只有在遊戲進行中且未暫停時才能暫停
                      if (gameStartScreen.classList.contains('hidden') && gameContent.classList.contains('hidden') === false && !isPaused) {
                          pauseGame();
@@ -3995,7 +3995,7 @@
                  });
                  
                  // 繼續遊戲按鈕
-                 continueBtn.addEventListener('touchstart', function() {
+                 continueBtn.addEventListener('click', function() {
                      // 隱藏按鈕，顯示倒計時
                      pauseButtons.classList.add('hidden');
                      countdownResume.classList.remove('hidden');
@@ -4032,7 +4032,7 @@
                  });
                  
                  // 重新開始按鈕
-                 restartFromPauseBtn.addEventListener('touchstart', async function() {
+                 restartFromPauseBtn.addEventListener('click', async function() {
                      // 先關閉暫停菜單
                      pauseOverlay.classList.add('hidden');
                      isPaused = false;
@@ -4062,7 +4062,7 @@
                  // 返回主頁按鈕
                  const returnHomeBtn = document.getElementById('return-home-btn');
                  if (returnHomeBtn) {
-                     returnHomeBtn.addEventListener('touchstart', async function() {
+                     returnHomeBtn.addEventListener('click', async function() {
                          console.log("暫停界面的返回主頁按鈕被點擊");
                          
                          try {
@@ -4183,9 +4183,9 @@
                      if (e.key === 'Escape') {
                          if (gameStartScreen.classList.contains('hidden') && gameContent.classList.contains('hidden') === false) {
                              if (isPaused) {
-                                 continueBtn.touchstart();
+                                 continueBtn.click();
                              } else {
-                                 pauseBtn.touchstart();
+                                 pauseBtn.click();
                              }
                          }
                      }
@@ -4320,7 +4320,7 @@
              // 創建查看完整文章功能
              const viewFullTextBtn = document.getElementById('view-full-text-btn');
              if (viewFullTextBtn) {
-                 viewFullTextBtn.addEventListener('touchstart', function() {
+                 viewFullTextBtn.addEventListener('click', function() {
                      if (!currentPassageKey) {
                          alert('請先選擇一篇文章');
                          return;
@@ -4360,12 +4360,12 @@
                      fullTextModal.classList.remove('hidden');
                      
                      // 關閉按鈕事件
-                     document.getElementById('close-modal-btn').addEventListener('touchstart', function() {
+                     document.getElementById('close-modal-btn').addEventListener('click', function() {
                          fullTextModal.classList.add('hidden');
                      });
                      
                      // 點擊背景關閉模態框
-                     fullTextModal.addEventListener('touchstart', function(e) {
+                     fullTextModal.addEventListener('click', function(e) {
                          if (e.target === fullTextModal) {
                              fullTextModal.classList.add('hidden');
                          }
@@ -4469,7 +4469,7 @@
                      btn.className = 'option-btn h-16 md:h-20 text-2xl md:text-3xl bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none';
                      btn.textContent = option;
                      
-                     btn.addEventListener('touchstart', function() {
+                     btn.addEventListener('click', function() {
                          if (!canSelect || isPaused) return; // 如果已暫停，不允許選擇
                          
                          if (option === correctAnswer) {
@@ -4802,7 +4802,7 @@
                  // === 直接添加事件處理器 ===
                  
                  // 1. 分享按鈕事件
-                 shareButton.ontouchstart = function() {
+                 shareButton.onclick = function() {
                      console.log("分享按鈕被點擊");
                      
                      // 顯示加載中動畫
@@ -4845,7 +4845,7 @@
                  };
                  
                  // 2. 重來按鈕事件 - 修復重新開始功能
-                 restartButton.ontouchstart = async function() {
+                 restartButton.onclick = async function() {
                      console.log("重來按鈕被點擊");
                      
                      try {
@@ -4921,7 +4921,7 @@
                  };
                  
                  // 3. 返回按鈕事件 - 徹底重寫，並添加頁面滾動至頂部功能
-                 returnButton.ontouchstart = function() {
+                 returnButton.onclick = function() {
                      console.log("返回按鈕被點擊");
                      
                      try {
@@ -5320,22 +5320,22 @@
                  document.body.appendChild(shareModal);
                  
                  // 關閉按鈕
-                 document.getElementById('close-share-modal').addEventListener('touchstart', () => {
+                 document.getElementById('close-share-modal').addEventListener('click', () => {
                      document.body.removeChild(shareModal);
                  });
                  
                  // 下載圖片
-                 document.getElementById('download-share-image').addEventListener('touchstart', () => {
+                 document.getElementById('download-share-image').addEventListener('click', () => {
                      const link = document.createElement('a');
                      link.href = imageData;
                      link.download = '文言文背誦成績.png';
                      document.body.appendChild(link);
-                     link.touchstart();
+                     link.click();
                      document.body.removeChild(link);
                  });
                  
                  // 點擊背景關閉模態框
-                 shareModal.addEventListener('touchstart', (e) => {
+                 shareModal.addEventListener('click', (e) => {
                      if (e.target === shareModal) {
                          document.body.removeChild(shareModal);
                      }
@@ -5662,7 +5662,7 @@
                      achievementsHTML += `</div></div>`;
                  }
                  
-                 // 準備按鈕HTML，先不包含onTouchstart事件，稍後會直接在DOM元素上設置
+                 // 準備按鈕HTML，先不包含onClick事件，稍後會直接在DOM元素上設置
                  const buttonsHTML = `
                      <div class="flex justify-center gap-6 mt-4">
                          <button id="share-result-btn" class="w-12 h-12 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors flex items-center justify-center text-xl">
@@ -5738,7 +5738,7 @@
                  
                  // 立即為按鈕添加點擊事件
                  if (shareResultBtn) {
-                     shareResultBtn.ontouchstart = function() {
+                     shareResultBtn.onclick = function() {
                          console.log("分享按鈕被點擊");
                          
                          // 顯示加載中動畫
@@ -5777,7 +5777,7 @@
                  }
                  
                  if (restartResultBtn) {
-                     restartResultBtn.addEventListener('touchstart', async function() {
+                     restartResultBtn.addEventListener('click', async function() {
                          console.log("重來按鈕被點擊");
                          
                          try {
@@ -5823,7 +5823,7 @@
                  }
                  
                  if (completionReturnBtn) {
-                     completionReturnBtn.ontouchstart = function() {
+                     completionReturnBtn.onclick = function() {
                          console.log("返回按鈕被點擊");
                          
                          try {
@@ -5869,31 +5869,31 @@
                  }
                  
                  // 以防萬一，添加額外的事件代理
-                 optionsContainer.addEventListener('touchstart', function(event) {
+                 optionsContainer.addEventListener('click', function(event) {
                      const target = event.target;
                      
                      // 檢查是否是按鈕或按鈕內的元素
                      if (target.closest('#restart-result-btn')) {
                          console.log("通過代理偵測到重來按鈕點擊");
                          const btn = document.getElementById('restart-result-btn');
-                         if (btn && typeof btn.ontouchstart === 'function') {
-                             btn.ontouchstart();
+                         if (btn && typeof btn.onclick === 'function') {
+                             btn.onclick();
                          }
                      }
                      
                      if (target.closest('#completion-return-btn')) {
                          console.log("通過代理偵測到返回按鈕點擊");
                          const btn = document.getElementById('completion-return-btn');
-                         if (btn && typeof btn.ontouchstart === 'function') {
-                             btn.ontouchstart();
+                         if (btn && typeof btn.onclick === 'function') {
+                             btn.onclick();
                          }
                      }
                      
                      if (target.closest('#share-result-btn')) {
                          console.log("通過代理偵測到分享按鈕點擊");
                          const btn = document.getElementById('share-result-btn');
-                         if (btn && typeof btn.ontouchstart === 'function') {
-                             btn.ontouchstart();
+                         if (btn && typeof btn.onclick === 'function') {
+                             btn.onclick();
                          }
                      }
                  });
@@ -6221,7 +6221,7 @@
                  }
                  
                  // 編輯按鈕點擊事件
-                 editNameBtn.addEventListener('touchstart', function() {
+                 editNameBtn.addEventListener('click', function() {
                      // 將目前的用戶名填入輸入框
                      userNameInput.value = userNameElement.textContent;
                      
@@ -6240,7 +6240,7 @@
                  userNameInput.addEventListener('input', updateCharCounter);
                  
                  // 保存按鈕點擊事件
-                 saveNameBtn.addEventListener('touchstart', function() {
+                 saveNameBtn.addEventListener('click', function() {
                      // 獲取輸入的新名稱
                      const newName = userNameInput.value.trim();
                      
@@ -6276,7 +6276,7 @@
                  });
                  
                  // 取消按鈕點擊事件
-                 cancelNameBtn.addEventListener('touchstart', function() {
+                 cancelNameBtn.addEventListener('click', function() {
                      // 不做任何更改，切換回顯示模式
                      nameEditMode.classList.add('hidden');
                      nameDisplayMode.classList.remove('hidden');
@@ -6285,9 +6285,9 @@
                  // 支持按Enter鍵保存
                  userNameInput.addEventListener('keydown', function(event) {
                      if (event.key === 'Enter') {
-                         saveNameBtn.touchstart();
+                         saveNameBtn.click();
                      } else if (event.key === 'Escape') {
-                         cancelNameBtn.touchstart();
+                         cancelNameBtn.click();
                      }
                  });
                  
@@ -6335,20 +6335,20 @@
                  }
                  
                  // 打開設置菜單
-                 settingsButton.addEventListener('touchstart', function() {
+                 settingsButton.addEventListener('click', function() {
                      settingsMenu.classList.remove('hidden');
                      // 禁用設置按鈕直到關閉菜單
                      disableSettingsButton();
                  });
                  
                  // 關閉設置菜單並重新啟用設置按鈕
-                 closeSettings.addEventListener('touchstart', function() {
+                 closeSettings.addEventListener('click', function() {
                      settingsMenu.classList.add('hidden');
                      enableSettingsButton();
                  });
                  
                  // 點擊背景關閉設置菜單並重新啟用設置按鈕
-                 settingsMenu.addEventListener('touchstart', function(e) {
+                 settingsMenu.addEventListener('click', function(e) {
                      if (e.target === settingsMenu) {
                          settingsMenu.classList.add('hidden');
                          enableSettingsButton();
@@ -6356,13 +6356,13 @@
                  });
                  
                  // 關閉信息模態框時重新啟用設置按鈕
-                 closeInfoModal.addEventListener('touchstart', function() {
+                 closeInfoModal.addEventListener('click', function() {
                      infoModal.classList.add('hidden');
                      enableSettingsButton();
                  });
                  
                  // 點擊背景關閉信息模態框時重新啟用設置按鈕
-                 infoModal.addEventListener('touchstart', function(e) {
+                 infoModal.addEventListener('click', function(e) {
                      if (e.target === infoModal) {
                          infoModal.classList.add('hidden');
                          enableSettingsButton();
@@ -6371,7 +6371,7 @@
                  
                  // 設置選項點擊事件 - 修正版本，附帶調試輸出
                  settingsOptions.forEach(option => {
-                     option.addEventListener('touchstart', function() {
+                     option.addEventListener('click', function() {
                          const section = this.dataset.section;
                          console.log(`點擊了設置選項: ${section}`);
                          
@@ -6538,7 +6538,7 @@
                                      const copySaveCodeBtn = document.getElementById('copy-save-code-btn');
                                      
                                      if (generateSaveCodeBtn && saveCodeContainer && saveCodeTextarea) {
-                                         generateSaveCodeBtn.addEventListener('touchstart', function() {
+                                         generateSaveCodeBtn.addEventListener('click', function() {
                                              try {
                                                  // 收集需要保存的數據
                                                  const saveData = {
@@ -6597,7 +6597,7 @@
                                      
                                      // 複製進度代碼按鈕點擊事件
                                      if (copySaveCodeBtn && saveCodeTextarea) {
-                                         copySaveCodeBtn.addEventListener('touchstart', function() {
+                                         copySaveCodeBtn.addEventListener('click', function() {
                                              // 選中文本
                                              saveCodeTextarea.select();
                                              saveCodeTextarea.setSelectionRange(0, 99999); // 對於移動設備
@@ -6628,7 +6628,7 @@
                                      const loadCodeInput = document.getElementById('load-code-input');
                                      
                                      if (loadSaveCodeBtn && loadCodeInput) {
-                                         loadSaveCodeBtn.addEventListener('touchstart', function() {
+                                         loadSaveCodeBtn.addEventListener('click', function() {
                                              try {
                                                  const inputCode = loadCodeInput.value.trim();
                                                  
@@ -7200,7 +7200,7 @@
                      const categorySections = infoModalContent.querySelectorAll('.category-section');
                      
                      categoryFilters.forEach(filter => {
-                         filter.addEventListener('touchstart', function() {
+                         filter.addEventListener('click', function() {
                              // 移除所有按鈕的高亮樣式
                              categoryFilters.forEach(btn => {
                                  btn.classList.remove('bg-primary', 'text-white');
@@ -7236,7 +7236,7 @@
                      // 默認選中"全部"按鈕
                      const allFilter = infoModalContent.querySelector('.category-filter[data-category="all"]');
                      if (allFilter) {
-                         allFilter.touchstart();
+                         allFilter.click();
                      }
                  }, 100);
              }
@@ -8247,7 +8247,7 @@
                  generateAvatarOptions(avatarGrid);
                  
                  // 打開頭像選擇器
-                 changeAvatarBtn.addEventListener('touchstart', function() {
+                 changeAvatarBtn.addEventListener('click', function() {
                      avatarSelectorModal.classList.remove('hidden');
                      
                      // 標記當前選中的頭像
@@ -8264,12 +8264,12 @@
                  }
                  
                  // 關閉頭像選擇器
-                 closeAvatarSelector.addEventListener('touchstart', function() {
+                 closeAvatarSelector.addEventListener('click', function() {
                      closeAvatarSelectorModal();
                  });
                  
                  // 點擊背景關閉
-                 avatarSelectorModal.addEventListener('touchstart', function(e) {
+                 avatarSelectorModal.addEventListener('click', function(e) {
                      if (e.target === avatarSelectorModal) {
                          closeAvatarSelectorModal();
                      }
@@ -8308,7 +8308,7 @@
                  container.appendChild(defaultOption);
                  
                  // 為默認頭像添加點擊事件
-                 defaultOption.addEventListener('touchstart', function() {
+                 defaultOption.addEventListener('click', function() {
                      selectAvatar('default');
                  });
                  
@@ -8349,7 +8349,7 @@
                      document.head.appendChild(avatarShakeStyle);
                      
                      // 添加點擊事件
-                     option.addEventListener('touchstart', function() {
+                     option.addEventListener('click', function() {
                          // 檢查頭像是否已解鎖
                          if (isUnlocked) {
                              selectAvatar(key);
@@ -10225,7 +10225,7 @@
                  // 管理成就按鈕點擊事件
                  const manageAchievementsBtn = document.getElementById('manage-achievements-btn');
                  if (manageAchievementsBtn) {
-                     manageAchievementsBtn.addEventListener('touchstart', function() {
+                     manageAchievementsBtn.addEventListener('click', function() {
                          showAchievementSelector(selectedAchievements);
                      });
                  }
@@ -10448,7 +10448,7 @@
                                  achievementsContainer.appendChild(achievementItem);
                                  
                                  // 添加點擊事件
-                                     achievementItem.addEventListener('touchstart', function() {
+                                     achievementItem.addEventListener('click', function() {
                                      const isCurrentlySelected = this.classList.contains('selected');
                                      const isNowSelected = !isCurrentlySelected;
                                      
@@ -10498,13 +10498,13 @@
                  // 關閉按鈕事件
                  const closeBtn = document.getElementById('close-achievement-selector');
                  if (closeBtn) {
-                     closeBtn.addEventListener('touchstart', function() {
+                     closeBtn.addEventListener('click', function() {
                          document.body.removeChild(modal);
                      });
                  }
                  
                  // 點擊背景關閉
-                 modal.addEventListener('touchstart', function(e) {
+                 modal.addEventListener('click', function(e) {
                      if (e.target === modal) {
                          document.body.removeChild(modal);
                      }
@@ -10513,7 +10513,7 @@
                  // 保存按鈕事件
                  const saveBtn = document.getElementById('save-achievements-btn');
                  if (saveBtn) {
-                     saveBtn.addEventListener('touchstart', function() {
+                     saveBtn.addEventListener('click', function() {
                          // 獲取選中的成就
                          const selectedItems = document.querySelectorAll('.achievement-item.selected');
                          const selected = [];
