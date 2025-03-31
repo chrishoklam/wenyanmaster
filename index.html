@@ -1185,7 +1185,7 @@
       .then(data => {
         passages = data; // 將 JSON 數據賦給現有變量
         console.log('古文數據載入成功');
-        // 如果需要在數據載入後初始化其他功能，可以在這裡調用
+        // 如果需要在數據載入後初始化其他功能，可以在這裏調用
       })
       .catch(error => {
         console.error('載入古文數據失敗:', error);
@@ -4797,7 +4797,7 @@
                  const isSnail = totalSeconds >= totalNonPunctChars * 3; // 蝸牛（時間超過字數*3秒）
                  const isTireless = !hasPaused; // 不知疲倦（全程不暫停）
                  
-                 // 檢查特殊時間成就 - 在這裡也檢查一次，確保成就及時展示
+                 // 檢查特殊時間成就 - 在這裏也檢查一次，確保成就及時展示
                  // 判斷夜貓成就 (01:00-03:00)
                  const now = new Date();
                  const hours = now.getHours();
@@ -4950,7 +4950,7 @@
                      });
                  }
                  
-                 // 添加夜貓成就 - 在這裡直接添加，確保用戶可以看到
+                 // 添加夜貓成就 - 在這裏直接添加，確保用戶可以看到
                  if (isNightOwl) {
                      // 更新全局統計
                      globalStats.achievements.nightOwl = true;
@@ -4972,7 +4972,7 @@
                      console.log(`獲得夜貓成就，總計: ${globalStats.nightOwlAchievementCount}次`);
                  }
                  
-                 // 添加腸胃不好成就 - 在這裡直接添加，確保用戶可以看到
+                 // 添加腸胃不好成就 - 在這裏直接添加，確保用戶可以看到
                  if (isBadDigestion) {
                      // 更新全局統計
                      globalStats.achievements.badDigestion = true;
@@ -6247,7 +6247,7 @@
                                                  <i class="fas fa-user"></i>
                                              </div>
                                              <h3 class="text-lg font-medium">IG：@dse.chinese.meme</h3>
-                                             <p class="text-gray-500 dark:text-gray-400 text-sm">瀝源邨校 中文科老師</p>
+                                             <p class="text-gray-500 dark:text-gray-400 text-sm">BLMCSS 中文老師</p>
                                          </div>
                                          
                                          <p class="text-gray-700 dark:text-gray-300">
@@ -6260,7 +6260,7 @@
                                          
                                          <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                              <p class="text-gray-600 dark:text-gray-400 text-sm text-center">
-                                                 沒什麼事情是做不到的，除了數學。
+                                                 視覺上喜歡貓。
                                              </p>
                                          </div>
                                      </div>
@@ -8645,8 +8645,8 @@
                 // 龍嘴 - 嘴巴張開的樣子
                 pixels[5][2] = 3; // 牙齒
                 pixels[5][5] = 3; // 牙齒
-                pixels[6][3] = 2; // 嘴裡
-                pixels[6][4] = 2; // 嘴裡
+                pixels[6][3] = 2; // 嘴裏
+                pixels[6][4] = 2; // 嘴裏
                 
                 // 鱗片紋理
                 pixels[3][3] = 1;
@@ -9755,7 +9755,7 @@
                          <p class="text-gray-600 dark:text-gray-400 mb-4">可選擇最多三個歷史成就</p>
                          
                          <div id="achievement-list" class="space-y-4">
-                             <!-- 成就列表將在這裡生成 -->
+                             <!-- 成就列表將在這裏生成 -->
                          </div>
                          
                          <div class="flex justify-end mt-6">
@@ -9809,7 +9809,7 @@
                              categoryElement.innerHTML = `
                                  <h4 class="text-lg font-medium text-amber-700 dark:text-amber-400 mb-3">${category.name}</h4>
                                  <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 grid grid-cols-1 md:grid-cols-2 gap-3 category-achievements">
-                                     <!-- 成就將在這裡添加 -->
+                                     <!-- 成就將在這裏添加 -->
                                  </div>
                              `;
                              
