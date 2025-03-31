@@ -1182,32 +1182,26 @@
              let timerInterval = null;
              const timerElement = document.getElementById('timer');
              
-</script>
-
-<script>
              // 文言文數據 - 您可以在此處添加更多篇章
-         
-               function loadPassagesFromJSON() {
-                 fetch('passages.json')
-                   .then(response => response.json())
-                   .then(data => {
-                     window.passages = data;
-                     console.log('古文數據載入成功');
-        
-                     // 如果有初始化函數，在數據載入後調用它
-                     if (typeof initializeApp === 'function') {
-                       initializeApp();
-                     }
-                   })
-                   .catch(error => {
-                     console.error('載入古文數據失敗:', error);
-                   });
-               }
 
-               document.addEventListener('DOMContentLoaded', loadPassagesFromJSON);
- </script>
+  let passages = {}; // 初始化為空物件
+  
+  function loadPassagesFromJSON() {
+    fetch('passages.json')
+      .then(response => response.json())
+      .then(data => {
+        passages = data; // 將 JSON 數據賦給現有變量
+        console.log('古文數據載入成功');
+        // 如果需要在數據載入後初始化其他功能，可以在這裡調用
+      })
+      .catch(error => {
+        console.error('載入古文數據失敗:', error);
+      });
+  }
+  
+  // 在頁面載入時調用載入函數
+  window.addEventListener('DOMContentLoaded', loadPassagesFromJSON);
 
-<script>
              // 重新生成篇章列表
              generatePassageItems();
          
