@@ -1,992 +1,4 @@
-<!--
-   * WenyanMaster - 文言大師之旅 © 2025
-   * All rights reserved. Unauthorized copying or reproduction is prohibited.
-   -->
-<!DOCTYPE html>
-<html lang="zh-TW">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>文言大師之旅</title>
-      <link rel="manifest" href="manifest.json">
-      <!-- iOS 额外配置 -->
-      <link rel="apple-touch-icon" href="https://i.imgur.com/tuMkTTR.png">
-      <meta name="apple-mobile-web-app-capable" content="yes">
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-      <meta name="apple-mobile-web-app-title" content="文言大師之旅">
-      <meta name="theme-color" content="#ffffff">
-      <script src="https://cdn.tailwindcss.com"></script>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-      <!-- 添加html2canvas库 - 用于截图功能 -->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-      <script>
-         tailwind.config = {
-             darkMode: 'class',
-             theme: {
-                 extend: {
-                     colors: {
-                         primary: '#5D5CDE',
-                         /* 遊戲界面顏色 */
-                         paper: {
-                             light: '#f9f9ec',
-                             dark: '#2a2a2a'
-                         }
-                     },
-                     fontFamily: {
-                         'sans': ['Noto Sans TC', 'sans-serif'],
-                         'serif': ['"Noto Serif TC"', 'serif'],
-                     }
-                 }
-             }
-         }
-      </script>
-      <style>
-         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;700&display=swap');
-         body {
-         overflow-x: hidden;
-         }
-         /* 滑塊樣式 */
-         input:checked + .slider:before {
-           transform: translateX(21px);
-         }
-         .game-mode-switch-container {
-           min-width: 120px;
-           justify-content: center;
-         }
-         /* 8-bit 像素風格頭像樣式 */
-         .pixel-avatar {
-         image-rendering: pixelated;
-         image-rendering: -moz-crisp-edges;
-         image-rendering: crisp-edges;
-         width: 100%;
-         height: 100%;
-         display: flex;
-         align-items: center;
-         justify-content: center;
-         }
-         .avatar-option {
-         width: 60px;
-         height: 60px;
-         border-radius: 8px;
-         cursor: pointer;
-         transition: all 0.2s ease;
-         overflow: hidden;
-         position: relative;
-         border: 2px solid transparent;
-         background-color: #f0f0f0;
-         }
-         .dark .avatar-option {
-         background-color: #333;
-         }
-         .avatar-option:hover {
-         transform: scale(1.05);
-         box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-         }
-         .avatar-option.selected {
-         border-color: #5D5CDE;
-         box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.3);
-         }
-         .book {
-         perspective: 1200px;
-         }
-         .page {
-         transform-origin: center left;
-         transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000);
-         transform-style: preserve-3d;
-         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-         }
-         .page.turned {
-         transform: rotateY(-180deg);
-         }
-         .page-content {
-         backface-visibility: hidden;
-         }
-         .page-back {
-         backface-visibility: hidden;
-         transform: rotateY(180deg);
-         }
-         .character {
-         animation: fadeIn 0.5s ease-in-out;
-         text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-         }
-         .dark .character {
-         text-shadow: 0 2px 5px rgba(255, 255, 255, 0.2);
-         }
-         .option-btn {
-         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-         animation: flyIn 0.6s cubic-bezier(0.19, 1, 0.22, 1) backwards;
-         transform-style: preserve-3d;
-         perspective: 1000px;
-         position: relative;
-         overflow: hidden;
-         will-change: transform;
-         }
-         .option-btn:nth-child(1) { animation-delay: 0s; }
-         .option-btn:nth-child(2) { animation-delay: 0.1s; }
-         .option-btn:nth-child(3) { animation-delay: 0.2s; }
-         .option-btn:before {
-         content: '';
-         position: absolute;
-         top: -50%;
-         left: -50%;
-         width: 200%;
-         height: 200%;
-         background: linear-gradient(
-         to bottom right,
-         rgba(255, 255, 255, 0.3) 0%,
-         rgba(255, 255, 255, 0) 50%,
-         rgba(255, 255, 255, 0) 100%
-         );
-         transform: rotate(30deg);
-         transition: transform 0.7s;
-         }
-         .option-btn:hover:before {
-         transform: rotate(30deg) translate(10%, 10%);
-         }
-         .option-btn:hover {
-         transform: translateY(-3px) translateZ(20px) rotateX(10deg);
-         box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
-         }
-         @keyframes flyIn {
-         0% {
-         opacity: 0;
-         transform: translateZ(-300px) scale(0.5) rotateX(20deg);
-         }
-         70% {
-         opacity: 1;
-         transform: translateZ(50px) scale(1.05) rotateX(-5deg);
-         }
-         100% {
-         transform: translateZ(0) scale(1) rotateX(0);
-         }
-         }
-         .option-btn.correct {
-         background-color: rgba(34, 197, 94, 0.8);
-         color: white;
-         animation: correct-pulse 0.5s ease-in-out;
-         }
-         @keyframes correct-pulse {
-         0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-         50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-         }
-         .option-btn.incorrect {
-         background-color: rgba(239, 68, 68, 0.8);
-         color: white;
-         animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-         }
-         @keyframes shake {
-         10%, 90% { transform: translate3d(-1px, 0, 0); }
-         20%, 80% { transform: translate3d(2px, 0, 0); }
-         30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-         40%, 60% { transform: translate3d(3px, 0, 0); }
-         }
-         .dark .option-btn {
-         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-         }
-         .dark .page {
-         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-         }
-         /* 統一動畫定義 */
-         /* 淡入淡出動畫 */
-         @keyframes fadeIn {
-         from { opacity: 0; transform: translateY(10px); }
-         to { opacity: 1; transform: translateY(0); }
-         }
-         @keyframes fadeOut {
-         from { opacity: 1; }
-         to { opacity: 0; }
-         }
-         @keyframes fadeInOut {
-         0% { opacity: 0; transform: translate(-50%, -20px); }
-         15% { opacity: 1; transform: translate(-50%, 0); }
-         85% { opacity: 1; transform: translate(-50%, 0); }
-         100% { opacity: 0; transform: translate(-50%, -20px); }
-         }
-         /* 震動效果 */
-         @keyframes screen-shake {
-         0%, 100% { transform: translateX(0); }
-         10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-         20%, 40%, 60%, 80% { transform: translateX(5px); }
-         }
-         @keyframes game-over-shake {
-         0%, 100% { transform: translateX(0); }
-         10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-         20%, 40%, 60%, 80% { transform: translateX(10px); }
-         }
-         /* 脈動效果 */
-         @keyframes heart-pulse {
-         0% { transform: scale(1); }
-         50% { transform: scale(1.2); }
-         100% { transform: scale(1); }
-         }
-         @keyframes countdownPulse {
-         0% { transform: scale(1.2); opacity: 0.5; }
-         50% { transform: scale(1.5); opacity: 1; }
-         100% { transform: scale(1); opacity: 0.7; }
-         }
-         @keyframes correct-pulse {
-         0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-         50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-         }
-         /* 特效動畫 */
-         @keyframes bounce {
-         0%, 100% { transform: translateY(0); }
-         50% { transform: translateY(-10px); }
-         }
-         @keyframes inkSplash {
-         0% { transform: scale(0); opacity: 0.8; }
-         70% { opacity: 0.3; }
-         100% { transform: scale(15); opacity: 0; }
-         }
-         @keyframes flyIn {
-         0% {
-         opacity: 0;
-         transform: translateZ(-300px) scale(0.5) rotateX(20deg);
-         }
-         70% {
-         opacity: 1;
-         transform: translateZ(50px) scale(1.05) rotateX(-5deg);
-         }
-         100% {
-         transform: translateZ(0) scale(1) rotateX(0);
-         }
-         }
-         @keyframes pauseMenuAppear {
-         from { opacity: 0; transform: scale(0.9); }
-         to { opacity: 1; transform: scale(1); }
-         }
-         /* 動畫類 */
-         .fade-out {
-         animation: fadeOut 0.5s ease forwards;
-         }
-         .screen-shake {
-         animation: screen-shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-         }
-         .game-over-shake {
-         animation: game-over-shake 0.8s ease-in-out;
-         }
-         .animate-pulse {
-         animation: heart-pulse 1.5s ease-in-out infinite;
-         }
-         .animate-bounce {
-         animation: bounce 1s ease infinite;
-         }
-         .pause-countdown-number {
-         animation: countdownPulse 1s ease-out;
-         }
-         /* 墨滴效果 - 使用CSS變量 */
-         :root {
-         --ink-drop-color: rgba(0, 0, 0, 0.7);
-         --ink-drop-color-dark: rgba(255, 255, 255, 0.5);
-         --ink-animation-duration: 2s;
-         --ink-animation-timing: cubic-bezier(0.165, 0.84, 0.44, 1);
-         }
-         .ink-drop {
-         position: absolute;
-         top: 0;
-         left: 0;
-         width: 10px;
-         height: 10px;
-         border-radius: 50%;
-         background-color: var(--ink-drop-color);
-         opacity: 0;
-         transform: scale(0);
-         animation: inkSplash var(--ink-animation-duration) var(--ink-animation-timing) forwards;
-         }
-         .dark .ink-drop {
-         background-color: var(--ink-drop-color-dark);
-         }
-         /* 3D书本 */
-         .book {
-         transform-style: preserve-3d;
-         }
-         .book:after {
-         content: '';
-         position: absolute;
-         top: 0;
-         right: 0;
-         bottom: 0;
-         width: 30px;
-         background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
-         transform: translateX(100%) rotateY(90deg);
-         transform-origin: left;
-         }
-         /* 成就徽章樣式 */
-         .achievement-seal {
-         width: 80px;
-         height: 80px;
-         position: relative;
-         display: inline-flex;
-         justify-content: center;
-         align-items: center;
-         margin: 0 0px 0px;
-         transform: rotate(-5deg);
-         }
-         .achievement-seal svg {
-         position: absolute;
-         top: 0;
-         left: 0;
-         width: 100%;
-         height: 100%;
-         }
-         .seal-text {
-         position: relative;
-         z-index: 5;
-         font-family: 'Noto Serif TC', serif;
-         font-weight: bold;
-         text-align: center;
-         display: flex;
-         flex-direction: column;
-         color: #fff;
-         line-height: 1.2;
-         }
-         .seal-title {
-         font-size: 14px;
-         margin-bottom: 2px;
-         }
-         .seal-desc {
-         font-size: 10px;
-         opacity: 0.9;
-         }
-         .achievements-container {
-         display: flex;
-         flex-wrap: wrap;
-         justify-content: center;
-         margin-bottom: 10px;
-         }
-         /* 暫停菜單動畫 */
-         @keyframes pauseMenuAppear {
-         from { opacity: 0; transform: scale(0.9); }
-         to { opacity: 1; transform: scale(1); }
-         }
-         #pause-overlay > div {
-         animation: pauseMenuAppear 0.3s ease-out;
-         }
-         /* 倒計時數字動畫 */
-         .pause-countdown-number {
-         animation: countdownPulse 1s ease-out;
-         }
-         @keyframes countdownPulse {
-         0% { transform: scale(1.2); opacity: 0.5; }
-         50% { transform: scale(1.5); opacity: 1; }
-         100% { transform: scale(1); opacity: 0.7; }
-         }
-         /* 優化篇章列表和段落選擇器的滾動條樣式 */
-         #passage-list, #paragraph-list, .paragraph-options {
-         scrollbar-width: thin;
-         scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-         }
-         #passage-list::-webkit-scrollbar, #paragraph-list::-webkit-scrollbar, .paragraph-options::-webkit-scrollbar {
-         width: 6px;
-         }
-         #passage-list::-webkit-scrollbar-track, #paragraph-list::-webkit-scrollbar-track, .paragraph-options::-webkit-scrollbar-track {
-         background: transparent;
-         }
-         #passage-list::-webkit-scrollbar-thumb, #paragraph-list::-webkit-scrollbar-thumb, .paragraph-options::-webkit-scrollbar-thumb {
-         background-color: rgba(156, 163, 175, 0.5);
-         border-radius: 6px;
-         }
-         /* 確保篇章和段落選擇器有合適的內距 */
-         .passage-item, #paragraph-list > div {
-         padding: 0.5rem;
-         margin-bottom: 0.25rem;
-         }
-         /* 確保可見性指示器 */
-         .passage-item.hidden, #paragraph-selector.hidden {
-         display: none;
-         }
-         /* 優化段落選項容器 */
-         .paragraph-options {
-         max-height: 300px;
-         overflow-y: auto;
-         margin-bottom: 10px;
-         padding-right: 10px;
-         }
-         /* 改進確定按鈕樣式和位置 */
-         #confirm-paragraphs {
-         position: sticky;
-         bottom: 0;
-         margin-top: 10px;
-         width: 100%;
-         padding: 8px;
-         font-weight: 500;
-         box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-         }
-      </style>
-      <!-- 慶祝動畫和載入動畫樣式 -->
-      <style>
-         #confetti-canvas {
-         position: fixed;
-         top: 0;
-         left: 0;
-         width: 100%;
-         height: 100%;
-         pointer-events: none;
-         z-index: 100;
-         }
-         /* 墨水擴散動畫樣式 - 簡化版 */
-         #loading-container {
-         position: fixed;
-         top: 0;
-         left: 0;
-         width: 100%;
-         height: 100%;
-         background-color: rgba(245, 242, 234, 1); /* 完全不透明背景 */
-         display: flex;
-         justify-content: center;
-         align-items: center;
-         z-index: 9999; /* 更高的 z-index 確保覆蓋所有元素 */
-         opacity: 0;
-         animation: fadeIn 0.15s ease forwards;
-         overflow: hidden;
-         }
-         #main-splash {
-         position: absolute;
-         width: 220px;
-         height: 220px;
-         top: 50%;
-         left: 50%;
-         background-color: rgba(0, 0, 0, 0.85);
-         border-radius: 50%;
-         transform-origin: center;
-         transform: translate(-50%, -50%) scale(0);
-         opacity: 0;
-         animation: mainSplash 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-         }
-         @keyframes mainSplash {
-         0% { 
-         transform: translate(-50%, -50%) scale(0); 
-         opacity: 0.9;
-         border-radius: 50%;
-         }
-         20% { 
-         opacity: 0.8;
-         }
-         100% { 
-         transform: translate(-50%, -50%) scale(4.5); 
-         opacity: 0;
-         border-radius: 48%;
-         }
-         }
-         @keyframes fadeIn {
-         from { opacity: 0; }
-         to { opacity: 1; }
-         }
-         @keyframes fadeOut {
-         from { opacity: 1; }
-         to { opacity: 0; }
-         }
-         .fade-out {
-         animation: fadeOut 0.5s ease forwards;
-         }
-         /* 啟動界面樣式 */
-         #start-screen {
-         position: fixed;
-         top: 0;
-         left: 0;
-         width: 100%;
-         height: 100%;
-         background-image: url('https://i.imgur.com/ACyJYTg.png');
-         background-color: rgba(0, 0, 0, 0.7);
-         background-blend-mode: overlay;
-         background-size: cover;
-         background-position: center;
-         display: flex;
-         flex-direction: column;
-         justify-content: center;
-         align-items: center;
-         z-index: 10000;
-         transition: opacity 0.8s ease;
-         }
-         .start-title {
-         font-size: 2.5rem;
-         font-weight: bold;
-         color: white;
-         text-align: center;
-         margin-bottom: 3rem;
-         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-         line-height: 1.3;
-         }
-         .start-button {
-         position: relative;
-         padding: 0.8rem 2.5rem;
-         color: white;
-         border: none;
-         font-size: 1.25rem;
-         font-weight: 500;
-         cursor: pointer;
-         transition: all 0.3s ease;
-         margin-bottom: 2.5rem;
-         /* 純黑白水墨風格 */
-         background-color: rgba(0, 0, 0, 0.9);
-         border-radius: 0.5rem;
-         overflow: hidden;
-         /* 簡潔陰影 */
-         box-shadow: 
-         0 4px 10px rgba(0, 0, 0, 0.4),
-         inset 0 0 3px rgba(255, 255, 255, 0.15);
-         /* 添加毛筆邊緣效果 */
-         border: 1px solid rgba(255, 255, 255, 0.1);
-         }
-         .start-button::before {
-         content: '';
-         position: absolute;
-         top: 0;
-         left: 0;
-         right: 0;
-         bottom: 0;
-         /* 輕微的黑白變化，模擬墨跡濃淡 */
-         background: 
-         radial-gradient(ellipse at top left, rgba(60, 60, 60, 0.5) 0%, transparent 70%),
-         radial-gradient(ellipse at bottom right, rgba(20, 20, 20, 0.8) 0%, transparent 70%);
-         opacity: 0.7;
-         z-index: -1;
-         }
-         .start-button::after {
-         content: '';
-         position: absolute;
-         top: 0;
-         left: 0;
-         right: 0;
-         bottom: 0;
-         /* 水墨紋理效果 */
-         background-image: url('data:image/svg+xml;utf8,
-         <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-            <filter id="noise">
-               <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/>
-               <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.3 0"/>
-            </filter>
-            <rect width="100%" height="100%" filter="url(%23noise)"/>
-         </svg>
-         ');
-         opacity: 0.07;
-         mix-blend-mode: overlay;
-         z-index: -1;
-         pointer-events: none;
-         }
-         .start-button:hover {
-         transform: translateY(-2px);
-         box-shadow: 
-         0 6px 12px rgba(0, 0, 0, 0.5),
-         inset 0 0 5px rgba(255, 255, 255, 0.2);
-         /* 懸停時變暗一點，模擬墨色加深 */
-         background-color: rgba(0, 0, 0, 1);
-         }
-         .start-button:active {
-         transform: translateY(0);
-         box-shadow: 
-         0 2px 6px rgba(0, 0, 0, 0.4),
-         inset 0 0 3px rgba(255, 255, 255, 0.1);
-         }
-         .version-info {
-         color: rgba(255, 255, 255, 0.8);
-         font-size: 0.9rem;
-         }
-      </style>
-   </head>
-   <body class="bg-white font-serif min-h-screen bg-cover bg-center bg-fixed" style="background-image: url('https://i.imgur.com/ACyJYTg.png'); background-color: rgba(255, 255, 255, 0.8); background-blend-mode: overlay;">
-      <!-- 啟動界面 -->
-      <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cover bg-center" style="background-image: url('https://i.imgur.com/ACyJYTg.png'); background-color: rgba(0, 0, 0, 0.7); background-blend-mode: overlay;">
-         <div class="text-center p-8 max-w-xl">
-            <h1 class="start-title mb-10 text-4xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg">文言大師之旅</h1>
-            <button id="start-journey-btn" class="start-button text-xl font-medium px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transform transition hover:scale-105">
-            進入
-            </button>
-            <p class="version-info mt-10 text-white/70 text-sm">v1.5</p>
-         </div>
-      </div>
-      <!-- 暫停菜單覆蓋層 - 改進按鈕垂直居中 -->
-      <div id="pause-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-         <div class="bg-white dark:bg-gray-800 rounded-lg p-8 py-12 max-w-sm w-full mx-4 flex flex-col items-center justify-center">
-            <div id="pause-buttons" class="flex justify-center gap-8 mb-8">
-               <button id="restart-from-pause-btn" class="w-16 h-16 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors flex items-center justify-center text-xl" title="重新開始">
-               <i class="fas fa-redo"></i>
-               </button>
-               <button id="continue-btn" class="w-16 h-16 bg-primary text-white rounded-full hover:bg-opacity-90 flex items-center justify-center text-xl" title="繼續遊戲">
-               <i class="fas fa-play"></i>
-               </button>
-               <button id="return-home-btn" class="w-16 h-16 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors flex items-center justify-center text-xl" title="返回主頁">
-               <i class="fas fa-home"></i>
-               </button>
-            </div>
-            <!-- 隱藏的倒計時顯示 -->
-            <div id="countdown-resume" class="hidden text-center">
-               <p class="text-gray-600 dark:text-gray-300 mb-3">遊戲將在以下時間後繼續</p>
-               <div class="text-4xl font-bold text-primary pause-countdown-number">3</div>
-            </div>
-         </div>
-      </div>
-      <!-- 設置按鈕 - 絕對固定不滾動 -->
-      <div id="settings-button" style="position: fixed; top: 16px; left: 16px; width: 48px; height: 48px; background-color: #92400e; color: white; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 9999; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s;">
-         <i class="fas fa-cog text-xl"></i>
-      </div>
-      <!-- 設置菜單 -->
-      <div id="settings-menu" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-6">
-               <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">設置</h2>
-               <button id="close-settings" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
-               <i class="fas fa-times"></i>
-               </button>
-            </div>
-            <div class="flex flex-col gap-3">
-               <button data-section="help" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
-               <i class="fas fa-question-circle text-primary mr-3"></i>
-               <span class="text-gray-800 dark:text-gray-200 font-semibold">遊玩說明</span>
-               </button>
-               <button data-section="records" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
-               <i class="fas fa-trophy text-amber-500 mr-3"></i>
-               <span class="text-gray-800 dark:text-gray-200 font-semibold">我的記錄</span>
-               </button>
-               <button data-section="achievements" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
-               <i class="fas fa-medal text-yellow-500 mr-3"></i>
-               <span class="text-gray-800 dark:text-gray-200 font-semibold">歷史成就</span>
-               </button>
-               <button data-section="saveload" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
-               <i class="fas fa-save text-cyan-500 mr-3"></i>
-               <span class="text-gray-800 dark:text-gray-200 font-semibold">保存及載入進度</span>
-               </button>
-               <button data-section="version" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
-               <i class="fas fa-code-branch text-green-500 mr-3"></i>
-               <span class="text-gray-800 dark:text-gray-200 font-semibold">版本資訊（v1.5重大更新！）</span>
-               </button>
-               <button data-section="about" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600">
-               <i class="fas fa-user text-blue-500 mr-3"></i>
-               <span class="text-gray-800 dark:text-gray-200 font-semibold">關於製作者</span>
-               </button>
-            </div>
-         </div>
-      </div>
-      <!-- 詳細信息模態框 -->
-      <div id="info-modal" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-         <div class="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full mx-4 max-h-[80vh] flex flex-col">
-            <!-- 固定在頂部的標題欄，不參與滾動 -->
-            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-20 shadow-sm">
-               <h3 id="info-modal-title" class="text-xl font-bold text-gray-800 dark:text-gray-100"></h3>
-               <button id="close-info-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
-               <i class="fas fa-times"></i>
-               </button>
-            </div>
-            <!-- 內容區域可滾動 -->
-            <div class="overflow-y-auto p-6 pt-2 flex-1">
-               <div id="info-modal-content" class="text-gray-700 dark:text-gray-300"></div>
-            </div>
-         </div>
-      </div>
-      <!-- 頭像選擇模態框 -->
-      <div id="avatar-selector-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-         <div class="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-               <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">選擇頭像</h3>
-               <button id="close-avatar-selector" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
-               <i class="fas fa-times"></i>
-               </button>
-            </div>
-            <div class="grid grid-cols-4 gap-3 md:grid-cols-5 md:gap-4" id="avatar-grid">
-               <!-- 頭像會通過JS動態生成 -->
-            </div>
-         </div>
-      </div>
-      <div class="container mx-auto px-4 pt-16 pb-8 max-w-2xl">
-         <header class="mb-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">文言大師之旅</h1>
-            <p class="text-gray-600 dark:text-gray-300 text-m">踏上屬於自己的征途</p>
-         </header>
-         <div class="passage-selector mb-6">
-            <div id="passage-container" class="bg-amber-800 rounded-lg overflow-hidden transition-all duration-300 shadow-md z-50" style="max-height: 46px;">
-               <div id="passage-header" class="flex justify-between items-center cursor-pointer p-3 text-white">
-                  <h3 class="text-lg font-medium">選擇篇章</h3>
-                  <i id="passage-toggle" class="fas fa-chevron-down transition-transform duration-300"></i>
-               </div>
-               <div id="passage-content" class="px-3 pb-3 hidden">
-                  <div class="categories mb-3 flex flex-wrap gap-2 justify-between">
-                     <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="中一">中一</button>
-                     <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="中二">中二</button>
-                     <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="中三">中三</button>
-                     <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="指定文言">指定文言</button>
-                     <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="文學">文學</button>
-                     <button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="其他">其他</button>
-                  </div>
-                  <div id="passage-list" class="bg-white dark:bg-gray-800 rounded-md p-2 max-h-60 overflow-y-auto">
-                     <!-- 篇章項目會在初始化時自動生成 -->
-                  </div>
-                  <!--選擇區域段落 (默認隱藏) -->
-                  <div id="paragraph-selector" class="mt-3 bg-white dark:bg-gray-800 rounded-md p-3 hidden">
-                     <p class="text-gray-700 dark:text-gray-300 mb-2 font-medium">選擇背誦段落：</p>
-                     <div id="paragraph-list" class="space-y-2">
-                        <!-- 段落選項將在選擇篇章後動態生成 -->
-                     </div>
-                     <div class="mt-3">
-                        <button id="confirm-paragraphs" class="px-3 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-base font-medium w-full">
-                        確定
-                        </button>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-         <div class="book relative mb-8">
-            <!-- 用戶資料容器 - 修改成與遊戲頁面相似大小 -->
-            <div id="user-profile-container" class="page rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-6 md:p-8 min-h-[400px] shadow-md">
-               <div class="flex flex-col h-full justify-center items-center">
-                  <div id="change-avatar-btn" class="user-avatar-container w-24 h-24 md:w-32 md:h-32 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center mb-6 relative cursor-pointer hover:shadow-lg transition-shadow">
-                     <div id="user-avatar" class="w-full h-full flex items-center justify-center overflow-hidden">
-                        <!-- 默認頭像 -->
-                        <i class="fas fa-user text-4xl md:text-5xl text-amber-800 dark:text-amber-100"></i>
-                     </div>
-                  </div>
-                  <div class="text-center w-full max-w-md">
-                     <div class="flex justify-center items-center gap-3 mb-4">
-                        <!-- 顯示模式 -->
-                        <div id="name-display-mode" class="flex items-center">
-                           <h3 id="user-name" class="text-xl font-bold text-gray-800 dark:text-gray-100">文言大師</h3>
-                           <button id="edit-name-btn" class="ml-2 w-7 h-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary transition-colors">
-                           <i class="fas fa-pen text-xs"></i>
-                           </button>
-                        </div>
-                        <!-- 編輯模式 (默認隱藏) -->
-                        <div id="name-edit-mode" class="flex flex-col items-center gap-2 hidden w-full max-w-xs mx-auto">
-                           <div class="w-full relative">
-                              <input type="text" id="user-name-input" class="w-full text-xl font-bold text-gray-800 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 border-2 border-primary/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" maxlength="12">
-                              <div class="absolute right-3 bottom-2 text-xs text-gray-500 dark:text-gray-400" id="char-counter">0/12</div>
-                           </div>
-                           <div class="flex gap-3 mt-1">
-                              <button id="save-name-btn" class="w-9 h-9 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
-                              <i class="fas fa-check"></i>
-                              </button>
-                              <button id="cancel-name-btn" class="w-9 h-9 flex items-center justify-center bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
-                              <i class="fas fa-times"></i>
-                              </button>
-                           </div>
-                        </div>
-                     </div>
-                     <div class="w-full mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                           <div class="flex items-center">
-                              <span id="user-level" class="bg-primary text-white text-sm py-0.5 px-2 rounded-full mr-2">Lv.1</span>
-                              <span class="text-sm text-gray-600 dark:text-gray-400">經驗值</span>
-                           </div>
-                           <span id="exp-text" class="text-sm text-gray-600 dark:text-gray-400">0 / 100</span>
-                        </div>
-                        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                           <div id="exp-bar" class="h-full bg-amber-500 rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                     </div>
-                     <div class="mt-6">
-                        <div class="mb-4">
-                           <h4 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
-                              成就
-                              <button id="manage-achievements-btn" class="text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-md px-2 py-1 focus:outline-none transition-colors">
-                              <i class="fas fa-cog text-xs"></i>
-                              </button>
-                           </h4>
-                           <div id="achievements-display" class="flex justify-center flex-wrap gap-2">
-                              <p class="text-sm text-gray-500 dark:text-gray-400 italic">從設置菜單的「歷史成就」中選擇展示</p>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-            <!-- 遊戲界面容器 -->
-            <div id="game-page" class="page rounded-lg overflow-hidden hidden">
-               <div class="page-content bg-paper-light dark:bg-paper-dark p-6 md:p-8 min-h-[400px] flex flex-col justify-between">
-                  <!-- 遊戲控制區域 -->
-                  <div class="flex justify-between items-center mb-4">
-                     <div class="flex flex-col gap-2">
-                        <!-- 進度條 -->
-                        <div class="w-full max-w-[200px]">
-                           <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
-                              <span>進度</span>
-                              <span id="progress-text">0 / <span id="total-chars">0</span></span>
-                           </div>
-                           <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                              <div id="progress-bar" class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%"></div>
-                           </div>
-                        </div>
-                        <!-- 生命值 -->
-                        <div id="lives" class="flex text-red-500 dark:text-red-400 text-2xl">
-                           <i class="fas fa-heart mx-0.5"></i>
-                           <i class="fas fa-heart mx-0.5"></i>
-                           <i class="fas fa-heart mx-0.5"></i>
-                        </div>
-                     </div>
-                     <div class="flex items-center gap-2">
-                        <div id="stopwatch" class="text-gray-700 dark:text-gray-300 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-base flex items-center">
-                           <i class="fas fa-stopwatch mr-2"></i><span id="timer" class="font-medium">00:00.0</span>
-                        </div>
-                        <!-- 暫停按鈕或返回主頁按鈕 -->
-                        <button id="pause-btn" class="p-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-xl flex items-center justify-center w-10 h-10" title="暫停遊戲">
-                        <i class="fas fa-pause"></i>
-                        </button>
-                        <button id="return-home-btn-game" class="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xl flex items-center justify-center w-10 h-10 hidden" title="返回主頁">
-                        <i class="fas fa-home"></i>
-                        </button>
-                     </div>
-                  </div>
-                  <div class="text-center">
-                     <div class="passage-info mb-4">
-                        <h2 id="passage-title" class="text-xl font-bold text-gray-800 dark:text-gray-100">《論四端》</h2>
-                        <p id="passage-author" class="text-gray-600 dark:text-gray-400">孟子</p>
-                     </div>
-                     <div class="current-text my-6">
-                        <div id="game-start-screen" class="flex flex-col items-center justify-center">
-                           <div class="flex flex-col items-center justify-center gap-3">
-                              <div class="flex items-center justify-center gap-3">
-                                 <button id="start-game-btn" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transform hover:scale-105 transition-transform text-lg">
-                                 開始
-                                 </button>
-                                 <button id="view-full-text-btn" class="p-3 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 flex items-center justify-center" title="查看完整文章">
-                                 <i class="fas fa-search text-xl"></i>
-                                 </button>
-                              </div>
-                              <!-- 單人/雙人模式切換 - 改為滑塊 -->
-                              <div class="game-mode-switch-container flex items-center my-2">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-3">單人</span>
-                                <label class="relative inline-block w-14 h-6">
-                                  <input type="checkbox" id="game-mode-switch" class="opacity-0 w-0 h-0">
-                                  <span class="slider round absolute cursor-pointer inset-0 bg-teal-600 transition-all duration-300 rounded-full before:content-[''] before:absolute before:h-5 before:w-5 before:left-0.5 before:bottom-0.5 before:bg-white before:rounded-full before:transition before:duration-300"></span>
-                                </label>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 ml-3">雙人</span>
-                              </div>
-                           </div>
-                        </div>
-                        <div id="game-content" class="hidden">
-                           <!-- 單人模式遊戲界面 -->
-                           <div id="single-player-ui" class="flex flex-col items-center justify-center">
-                              <div class="flex items-center justify-center">
-                                 <div id="last-answered-chars" class="text-lg md:text-xl text-gray-700 dark:text-gray-300 whitespace-nowrap overflow-x-auto max-w-full h-12 flex items-center"></div>
-                                 <div id="current-char" class="character text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 min-w-[1.2em] flex items-center justify-center ml-1"></div>
-                                 <div class="text-lg text-gray-400 dark:text-gray-500">...</div>
-                              </div>
-                              <div id="completed-text" class="hidden"></div>
-                           </div>
-                           <!-- 雙人模式遊戲界面 -->
-                           <div id="multiplayer-ui" class="hidden flex flex-col h-full">
-                              <!-- 上方玩家區域 -->
-                              <div id="player-top" class="w-full pb-4 mb-2 border-b border-gray-300 dark:border-gray-700 relative" style="transform: rotate(180deg);">
-                                 <div class="flex flex-col items-center">
-                                    <!-- 上方玩家控制欄 -->
-                                    <div class="w-full flex justify-between items-center px-4 mb-2">
-                                       <div class="flex flex-col gap-1 max-w-[150px] w-full">
-                                          <div id="stopwatch-top" class="text-gray-700 dark:text-gray-300 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-base flex items-center">
-                                             <i class="fas fa-stopwatch mr-2"></i><span id="timer-top" class="font-medium">00:00.0</span>
-                                          </div>
-                                          <!-- 上方玩家進度條 -->
-                                          <div class="px-3">
-                                             <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
-                                                <span>進度</span>
-                                                <span id="progress-text-top">0 / <span id="total-chars-top">0</span></span>
-                                             </div>
-                                             <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                <div id="progress-bar-top" class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%"></div>
-                                             </div>
-                                          </div>
-                                       </div>
-                                       <button id="pause-btn-top" class="p-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-xl flex items-center justify-center w-10 h-10" title="暫停遊戲" style="transform: rotate(180deg);">
-                                       <i class="fas fa-pause"></i>
-                                       </button>
-                                    </div>
-                                    <div class="flex items-center justify-center">
-                                       <div id="last-answered-chars-top" class="text-lg md:text-xl text-gray-700 dark:text-gray-300 whitespace-nowrap overflow-x-auto max-w-full h-12 flex items-center"></div>
-                                       <div id="current-char-top" class="character text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 min-w-[1.2em] flex items-center justify-center ml-1"></div>
-                                       <div class="text-lg text-gray-400 dark:text-gray-500">...</div>
-                                    </div>
-                                    <div id="options-container-top" class="grid grid-cols-3 gap-3 md:gap-4 mt-4 w-full px-4"></div>
-                                    <!-- 上方玩家錯誤屏障 -->
-                                    <div id="top-player-error-overlay" class="absolute inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center" style="transform: rotate(180deg);">
-                                       <div class="text-white font-bold flex items-center">
-                                          <span id="top-error-timer" class="text-3xl text-red-500">●●●</span>
-                                       </div>
-                                    </div>
-                                 </div>
-                              </div>
-                              <!-- 中間區域 - 僅用於倒計時 -->
-                              <div class="flex-grow flex items-center justify-center relative min-h-[50px]">
-                                 <!-- 倒計時區域 - 增加覆蓋整個畫面的半透明黑色背景並加大綠點 -->
-                                 <div id="multiplayer-countdown" class="fixed inset-0 flex items-center justify-center hidden bg-black bg-opacity-70 z-[1000]">
-                                    <div class="text-5xl font-bold text-green-500">●●●</div>
-                                 </div>
-                              </div>
-                              <!-- 下方玩家區域 -->
-                              <div id="player-bottom" class="w-full pt-4 mt-2 border-t border-gray-300 dark:border-gray-700 relative">
-                                 <div class="flex flex-col items-center">
-                                    <!-- 下方玩家控制欄 -->
-                                    <div class="w-full flex justify-between items-center px-4 mb-2">
-                                       <div class="flex flex-col gap-1 max-w-[150px] w-full">
-                                          <div id="stopwatch-bottom" class="text-gray-700 dark:text-gray-300 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-base flex items-center">
-                                             <i class="fas fa-stopwatch mr-2"></i><span id="timer-bottom" class="font-medium">00:00.0</span>
-                                          </div>
-                                          <!-- 下方玩家進度條 -->
-                                          <div class="px-3">
-                                             <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
-                                                <span>進度</span>
-                                                <span id="progress-text-bottom">0 / <span id="total-chars-bottom">0</span></span>
-                                             </div>
-                                             <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                <div id="progress-bar-bottom" class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%"></div>
-                                             </div>
-                                          </div>
-                                       </div>
-                                       <button id="pause-btn-bottom" class="p-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-xl flex items-center justify-center w-10 h-10" title="暫停遊戲">
-                                       <i class="fas fa-pause"></i>
-                                       </button>
-                                    </div>
-                                    <div class="flex items-center justify-center">
-                                       <div id="last-answered-chars-bottom" class="text-lg md:text-xl text-gray-700 dark:text-gray-300 whitespace-nowrap overflow-x-auto max-w-full h-12 flex items-center"></div>
-                                       <div id="current-char-bottom" class="character text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 min-w-[1.2em] flex items-center justify-center ml-1"></div>
-                                       <div class="text-lg text-gray-400 dark:text-gray-500">...</div>
-                                    </div>
-                                    <div id="options-container-bottom" class="grid grid-cols-3 gap-3 md:gap-4 mt-4 w-full px-4"></div>
-                                    <!-- 下方玩家錯誤屏障 -->
-                                    <div id="bottom-player-error-overlay" class="absolute inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center">
-                                       <div class="text-white font-bold flex items-center">
-                                          <span id="bottom-error-timer" class="text-3xl text-red-500">●●●</span>
-                                       </div>
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                           <!-- 雙人模式暫停菜單 -->
-                           <div id="multiplayer-pause-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-                              <div class="bg-white dark:bg-gray-800 rounded-lg p-8 py-12 max-w-sm w-full mx-4 flex flex-col items-center justify-center">
-                                 <div id="multiplayer-pause-buttons" class="flex justify-center gap-8 mb-8">
-                                    <button id="multiplayer-continue-btn" class="w-16 h-16 bg-primary text-white rounded-full hover:bg-opacity-90 flex items-center justify-center text-xl" title="繼續遊戲">
-                                    <i class="fas fa-play"></i>
-                                    </button>
-                                    <button id="multiplayer-return-btn" class="w-16 h-16 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors flex items-center justify-center text-xl" title="返回主頁">
-                                    <i class="fas fa-home"></i>
-                                    </button>
-                                 </div>
-                                 <!-- 隱藏的倒計時顯示 -->
-                                 <div id="multiplayer-countdown-resume" class="hidden text-center">
-                                    <p class="text-gray-600 dark:text-gray-300 mb-3">遊戲將在以下時間後繼續</p>
-                                    <div class="text-4xl font-bold text-primary pause-countdown-number">3</div>
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <div id="options-container" class="grid grid-cols-3 gap-3 md:gap-4 mb-4">
-                     <!-- Options will be generated here -->
-                  </div>
-                  <div id="feedback" class="text-center h-6 text-lg"></div>
-               </div>
-            </div>
-         </div>
-         <!-- 移除底部的遊玩說明按鈕，因為已經放在齒輪菜單中 -->
-      </div>
-      <!-- 版本號 -->
-      <div class="text-center py-3 text-gray-500 dark:text-gray-400 text-sm">
-         <p>v1.5</p>
-         <p>WenyanMaster - 文言大師之旅 © 2025</p>
-      </div>
-      <script>
-         // 添加用於頭像的兩個全局變量
+<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>文言大師之旅</title><audio id="rival1" controls autoplay loop style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMDhf/wmr_01.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="sanctuary" controls autoplay loop style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczNDZf/Midnight%20Sanctuary.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="rival2" controls autoplay loop style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMTNf/wmr_02.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="nip" controls autoplay loop style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMDlf/Maximum%20Tune%202%20OST%20-%20Nip%20And%20Tuck%20Race.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="obs" controls autoplay loop style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMDZf/Highway%20Obsession.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="flat" controls autoplay loop style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczNDdf/Just%20Flat%20Out.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="finish" controls autoplay style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMDVf/Win.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="free" controls autoplay loop style="display: none;"><source src="Free.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="lose" controls autoplay style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMDRf/Lose.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="menu" controls autoplay loop style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMDdf/Rival%20and%20Course%20Select%20%28Max2%20Version%29.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="turning5" controls autoplay style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMTJf/turning5.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="cursor" controls autoplay style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMTBf/cursor.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><audio id="select" controls autoplay style="display: none;"><source src="https://od.lk/s/NjlfMzY3NjczMTFf/select.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="https://i.imgur.com/tuMkTTR.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="文言大師之旅"><meta name="theme-color" content="#ffffff"><script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script><script>tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:"#5D5CDE",paper:{light:"#f9f9ec",dark:"#2a2a2a"}},fontFamily:{sans:["Noto Sans TC","sans-serif"],serif:['"Noto Serif TC"',"serif"]}}}}</script><style>@import url(https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;700&display=swap);body{overflow-x:hidden}input:checked+.slider:before{transform:translateX(21px)}.game-mode-switch-container{min-width:120px;justify-content:center}.pixel-avatar{image-rendering:pixelated;image-rendering:-moz-crisp-edges;image-rendering:crisp-edges;width:100%;height:100%;display:flex;align-items:center;justify-content:center}.avatar-option{width:60px;height:60px;border-radius:8px;cursor:pointer;transition:all .2s ease;overflow:hidden;position:relative;border:2px solid transparent;background-color:#f0f0f0}.dark .avatar-option{background-color:#333}.avatar-option:hover{transform:scale(1.05);box-shadow:0 3px 8px rgba(0,0,0,.2)}.avatar-option.selected{border-color:#5d5cde;box-shadow:0 0 0 2px rgba(93,92,222,.3)}.book{perspective:1200px}.page{transform-origin:center left;transition:transform .6s cubic-bezier(.645,.045,.355,1);transform-style:preserve-3d;box-shadow:0 4px 10px rgba(0,0,0,.3)}.page.turned{transform:rotateY(-180deg)}.page-content{backface-visibility:hidden}.page-back{backface-visibility:hidden;transform:rotateY(180deg)}.character{animation:fadeIn .5s ease-in-out;text-shadow:0 2px 5px rgba(0,0,0,.2)}.dark .character{text-shadow:0 2px 5px rgba(255,255,255,.2)}.option-btn{transition:all .5s cubic-bezier(.175,.885,.32,1.275);box-shadow:0 2px 5px rgba(0,0,0,.2);animation:flyIn .6s cubic-bezier(.19,1,.22,1) backwards;transform-style:preserve-3d;perspective:1000px;position:relative;overflow:hidden;will-change:transform}.option-btn:nth-child(1){animation-delay:0s}.option-btn:nth-child(2){animation-delay:.1s}.option-btn:nth-child(3){animation-delay:.2s}.option-btn:before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(to bottom right,rgba(255,255,255,.3) 0,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);transform:rotate(30deg);transition:transform .7s}.option-btn:hover:before{transform:rotate(30deg) translate(10%,10%)}.option-btn:hover{transform:translateY(-3px) translateZ(20px) rotateX(10deg);box-shadow:0 15px 25px rgba(0,0,0,.4)}@keyframes flyIn{0%{opacity:0;transform:translateZ(-300px) scale(.5) rotateX(20deg)}70%{opacity:1;transform:translateZ(50px) scale(1.05) rotateX(-5deg)}100%{transform:translateZ(0) scale(1) rotateX(0)}}.option-btn.correct{background-color:rgba(34,197,94,.8);color:#fff;animation:correct-pulse .5s ease-in-out}@keyframes correct-pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(34,197,94,.7)}50%{transform:scale(1.1);box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(34,197,94,0)}}.option-btn.incorrect{background-color:rgba(239,68,68,.8);color:#fff;animation:shake .5s cubic-bezier(.36,.07,.19,.97) both}@keyframes shake{10%,90%{transform:translate3d(-1px,0,0)}20%,80%{transform:translate3d(2px,0,0)}30%,50%,70%{transform:translate3d(-3px,0,0)}40%,60%{transform:translate3d(3px,0,0)}}.dark .option-btn{box-shadow:0 2px 5px rgba(0,0,0,.4)}.dark .page{box-shadow:0 4px 10px rgba(0,0,0,.6)}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}@keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-20px)}15%{opacity:1;transform:translate(-50%,0)}85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}@keyframes screen-shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-5px)}20%,40%,60%,80%{transform:translateX(5px)}}@keyframes game-over-shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-10px)}20%,40%,60%,80%{transform:translateX(10px)}}@keyframes heart-pulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}@keyframes countdownPulse{0%{transform:scale(1.2);opacity:.5}50%{transform:scale(1.5);opacity:1}100%{transform:scale(1);opacity:.7}}@keyframes correct-pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(34,197,94,.7)}50%{transform:scale(1.1);box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(34,197,94,0)}}@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@keyframes inkSplash{0%{transform:scale(0);opacity:.8}70%{opacity:.3}100%{transform:scale(15);opacity:0}}@keyframes flyIn{0%{opacity:0;transform:translateZ(-300px) scale(.5) rotateX(20deg)}70%{opacity:1;transform:translateZ(50px) scale(1.05) rotateX(-5deg)}100%{transform:translateZ(0) scale(1) rotateX(0)}}@keyframes pauseMenuAppear{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}.fade-out{animation:fadeOut .5s ease forwards}.screen-shake{animation:screen-shake .5s cubic-bezier(.36,.07,.19,.97) both}.game-over-shake{animation:game-over-shake .8s ease-in-out}.animate-pulse{animation:heart-pulse 1.5s ease-in-out infinite}.animate-bounce{animation:bounce 1s ease infinite}.pause-countdown-number{animation:countdownPulse 1s ease-out}:root{--ink-drop-color:rgba(0, 0, 0, 0.7);--ink-drop-color-dark:rgba(255, 255, 255, 0.5);--ink-animation-duration:2s;--ink-animation-timing:cubic-bezier(0.165, 0.84, 0.44, 1)}.ink-drop{position:absolute;top:0;left:0;width:10px;height:10px;border-radius:50%;background-color:var(--ink-drop-color);opacity:0;transform:scale(0);animation:inkSplash var(--ink-animation-duration) var(--ink-animation-timing) forwards}.dark .ink-drop{background-color:var(--ink-drop-color-dark)}.book{transform-style:preserve-3d}.book:after{content:'';position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(to right,rgba(0,0,0,.1),rgba(0,0,0,.4));transform:translateX(100%) rotateY(90deg);transform-origin:left}.achievement-seal{width:80px;height:80px;position:relative;display:inline-flex;justify-content:center;align-items:center;margin:0 0 0;transform:rotate(-5deg)}.achievement-seal svg{position:absolute;top:0;left:0;width:100%;height:100%}.seal-text{position:relative;z-index:5;font-family:'Noto Serif TC',serif;font-weight:700;text-align:center;display:flex;flex-direction:column;color:#fff;line-height:1.2}.seal-title{font-size:14px;margin-bottom:2px}.seal-desc{font-size:10px;opacity:.9}.achievements-container{display:flex;flex-wrap:wrap;justify-content:center;margin-bottom:10px}@keyframes pauseMenuAppear{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}#pause-overlay>div{animation:pauseMenuAppear .3s ease-out}.pause-countdown-number{animation:countdownPulse 1s ease-out}@keyframes countdownPulse{0%{transform:scale(1.2);opacity:.5}50%{transform:scale(1.5);opacity:1}100%{transform:scale(1);opacity:.7}}#paragraph-list,#passage-list,.paragraph-options{scrollbar-width:thin;scrollbar-color:rgba(156,163,175,.5) transparent}#paragraph-list::-webkit-scrollbar,#passage-list::-webkit-scrollbar,.paragraph-options::-webkit-scrollbar{width:6px}#paragraph-list::-webkit-scrollbar-track,#passage-list::-webkit-scrollbar-track,.paragraph-options::-webkit-scrollbar-track{background:0 0}#paragraph-list::-webkit-scrollbar-thumb,#passage-list::-webkit-scrollbar-thumb,.paragraph-options::-webkit-scrollbar-thumb{background-color:rgba(156,163,175,.5);border-radius:6px}#paragraph-list>div,.passage-item{padding:.5rem;margin-bottom:.25rem}#paragraph-selector.hidden,.passage-item.hidden{display:none}.paragraph-options{max-height:300px;overflow-y:auto;margin-bottom:10px;padding-right:10px}#confirm-paragraphs{position:sticky;bottom:0;margin-top:10px;width:100%;padding:8px;font-weight:500;box-shadow:0 -2px 10px rgba(0,0,0,.1)}</style><style>#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100}#loading-container{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(245,242,234,1);display:flex;justify-content:center;align-items:center;z-index:9999;opacity:0;animation:fadeIn .15s ease forwards;overflow:hidden}#main-splash{position:absolute;width:220px;height:220px;top:50%;left:50%;background-color:rgba(0,0,0,.85);border-radius:50%;transform-origin:center;transform:translate(-50%,-50%) scale(0);opacity:0;animation:mainSplash .8s cubic-bezier(.19,1,.22,1) forwards}@keyframes mainSplash{0%{transform:translate(-50%,-50%) scale(0);opacity:.9;border-radius:50%}20%{opacity:.8}100%{transform:translate(-50%,-50%) scale(4.5);opacity:0;border-radius:48%}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fade-out{animation:fadeOut .5s ease forwards}#start-screen{position:fixed;top:0;left:0;width:100%;height:100%;background-image:url(https://i.imgur.com/ACyJYTg.png);background-color:rgba(0,0,0,.7);background-blend-mode:overlay;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10000;transition:opacity .8s ease}.start-title{font-size:2.5rem;font-weight:700;color:#fff;text-align:center;margin-bottom:3rem;text-shadow:0 2px 10px rgba(0,0,0,.5);line-height:1.3}.start-button{position:relative;padding:.8rem 2.5rem;color:#fff;border:none;font-size:1.25rem;font-weight:500;cursor:pointer;transition:all .3s ease;margin-bottom:2.5rem;background-color:rgba(0,0,0,.9);border-radius:.5rem;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,.4),inset 0 0 3px rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.1)}.start-button::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at top left,rgba(60,60,60,.5) 0,transparent 70%),radial-gradient(ellipse at bottom right,rgba(20,20,20,.8) 0,transparent 70%);opacity:.7;z-index:-1}.start-button::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:url('data:image/svg+xml;utf8,         <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">            <filter id="noise">               <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/>               <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.3 0"/>            </filter>            <rect width="100%" height="100%" filter="url(%23noise)"/>         </svg>');opacity:.07;mix-blend-mode:overlay;z-index:-1;pointer-events:none}.start-button:hover{transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,0,0,.5),inset 0 0 5px rgba(255,255,255,.2);background-color:rgba(0,0,0,1)}.start-button:active{transform:translateY(0);box-shadow:0 2px 6px rgba(0,0,0,.4),inset 0 0 3px rgba(255,255,255,.1)}.version-info{color:rgba(255,255,255,.8);font-size:.9rem}</style></head><body class="bg-white font-serif min-h-screen bg-cover bg-center bg-fixed" style="background-image:url(https://i.imgur.com/ACyJYTg.png);background-color:rgba(255,255,255,.8);background-blend-mode:overlay"><div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cover bg-center" style="background-image:url(https://i.imgur.com/ACyJYTg.png);background-color:rgba(0,0,0,.7);background-blend-mode:overlay"><div class="text-center p-8 max-w-xl"><h1 class="start-title mb-10 text-4xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg">文言大師之旅</h1><button id="start-journey-btn" class="start-button text-xl font-medium px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transform transition hover:scale-105">進入</button><p class="version-info mt-10 text-white/70 text-sm">v1.5</p></div></div><div id="pause-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-gray-800 rounded-lg p-8 py-12 max-w-sm w-full mx-4 flex flex-col items-center justify-center"><div id="pause-buttons" class="flex justify-center gap-8 mb-8"><button id="restart-from-pause-btn" class="w-16 h-16 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors flex items-center justify-center text-xl" title="重新開始"><i class="fas fa-redo"></i></button><button id="continue-btn" class="w-16 h-16 bg-primary text-white rounded-full hover:bg-opacity-90 flex items-center justify-center text-xl" title="繼續遊戲"><i class="fas fa-play"></i></button><button id="return-home-btn" class="w-16 h-16 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors flex items-center justify-center text-xl" title="返回主頁"><i class="fas fa-home"></i></button></div><div id="countdown-resume" class="hidden text-center"><p class="text-gray-600 dark:text-gray-300 mb-3">遊戲將在以下時間後繼續</p><div class="text-4xl font-bold text-primary pause-countdown-number">3</div></div></div></div><div id="settings-button" style="position:fixed;top:16px;left:16px;width:48px;height:48px;background-color:#92400e;color:#fff;border-radius:50%;box-shadow:0 4px 6px rgba(0,0,0,.1);z-index:9999;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background-color .2s"><i class="fas fa-cog text-xl"></i></div><div id="settings-menu" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4"><div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">設置</h2><button id="close-settings" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"><i class="fas fa-times"></i></button></div><div class="flex flex-col gap-3"><button data-section="help" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600"><i class="fas fa-question-circle text-primary mr-3"></i><span class="text-gray-800 dark:text-gray-200 font-semibold">遊玩說明</span></button><button data-section="records" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600"><i class="fas fa-trophy text-amber-500 mr-3"></i><span class="text-gray-800 dark:text-gray-200 font-semibold">我的記錄</span></button><button data-section="achievements" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600"><i class="fas fa-medal text-yellow-500 mr-3"></i><span class="text-gray-800 dark:text-gray-200 font-semibold">歷史成就</span></button><button data-section="saveload" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600"><i class="fas fa-save text-cyan-500 mr-3"></i><span class="text-gray-800 dark:text-gray-200 font-semibold">保存及載入進度</span></button><button data-section="version" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600"><i class="fas fa-code-branch text-green-500 mr-3"></i><span class="text-gray-800 dark:text-gray-200 font-semibold">版本資訊（v1.5重大更新！）</span></button><button data-section="about" class="settings-option py-3 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center hover:bg-gray-100 dark:hover:bg-gray-600"><i class="fas fa-user text-blue-500 mr-3"></i><span class="text-gray-800 dark:text-gray-200 font-semibold">關於製作者</span></button></div></div></div><div id="info-modal" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full mx-4 max-h-[80vh] flex flex-col"><div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-20 shadow-sm"><h3 id="info-modal-title" class="text-xl font-bold text-gray-800 dark:text-gray-100"></h3><button id="close-info-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"><i class="fas fa-times"></i></button></div><div class="overflow-y-auto p-6 pt-2 flex-1"><div id="info-modal-content" class="text-gray-700 dark:text-gray-300"></div></div></div></div><div id="avatar-selector-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">選擇頭像</h3><button id="close-avatar-selector" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"><i class="fas fa-times"></i></button></div><div class="grid grid-cols-4 gap-3 md:grid-cols-5 md:gap-4" id="avatar-grid"></div></div></div><div class="container mx-auto px-4 pt-16 pb-8 max-w-2xl"><header class="mb-8 text-center"><h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">文言大師之旅</h1><p class="text-gray-600 dark:text-gray-300 text-m">踏上屬於自己的征途</p></header><div class="passage-selector mb-6"><div id="passage-container" class="bg-amber-800 rounded-lg overflow-hidden transition-all duration-300 shadow-md z-50" style="max-height:46px"><div id="passage-header" class="flex justify-between items-center cursor-pointer p-3 text-white"><h3 class="text-lg font-medium">選擇篇章</h3><i id="passage-toggle" class="fas fa-chevron-down transition-transform duration-300"></i></div><div id="passage-content" class="px-3 pb-3 hidden"><div class="categories mb-3 flex flex-wrap gap-2 justify-between"><button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="中一">中一</button><button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="中二">中二</button><button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="中三">中三</button><button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="指定文言">指定文言</button><button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="文學">文學</button><button class="category-btn p-2 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 rounded-md hover:bg-amber-200 dark:hover:bg-amber-700 text-sm flex-1" data-category="其他">其他</button></div><div id="passage-list" class="bg-white dark:bg-gray-800 rounded-md p-2 max-h-60 overflow-y-auto"><div id="empty-category-message" class="p-4 text-center hidden"><i class="fas fa-info-circle text-amber-500 text-xl mb-2"></i><p class="text-gray-600 dark:text-gray-300">此分類暫無篇章，請選擇其他分類</p></div></div><div id="paragraph-selector" class="mt-3 bg-white dark:bg-gray-800 rounded-md p-3 hidden"><p class="text-gray-700 dark:text-gray-300 mb-2 font-medium">選擇背誦段落：</p><div id="paragraph-list" class="space-y-2"></div><div class="mt-3"><button id="confirm-paragraphs" class="px-3 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-base font-medium w-full">確定</button></div></div></div></div></div><div class="book relative mb-8"><div id="user-profile-container" class="page rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-6 md:p-8 min-h-[400px] shadow-md"><div class="flex flex-col h-full justify-center items-center"><div id="change-avatar-btn" class="user-avatar-container w-24 h-24 md:w-32 md:h-32 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center mb-6 relative cursor-pointer hover:shadow-lg transition-shadow"><div id="user-avatar" class="w-full h-full flex items-center justify-center overflow-hidden"><i class="fas fa-user text-4xl md:text-5xl text-amber-800 dark:text-amber-100"></i></div></div><div class="text-center w-full max-w-md"><div class="flex justify-center items-center gap-3 mb-4"><div id="name-display-mode" class="flex items-center"><h3 id="user-name" class="text-xl font-bold text-gray-800 dark:text-gray-100">文言大師</h3><button id="edit-name-btn" class="ml-2 w-7 h-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary transition-colors"><i class="fas fa-pen text-xs"></i></button></div><div id="name-edit-mode" class="flex flex-col items-center gap-2 hidden w-full max-w-xs mx-auto"><div class="w-full relative"><input type="text" id="user-name-input" class="w-full text-xl font-bold text-gray-800 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 border-2 border-primary/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" maxlength="12"><div class="absolute right-3 bottom-2 text-xs text-gray-500 dark:text-gray-400" id="char-counter">0/12</div></div><div class="flex gap-3 mt-1"><button id="save-name-btn" class="w-9 h-9 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"><i class="fas fa-check"></i></button><button id="cancel-name-btn" class="w-9 h-9 flex items-center justify-center bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"><i class="fas fa-times"></i></button></div></div></div><div class="w-full mb-4"><div class="flex justify-between items-center mb-2"><div class="flex items-center"><span id="user-level" class="bg-primary text-white text-sm py-0.5 px-2 rounded-full mr-2">Lv.1</span><span class="text-sm text-gray-600 dark:text-gray-400">經驗值</span></div><span id="exp-text" class="text-sm text-gray-600 dark:text-gray-400">0 / 100</span></div><div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="exp-bar" class="h-full bg-amber-500 rounded-full transition-all duration-300" style="width:0%"></div></div></div><div class="mt-6"><div class="mb-4"><h4 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">成就<button id="manage-achievements-btn" class="text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-md px-2 py-1 focus:outline-none transition-colors"><i class="fas fa-cog text-xs"></i></button></h4><div id="achievements-display" class="flex justify-center flex-wrap gap-2"><p class="text-sm text-gray-500 dark:text-gray-400 italic">從設置菜單的「歷史成就」中選擇展示</p></div></div></div></div></div></div><div id="game-page" class="page rounded-lg overflow-hidden hidden"><div class="page-content bg-paper-light dark:bg-paper-dark p-6 md:p-8 min-h-[400px] flex flex-col justify-between"><div class="flex justify-between items-center mb-4"><div class="flex flex-col gap-2"><div class="w-full max-w-[200px]"><div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400 mb-1"><span>進度</span><span id="progress-text">0 /<span id="total-chars">0</span></span></div><div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-primary rounded-full transition-all duration-300" style="width:0%"></div></div></div><div id="lives" class="flex text-red-500 dark:text-red-400 text-2xl"><i class="fas fa-heart mx-0.5"></i><i class="fas fa-heart mx-0.5"></i><i class="fas fa-heart mx-0.5"></i></div></div><div class="flex items-center gap-2"><div id="stopwatch" class="text-gray-700 dark:text-gray-300 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-base flex items-center"><i class="fas fa-stopwatch mr-2"></i><span id="timer" class="font-medium">00:00.0</span></div><button id="pause-btn" class="p-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-xl flex items-center justify-center w-10 h-10" title="暫停遊戲"><i class="fas fa-pause"></i></button><button id="return-home-btn-game" class="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xl flex items-center justify-center w-10 h-10 hidden" title="返回主頁"><i class="fas fa-home"></i></button></div></div><div class="text-center"><div class="passage-info mb-4"><h2 id="passage-title" class="text-xl font-bold text-gray-800 dark:text-gray-100">《論四端》</h2><p id="passage-author" class="text-gray-600 dark:text-gray-400">孟子</p></div><div class="current-text my-6"><div id="game-start-screen" class="flex flex-col items-center justify-center"><div class="flex flex-col items-center justify-center gap-3"><div class="flex items-center justify-center gap-3"><button id="start-game-btn" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transform hover:scale-105 transition-transform text-lg">開始</button><button id="view-full-text-btn" class="p-3 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 flex items-center justify-center" title="查看完整文章"><i class="fas fa-search text-xl"></i></button></div><div class="game-mode-switch-container flex items-center my-2"><span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-3">單人</span><label class="relative inline-block w-14 h-6"><input type="checkbox" id="game-mode-switch" class="opacity-0 w-0 h-0"><span class="slider round absolute cursor-pointer inset-0 bg-teal-600 transition-all duration-300 rounded-full before:content-[''] before:absolute before:h-5 before:w-5 before:left-0.5 before:bottom-0.5 before:bg-white before:rounded-full before:transition before:duration-300"></span></label><span class="text-sm font-medium text-gray-700 dark:text-gray-300 ml-3">雙人</span></div></div></div><div id="game-content" class="hidden"><div id="single-player-ui" class="flex flex-col items-center justify-center"><div class="flex items-center justify-center"><div id="last-answered-chars" class="text-lg md:text-xl text-gray-700 dark:text-gray-300 whitespace-nowrap overflow-x-auto max-w-full h-12 flex items-center"></div><div id="current-char" class="character text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 min-w-[1.2em] flex items-center justify-center ml-1"></div><div class="text-lg text-gray-400 dark:text-gray-500">...</div></div><div id="completed-text" class="hidden"></div></div><div id="multiplayer-ui" class="hidden flex flex-col h-full"><div id="player-top" class="w-full pb-4 mb-2 border-b border-gray-300 dark:border-gray-700 relative" style="transform:rotate(180deg)"><div class="flex flex-col items-center"><div class="w-full flex justify-between items-center px-4 mb-2"><div class="flex flex-col gap-1 max-w-[150px] w-full"><div id="stopwatch-top" class="text-gray-700 dark:text-gray-300 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-base flex items-center"><i class="fas fa-stopwatch mr-2"></i><span id="timer-top" class="font-medium">00:00.0</span></div><div class="px-3"><div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400"><span>進度</span><span id="progress-text-top">0 /<span id="total-chars-top">0</span></span></div><div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="progress-bar-top" class="h-full bg-primary rounded-full transition-all duration-300" style="width:0%"></div></div></div></div><button id="pause-btn-top" class="p-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-xl flex items-center justify-center w-10 h-10" title="暫停遊戲" style="transform:rotate(180deg)"><i class="fas fa-pause"></i></button></div><div class="flex items-center justify-center"><div id="last-answered-chars-top" class="text-lg md:text-xl text-gray-700 dark:text-gray-300 whitespace-nowrap overflow-x-auto max-w-full h-12 flex items-center"></div><div id="current-char-top" class="character text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 min-w-[1.2em] flex items-center justify-center ml-1"></div><div class="text-lg text-gray-400 dark:text-gray-500">...</div></div><div id="options-container-top" class="grid grid-cols-3 gap-3 md:gap-4 mt-4 w-full px-4"></div><div id="top-player-error-overlay" class="absolute inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center" style="transform:rotate(180deg)"><div class="text-white font-bold flex items-center"><span id="top-error-timer" class="text-3xl text-red-500">●●●</span></div></div></div></div><div class="flex-grow flex items-center justify-center relative min-h-[50px]"><div id="multiplayer-countdown" class="fixed inset-0 flex items-center justify-center hidden bg-black bg-opacity-70 z-[1000]"><div class="text-5xl font-bold text-green-500">●●●</div></div></div><div id="player-bottom" class="w-full pt-4 mt-2 border-t border-gray-300 dark:border-gray-700 relative"><div class="flex flex-col items-center"><div class="w-full flex justify-between items-center px-4 mb-2"><div class="flex flex-col gap-1 max-w-[150px] w-full"><div id="stopwatch-bottom" class="text-gray-700 dark:text-gray-300 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-base flex items-center"><i class="fas fa-stopwatch mr-2"></i><span id="timer-bottom" class="font-medium">00:00.0</span></div><div class="px-3"><div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400"><span>進度</span><span id="progress-text-bottom">0 /<span id="total-chars-bottom">0</span></span></div><div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="progress-bar-bottom" class="h-full bg-primary rounded-full transition-all duration-300" style="width:0%"></div></div></div></div><button id="pause-btn-bottom" class="p-2 bg-primary text-white rounded-lg hover:bg-opacity-90 text-xl flex items-center justify-center w-10 h-10" title="暫停遊戲"><i class="fas fa-pause"></i></button></div><div class="flex items-center justify-center"><div id="last-answered-chars-bottom" class="text-lg md:text-xl text-gray-700 dark:text-gray-300 whitespace-nowrap overflow-x-auto max-w-full h-12 flex items-center"></div><div id="current-char-bottom" class="character text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 min-w-[1.2em] flex items-center justify-center ml-1"></div><div class="text-lg text-gray-400 dark:text-gray-500">...</div></div><div id="options-container-bottom" class="grid grid-cols-3 gap-3 md:gap-4 mt-4 w-full px-4"></div><div id="bottom-player-error-overlay" class="absolute inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center"><div class="text-white font-bold flex items-center"><span id="bottom-error-timer" class="text-3xl text-red-500">●●●</span></div></div></div></div></div><div id="multiplayer-pause-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"><div class="bg-white dark:bg-gray-800 rounded-lg p-8 py-12 max-w-sm w-full mx-4 flex flex-col items-center justify-center"><div id="multiplayer-pause-buttons" class="flex justify-center gap-8 mb-8"><button id="multiplayer-continue-btn" class="w-16 h-16 bg-primary text-white rounded-full hover:bg-opacity-90 flex items-center justify-center text-xl" title="繼續遊戲"><i class="fas fa-play"></i></button><button id="multiplayer-return-btn" class="w-16 h-16 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors flex items-center justify-center text-xl" title="返回主頁"><i class="fas fa-home"></i></button></div><div id="multiplayer-countdown-resume" class="hidden text-center"><p class="text-gray-600 dark:text-gray-300 mb-3">遊戲將在以下時間後繼續</p><div class="text-4xl font-bold text-primary pause-countdown-number">3</div></div></div></div></div></div></div><div id="options-container" class="grid grid-cols-3 gap-3 md:gap-4 mb-4"></div><div id="feedback" class="text-center h-6 text-lg"></div></div></div></div></div><div class="text-center py-3 text-gray-500 dark:text-gray-400 text-sm"><p>v1.5</p><p>WenyanMaster - 文言大師之旅 © 2025</p></div><script>// 添加用於頭像的兩個全局變量
          let userSelectedAvatar = null;
          let avatarPixelData = {
              // 定義頭像 - 部分保留，部分重新設計著重呈現物件形狀
@@ -1117,8 +129,19 @@
              // 開始旅程按鈕事件
              if (startJourneyBtn && startScreen && mainContainer) {
                  startJourneyBtn.addEventListener('click', function() {
+                    // create a HTMLCollection of audio elements in constant els
+                    const els = document.getElementsByTagName("AUDIO");
+                    // use Array.from() method to convert els to array,
+                    //   then iterate over it
+                    Array.from(els).forEach((el) => {
+                        el.pause();
+                     });
+                     
                      // 先禁用按鈕防止重複點擊
                      startJourneyBtn.disabled = true;
+
+                     // 播放音效
+                     document.getElementById("select").play();
                      
                      // 1. 讓啟動界面淡出
                      startScreen.style.opacity = '0';
@@ -1137,6 +160,9 @@
                              startScreen.style.display = 'none';
                              // 顯示主界面
                              mainContainer.style.display = 'block';
+
+                             // 播放音樂
+                             document.getElementById("menu").play();
                              
                              // 顯示用戶資料容器，隱藏遊戲界面
                              const userProfileContainer = document.getElementById('user-profile-container');
@@ -1178,23 +204,630 @@
              const timerElement = document.getElementById('timer');
              
              // 文言文數據 - 您可以在此處添加更多篇章
-  
-  function loadPassagesFromJSON() {
-    fetch('passages.json')
-      .then(response => response.json())
-      .then(data => {
-        passages = data; // 將 JSON 數據賦給現有變量
-        console.log('古文數據載入成功');
-        // 如果需要在數據載入後初始化其他功能，可以在這裏調用
-      })
-      .catch(error => {
-        console.error('載入古文數據失敗:', error);
-      });
-  }
-  
-  // 在頁面載入時調用載入函數
-  window.addEventListener('DOMContentLoaded', loadPassagesFromJSON);
+         
+             const passages = {
+          '木蘭辭': {
+                    title: '《木蘭辭》',
+                    author: '佚名',
+                    category: '中一',
+                    paragraphs: [
+                        '唧唧復唧唧，木蘭當戶織。不聞機杼聲，唯聞女歎息。問女何所思，問女何所憶。「女亦無所思，女亦無所憶。昨夜見軍帖，可汗大點兵。軍書十二卷，卷卷有爺名。阿爺無大兒，木蘭無長兄。願為市鞍馬，從此替爺征。」',
+                        '東市買駿馬，西市買鞍韉，南市買轡頭，北市買長鞭。旦辭爺娘去，暮宿黃河邊；不聞爺娘喚女聲，但聞黃河流水鳴濺濺。旦辭黃河去，暮宿黑山頭；不聞爺娘喚女聲，但聞燕山胡騎聲啾啾。',
+                        '萬里赴戎機，關山度若飛。朔氣傳金柝，寒光照鐵衣。將軍百戰死，壯士十年歸。歸來見天子，天子坐明堂。策勳十二轉，賞賜百千彊。可汗問所欲，「木蘭不用尚書郎，願借明駝千里足，送兒還故鄉。」',
+                        '爺娘聞女來，出郭相扶將。阿姊聞妹來，當戶理紅妝。小弟聞姊來，磨刀霍霍向豬羊。開我東閣門，坐我西閣牀；脫我戰時袍，着我舊時裳；當窗理雲鬢，對鏡帖花黃。出門看火伴，火伴皆驚惶：「同行十二年，不知木蘭是女郎。」',
+                        '雄兔腳撲朔，雌兔眼迷離；兩兔傍地走，安能辨我是雄雌？'
+                    ]
+                },
 
+                '燕詩': {
+                    title: '《燕詩》',
+                    author: '白居易',
+                    category: '中一',
+                    paragraphs: [
+                        '梁上有雙燕，翩翩雄與雌。銜泥兩椽間，一巢生四兒。四兒日夜長，索食聲孜孜。青蟲不易捕，黃口無飽期。嘴爪雖欲敝，心力不知疲。須臾十來往，猶恐巢中飢。辛勤三十日，母瘦雛漸肥。喃喃教言語，一一刷毛衣。一旦羽翼長，引上庭樹枝；舉翅不回顧，隨風四散飛。雌雄空中鳴，聲盡呼不歸；卻入空巢裏，啁啾終夜悲。燕燕爾勿悲！爾當反自思：思爾為雛日，高飛背母時。當時父母念，今日爾應知！'
+                    ]
+                },
+
+                '岳飛之少年時代': {
+                    title: '《岳飛之少年時代》',
+                    author: '佚名',
+                    category: '中一',
+                    paragraphs: [
+                        '岳飛，字鵬舉，相州湯陰人也。生時，有大禽若鵠，飛鳴室上，因以為名。未彌月，河決內黃，水暴至，母姚氏抱飛坐巨甕中，衝濤乘流而下，及岸，得不死。',
+                        '飛少負氣節，沉厚寡言。天資敏悟，強記書傳，尤好《左氏春秋》及孫吳兵法。家貧，拾薪為燭，誦習達旦不寐。生有神力，未冠，能挽弓三百斤。學射於周同。同射三矢，皆中的，以示飛；飛引弓一發，破其筈；再發，又中。同大驚，以所愛良弓贈之。飛由是益自練習，盡得同術。',
+                        '未幾，同死，飛悲慟不已。每值朔望，必具酒肉，詣同墓，奠而泣；又引同所贈弓，發三矢，乃酹。父知而義之，撫其背曰︰「使汝異日得為時用，其殉國死義乎？」應曰︰「惟大人許兒以身報國家，何事不可為！」'
+                    ]
+                },
+
+                '送杜少府之任蜀州': {
+                    title: '《送杜少府之任蜀州》',
+                    author: '王勃',
+                    category: '中一',
+                    paragraphs: [
+                        '城闕輔三秦，風煙望五津。與君離別意，同是宦遊人。海內存知己，天涯若比鄰。無為在歧路，兒女共霑巾。'
+                    ]
+                },
+             
+                '賣油翁': {
+                    title: '《賣油翁》',
+                    author: '歐陽修',
+                    category: '中一',
+                    paragraphs: [
+                        '陳康肅公堯咨善射，當世無雙，公亦以此自矜。嘗射於家圃，有賣油翁釋擔而立，睨之，久而不去。見其發矢十中八九，但微頷之。',
+                        '康肅問曰：「汝亦知射乎？吾射不亦精乎？」翁曰：「無他，但手熟爾。」康肅忿然曰：「爾安敢輕吾射！」翁曰：「以我酌油知之。」乃取一葫蘆置於地，以錢覆其口，徐以杓酌油瀝之，自錢孔入，而錢不濕。因曰：「我亦無他，惟手熟爾。」康肅笑而遣之。'
+                    ]
+                },
+
+                '蘇軾水調歌頭並序': {
+                    title: '《水調歌頭並序》',
+                    author: '蘇軾',
+                    category: '中二',
+                    paragraphs: [
+                        '丙辰中秋，歡飲達旦，大醉，作此篇，兼懷子由。',
+                        '明月幾時有？把酒問青天。不知天上宮闕，今夕是何年？我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。起舞弄清影，何似在人間？',                     
+                        '轉朱閣，低綺戶，照無眠。不應有恨，何事長向別時圓？人有悲歡離合，月有陰晴圓缺，此事古難全。但願人長久，千里共嬋娟。'
+                    ]
+                },
+
+                '李煜虞美人': {
+                    title: '《虞美人》（春花秋月）',
+                    author: '李煜',
+                    category: '中二',
+                    paragraphs: [
+                        '春花秋月何時了，往事知多少？小樓昨夜又東風，故國不堪回首月明中。',
+                        '雕闌玉砌應猶在，只是朱顏改。問君能有幾多愁，恰似一江春水向東流。'
+                    ]
+                },             
+
+                '愛蓮說': {
+                    title: '《愛蓮說》',
+                    author: '周敦頤',
+                    category: '中二',
+                    paragraphs: [
+                        '水陸草木之花，可愛者甚蕃，晉陶淵明獨愛菊。自李唐來，世人甚愛牡丹。予獨愛蓮之出淤泥而不染，濯清漣而不妖；中通外直，不蔓不枝；香遠益清，亭亭淨植，可遠觀而不可褻玩焉。',
+                        '予謂︰菊，花之隱逸者也；牡丹，花之富貴者也；蓮，花之君子者也。噫！菊之愛，陶後鮮有聞；蓮之愛，同予者何人？牡丹之愛，宜乎眾矣！'
+                    ]
+                },        
+
+                '為學一首示子姪': {
+                    title: '《為學一首示子姪》',
+                    author: '彭端淑',
+                    category: '中二',
+                    paragraphs: [
+                        '天下事有難易乎？為之，則難者亦易矣；不為，則易者亦難矣。人之為學有難易乎？學之，則難者亦易矣；不學，則易者亦難矣。吾資之昏不逮人也，吾材之庸不逮人也，旦旦而學之，久而不怠焉，迄乎成，而亦不知其昏與庸也。吾資之聰倍人也，吾材之敏倍人也；摒棄而不用，其與昏與庸無以異也。聖人之道，卒於魯也傳之。然則昏庸聰敏之用，豈有常哉？',
+                        '蜀之鄙有二僧：其一貧，其一富。貧者語於富者曰：「吾欲之南海，何如？」富者曰：「子何恃而往？」曰：「吾一瓶一鉢足矣。」富者曰：「吾數年來欲買舟而下，猶未能也。子何恃而往？」越明年，貧者自南海還，以告富者，富者有慚色。西蜀之去南海，不知幾千里也，僧之富者不能至，而貧者至之。人之立志，顧不如蜀鄙之僧哉？',
+                        '是故聰與敏，可恃而不可恃也，自恃其聰與敏而不學者，自敗者也。昏與庸，可限而不可限也；不自限其昏與庸而力學不倦者，自力者也。'
+                    ]
+                },     
+             
+                '傷仲永': {
+                    title: '《傷仲永》',
+                    author: '王安石',
+                    category: '中二',
+                    paragraphs: [
+                        '金溪民方仲永，世隸耕。仲永生五年，未嘗識書具，忽啼求之。父異焉，借旁近與之，即書詩四句，並自為其名。其詩以養父母、收族為意，傳一鄉秀才觀之。自是指物作詩立就，其文理皆有可觀者。邑人奇之，稍稍賓客其父，或以錢幣乞之。父利其然也，日扳仲永環謁於邑人，不使學。',
+                        '予聞之也久，明道中，從先人還家，於舅家見之，十二三矣。令作詩，不能稱前時之聞。又七年，還自揚州，復到舅家，問焉。曰：「泯然眾人矣。」',
+                        '王子曰：仲永之通悟，受之天也。其受之天也，賢於材人遠矣，卒之為眾人，則其受於人者不至也。彼其受之天也，如此其賢也，不受之人，且為眾人。今夫不受之天，固眾人，又不受之人，得為眾人而已邪？'
+                    ]
+                },        
+             
+                '人間詞話': {
+                    title: '《人間詞話》（節錄）',
+                    author: '王國維',
+                    category: '中三',
+                    paragraphs: [
+                        '古今之成大事業、大學問者，必經過三種境界：「昨夜西風凋碧樹。獨上高樓，望盡天涯路。」此第一境界也。「衣帶漸寬終不悔，為伊消得人憔悴。」此第二境界也。「眾裏尋他千百度，驀然回首，那人卻在，燈火闌珊處。」此第三境界也。此等語皆非大詞人不能道。然遽以此意解釋諸詞，恐為晏、歐諸公所不許也。'
+                    ]
+                },
+
+                '論四端': {
+                    title: '《論四端》',
+                    author: '孟子',
+                    category: '中三',
+                    paragraphs: [
+                        '孟子曰：「人皆有不忍人之心。先王有不忍人之心，斯有不忍人之政矣。以不忍人之心，行不忍人之政，治天下可運之掌上。」',
+                        '所以謂人皆有不忍人之心者，今人乍見孺子將入於井，皆有怵惕惻隱之心----非所以內交於孺子之父母也，非所以要譽於鄉黨朋友也，非惡其聲而然也。由是觀之，無惻隱之心，非人也；無羞惡之心，非人也；無辭讓之心，非人也；無是非之心，非人也。惻隱之心，仁之端也；羞惡之心，義之端也；辭讓之心，禮之端也；是非之心，智之端也。',
+                        '人之有是四端也，猶其有四體也。有是四端而自謂不能者，自賊者也；謂其君不能者，賊其君者也。凡有四端於我者，知皆擴而充之矣，若火之始然，泉之始達。苟能充之，足以保四海；苟不充之，不足以事父母。」'
+                    ]
+                },
+
+                '鄒忌諷齊王納諫': {
+                    title: '《鄒忌諷齊王納諫》',
+                    author: '戰國策',
+                    category: '中三', 
+                    paragraphs: [
+                        '鄒忌脩八尺有餘，而形貌昳麗。朝服衣冠，窺鏡，謂其妻曰：「我孰與城北徐公美？」其妻曰：「君美甚，徐公何能及君也！」城北徐公，齊國之美麗者也。忌不自信，而復問其妾曰：「吾孰與徐公美？」妾曰：「徐公何能及君也！」旦日，客從外來，與坐談，問之客曰：「吾與徐公孰美？」客曰：「徐公不若君之美也。」明日，徐公來，孰視之，自以為不如；窺鏡而自視，又弗如遠甚。暮寢而思之，曰：「吾妻之美我者，私我也；妾之美我者，畏我也；客之美我者，欲有求於我也。」',
+                        '於是入朝見威王，曰：「臣誠知不如徐公美。臣之妻私臣，臣之妾畏臣，臣之客欲有求於臣，皆以美於徐公。今齊地方千里，百二十城，宮婦左右，莫不私王；朝廷之臣，莫不畏王，四境之內，莫不有求於王。由此觀之，王之蔽甚矣。」王曰：「善。」乃下令：「羣臣吏民能面刺寡人之過者，受上賞；上書諫寡人者，受中賞；能謗議於市朝，聞寡人之耳者，受下賞。」',
+                        '令初下，羣臣進諫，門庭若市；數月之後，時時而間進；期年之後，雖欲言，無可進者。燕、趙、韓、魏聞之，皆朝於齊。此所謂戰勝於朝廷。'
+                    ]
+                },
+
+                 '李商隱無題相見時難': {
+                    title: '《無題》（相見時難）',
+                    author: '李商隱',
+                    category: '中三', 
+                    paragraphs: [
+                        '相見時難別亦難，東風無力百花殘。春蠶到死絲方盡，蠟炬成灰淚始乾。曉鏡但愁雲鬢改，夜吟應覺月光寒。蓬山此去無多路，青鳥殷勤為探看。'
+                    ]
+                },
+             
+                 '蘇軾江城子': {
+                    title: '《江城子》',
+                    author: '蘇軾',
+                    category: '中三', 
+                    paragraphs: [
+                        '十年生死兩茫茫。不思量，自難忘。千里孤墳，無處話淒涼。縱使相逢應不識，塵滿面，鬢如霜。',
+                        '夜來幽夢忽還鄉。小軒窗，正梳妝。相顧無言，惟有淚千行。料得年年腸斷處︰明月夜，短松岡。'
+                    ]
+                },
+             
+                 '李清照醉花陰': {
+                    title: '《醉花陰》',
+                    author: '李清照',
+                    category: '中三', 
+                    paragraphs: [
+                        '薄霧濃雲愁永晝，瑞腦銷金獸。佳節又重陽，玉枕紗廚，半夜涼初透。',
+                        '東籬把酒黃昏後，有暗香盈袖。莫道不銷魂，簾卷西風，人比黃花瘦。'
+                    ]
+                },
+             
+                '論仁論孝論君子': {
+                    title: '《論仁論孝論君子》',
+                    author: '論語',
+                    category: '指定文言',
+                    paragraphs: [
+                        '子曰：「不仁者，不可以久處約，不可以長處樂。仁者安仁，知者利仁。」',
+                        '子曰：「富與貴，是人之所欲也；不以其道得之，不處也。貧與賤，是人之所惡也；不以其道得之，不去也。君子去仁，惡乎成名？君子無終食之間違仁，造次必於是，顛沛必於是。」',
+                        '顏淵問仁。子曰：「克己復禮為仁。一日克己復禮，天下歸仁焉。為仁由己，而由人乎哉？」顏淵曰：「請問其目。」子曰：「非禮勿視，非禮勿聽，非禮勿言，非禮勿動。」顏淵曰：「回雖不敏，請事斯語矣。」',
+                        '子曰：「志士仁人，無求生以害仁，有殺身以成仁。」',
+                        '孟懿子問孝。子曰：「無違。」樊遲御，子告之曰：「孟孫問孝於我，我對曰，無違。」樊遲曰：「何謂也？」子曰：「生，事之以禮；死，葬之以禮，祭之以禮。',
+                        '子游問孝。子曰：「今之孝者，是謂能養。至於犬馬，皆能有養；不敬，何以別乎！」',
+                        '子曰：「事父母幾諫，見志不從，又敬不違，勞而不怨。」',
+                        '子曰：「父母之年，不可不知也。一則以喜，一則以懼。」',
+                        '子曰：「君子不重則不威；學則不固。主忠信。無友不如己者。過則勿憚改。」',
+                        '子曰：「君子坦蕩蕩，小人長戚戚。」',
+                        '司馬牛問君子。子曰：「君子不憂不懼。」曰：「不憂不懼，斯謂之君子已乎？」子曰：「內省不疚，夫何憂何懼？」',
+                        '子曰：「君子成人之美，不成人之惡。小人反是。」',
+                        '子曰：「君子恥其言而過其行。」',
+                        '子曰：「君子義以為質，禮以行之，孫以出之，信以成之。君子哉！」',
+                        '子曰：「君子病無能焉，不病人之不己知也。」',
+                        '子曰：「君子求諸己，小人求諸人。」'
+                    ]
+                },
+
+                '魚我所欲也': {
+                    title: '《魚我所欲也》',
+                    author: '孟子',
+                    category: '指定文言',
+                    paragraphs: [
+                        '孟子曰：「魚，我所欲也，熊掌，亦我所欲也；二者不可得兼，舍魚而取熊掌者也。生，亦我所欲也，義，亦我所欲也；二者不可得兼，舍生而取義者也。生亦我所欲，所欲有甚於生者，故不為苟得也；死亦我所惡，所惡有甚於死者，故患有所不辟也。如使人之所欲莫甚於生，則凡可以得生者，何不用也？使人之所惡莫甚於死者，則凡可以辟患者，何不為也？由是則生，而有不用也；由是則可以辟患，而有不為也。是故所欲有甚於生者，所惡有甚於死者。非獨賢者有是心也，人皆有之，賢者能勿喪耳。',
+                        '一簞食，一豆羹，得之則生，弗得則死。嘑爾而與之，行道之人弗受；蹴爾而與之，乞人不屑也。萬鍾，則不辯禮義而受之。萬鍾於我何加焉？為宮室之美、妻妾之奉、所識窮乏者得我與？鄉為身死而不受，今為宮室之美為之；鄉為身死而不受，今為妻妾之奉為之；鄉為身死而不受，今為所識窮乏者得我而為之，是亦不可以已乎？此之謂失其本心。」'
+                    ]
+                },
+
+                '勸學': {
+                    title: '《勸學》（節錄）',
+                    author: '荀子',
+                    category: '指定文言',
+                    paragraphs: [
+                        '君子曰：學不可以已。青，取之於藍，而青於藍；冰，水為之，而寒於水。木直中繩，輮以為輪，其曲中規；雖有槁暴、不復挺者，輮使之然也。故木受繩則直，金就礪則利，君子博學而日參省乎己，則知明而行無過矣。',
+                        '吾嘗終日而思矣，不如須臾之所學也；吾嘗跂而望矣，不如登高之博見也。登高而招，臂非加長也，而見者遠。順風而呼，聲非加疾也，而聞者彰。假輿馬者，非利足也，而致千里；假舟楫者，非能水也，而絕江河。君子生非異也，善假於物也。',
+                        '積土成山，風雨興焉；積水成淵，蛟龍生焉；積善成德，而神明自得，聖心備焉。故不積跬步，無以至千里；不積小流，無以成江海。騏驥一躍，不能十步；駑馬十駕，功在不舍。鍥而舍之，朽木不折；鍥而不舍，金石可鏤。螾無爪牙之利，筋骨之強，上食埃土，下飲黃泉，用心一也。蟹六跪而二螯，非蛇蟺之穴無可寄託者，用心躁也。'
+                    ]
+                },
+                
+                '師說': {
+                    title: '《師說》（節錄）',
+                    author: '韓愈',
+                    category: '指定文言',
+                    paragraphs: [
+                        '古之學者必有師。師者，所以傳道、受業、解惑也。人非生而知之者，孰能無惑？惑而不從師，其為惑也終不解矣。生乎吾前，其聞道也，固先乎吾，吾從而師之；生乎吾後，其聞道也，亦先乎吾，吾從而師之。吾師道也，夫庸知其年之先後生於吾乎？是故無貴無賤，無長無少，道之所存，師之所存也。',
+                        '嗟乎！師道之不傳也久矣！欲人之無惑也難矣！古之聖人，其出人也遠矣，猶且從師而問焉；今之眾人，其下聖人也亦遠矣，而恥學於師。是故聖益聖，愚益愚，聖人之所以為聖，愚人之所以為愚，其皆出於此乎！',
+                        '愛其子，擇師而教之；於其身也，則恥師焉，惑矣！彼童子之師，授之書而習其句讀者，非吾所謂傳其道、解其惑者也。句讀之不知，惑之不解，或師焉，或不焉，小學而大遺，吾未見其明也。',
+                        '巫、醫、樂師、百工之人，不恥相師；士大夫之族，曰師、曰弟子云者，則羣聚而笑之。問之，則曰：「彼與彼年相若也，道相似也。」位卑則足羞，官盛則近諛。嗚呼！師道之不復，可知矣。巫、醫、樂師、百工之人，君子不齒，今其智乃反不能及，其可怪也歟！',
+                        '聖人無常師，孔子師郯子、萇弘、師襄、老聃。郯子之徒，其賢不及孔子。孔子曰：「三人行，則必有我師。」是故弟子不必不如師，師不必賢於弟子；聞道有先後，術業有專攻，如是而已。',
+                        '李氏子蟠，年十七，好古文，六藝經傳，皆通習之，不拘於時，學於余。余嘉其能行古道，作《師說》以貽之。'
+                    ]
+                },
+
+                '岳陽樓記': {
+                    title: '《岳陽樓記》',
+                    author: '范仲淹',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '慶曆四年春，滕子京謫守巴陵郡。越明年，政通人和，百廢具興，乃重修岳陽樓，增其舊制，刻唐賢今人詩賦於其上；屬予作文以記之。',
+                        '予觀夫巴陵勝狀，在洞庭一湖。銜遠山，吞長江，浩浩湯湯，橫無際涯；朝暉夕陰，氣象萬千；此則岳陽樓之大觀也，前人之述備矣。然則北通巫峽，南極瀟湘，遷客騷人，多會於此，覽物之情，得無異乎？',
+                        '若夫霪雨霏霏，連月不開；陰風怒號，濁浪排空；日星隱曜，山嶽潛形；商旅不行，檣傾楫摧；薄暮冥冥，虎嘯猿啼。登斯樓也，則有去國懷鄉，憂讒畏譏，滿目蕭然，感極而悲者矣。',
+                        '至若春和景明，波瀾不驚，上下天光，一碧萬頃；沙鷗翔集，錦鱗游泳，岸芷汀蘭，郁郁青青。而或長煙一空，皓月千里，浮光躍金，靜影沉璧，漁歌互答，此樂何極。登斯樓也，則有心曠神怡，寵辱皆忘，把酒臨風，其喜洋洋者矣。',
+                        '嗟夫！予嘗求古仁人之心，或異二者之為，何哉？不以物喜，不以己悲。居廟堂之高，則憂其民；處江湖之遠，則憂其君。是進亦憂，退亦憂；然則何時而樂耶？其必曰：「先天下之憂而憂，後天下之樂而樂」歟！噫！微斯人，吾誰與歸？'
+                    ]
+                },
+
+                '六國論': {
+                    title: '《六國論》',
+                    author: '蘇洵',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '六國破滅，非兵不利，戰不善，弊在賂秦。賂秦而力虧，破滅之道也。或曰：「六國互喪，率賂秦耶？」曰：「不賂者以賂者喪。蓋失強援，不能獨完，故曰『弊在賂秦』也。」',
+                        '秦以攻取之外，小則獲邑，大則得城，較秦之所得與戰勝而得者，其實百倍；諸侯之所亡與戰敗而亡者，其實亦百倍。則秦之所大欲，諸侯之所大患，固不在戰矣。思厥先祖父，暴霜露，斬荊棘，以有尺寸之地。子孫視之不甚惜，舉以予人，如棄草芥。今日割五城，明日割十城，然後得一夕安寢，起視四境，而秦兵又至矣。然則諸侯之地有限，暴秦之欲無厭，奉之彌繁，侵之愈急，故不戰而強弱勝負已判矣。至於顛覆，理固宜然。古人云：「以地事秦，猶抱薪救火，薪不盡，火不滅。」此言得之。',
+                        '齊人未嘗賂秦，終繼五國遷滅，何哉？與嬴而不助五國也。五國既喪，齊亦不免矣。燕趙之君，始有遠略，能守其土，義不賂秦。是故燕雖小國而後亡，斯用兵之效也。至丹以荊卿為計，始速禍焉。趙嘗五戰于秦，二敗而三勝，後秦擊趙者再，李牧連卻之；洎牧以讒誅，邯鄲為郡，惜其用武而不終也。且燕趙處秦革滅殆盡之際，可謂智力孤危，戰敗而亡，誠不得已。向使三國各愛其地，齊人勿附於秦，刺客不行，良將猶在，則勝負之數，存亡之理，當與秦相較，或未易量。',
+                        '嗚呼！以賂秦之地，封天下之謀臣；以事秦之心，禮天下之奇才；幷力西嚮，則吾恐秦人食之不得下嚥也。悲夫！有如此之勢，而為秦人積威之所劫，日削月割，以趨於亡。為國者無使為積威之所劫哉！',
+                        '夫六國與秦皆諸侯，其勢弱於秦，而猶有可以不賂而勝之之勢；茍以天下之大，而從六國破亡之故事，是又在六國下矣！'
+                    ]
+                },
+
+                '出師表': {
+                    title: '《出師表》',
+                    author: '諸葛亮',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '先帝創業未半，而中道崩殂；今天下三分，益州疲弊，此誠危急存亡之秋也！然侍衞之臣，不懈於內；忠志之士忘身於外者，蓋追先帝之殊遇，欲報之於陛下也。',
+                        '誠宜開張聖聽，以光先帝遺德，恢弘志士之氣；不宜妄自菲薄，引喻失義，以塞忠諫之路也。',
+                        '宮中、府中，俱為一體；陟罰臧否，不宜異同。若有作姦、犯科，及為忠善者，宜付有司，論其刑賞，以昭陛下平明之治；不宜偏私，使內外異法也。',
+                        '侍中、侍郎郭攸之、費禕、董允等，此皆良實，志慮忠純，是以先帝簡拔以遺陛下。愚以為宮中之事，事無大小，悉以咨之，然後施行，必能裨補闕漏，有所廣益。將軍向寵，性行淑均，曉暢軍事，試用於昔日，先帝稱之曰「能」，是以眾議舉寵為督。愚以為營中之事，悉以咨之，必能使行陣和睦，優劣得所。',
+                        '親賢臣，遠小人，此先漢所以興隆也；親小人，遠賢臣，此後漢所以傾頹也。先帝在時，每與臣論此事，未嘗不歎息痛恨於桓、靈也！侍中、尚書、長史、參軍，此悉貞良死節之臣，願陛下親之、信之，則漢室之隆，可計日而待也。',
+                        '侍中、侍郎郭攸之、費禕、董允等，此皆良實，志慮忠純，是以先帝簡拔以遺陛下。愚以為宮中之事，事無大小，悉以咨之，然後施行，必能裨補闕漏，有所廣益。將軍向寵，性行淑均，曉暢軍事，試用於昔日，先帝稱之曰「能」，是以眾議舉寵為督。愚以為營中之事，悉以咨之，必能使行陣和睦，優劣得所。',
+                        '臣本布衣，躬耕於南陽，苟全性命於亂世，不求聞達於諸侯。先帝不以臣卑鄙，猥自枉屈，三顧臣於草廬之中，諮臣以當世之事；由是感激，遂許先帝以驅馳。後值傾覆，受任於敗軍之際，奉命於危難之間，爾來二十有一年矣。先帝知臣謹慎，故臨崩寄臣以大事也。受命以來，夙夜憂歎，恐託付不效，以傷先帝之明。故五月渡瀘，深入不毛。今南方已定，兵甲已足，當獎率三軍，北定中原。庶竭駑鈍，攘除奸凶，興復漢室，還於舊都。此臣之所以報先帝，而忠陛下之職分也。至於斟酌損益，進盡忠言，則攸之、禕、允之任也。',
+                        '願陛下託臣以討賊興復之效；不效，則治臣之罪，以告先帝之靈。若無興德之言，則責攸之、禕、允等之慢，以彰其咎。陛下亦宜自謀，以咨諏善道，察納雅言，深追先帝遺詔。臣不勝受恩感激。今當遠離，臨表涕零，不知所言！'
+                    ]
+                },
+
+                '登樓': {
+                    title: '《登樓》',
+                    author: '杜甫',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '花近高樓傷客心，萬方多難此登臨。錦江春色來天地，玉壘浮雲變古今。北極朝廷終不改，西山寇盜莫相侵。可憐後主還祠廟，日暮聊為梁甫吟。'
+                    ]
+                },
+
+                '山居秋暝': {
+                    title: '《山居秋暝》',
+                    author: '王維',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '空山新雨後，天氣晚來秋。明月松間照，清泉石上流。竹喧歸浣女，蓮動下漁舟。隨意春芳歇，王孫自可留。'
+                    ]
+                },
+
+                '月下獨酌': {
+                    title: '《月下獨酌》',
+                    author: '李白',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '花間一壺酒，獨酌無相親。舉杯邀明月，對影成三人。月既不解飲，影徒隨我身。暫伴月將影，行樂須及春。我歌月徘徊，我舞影零亂。醒時同交歡，醉後各分散。永結無情遊，相期邈雲漢。'
+                    ]
+                },
+
+                '青玉案': {
+                    title: '《青玉案．元夕》',
+                    author: '辛棄疾',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '東風夜放花千樹，更吹落、星如雨。寶馬雕車香滿路，鳳簫聲動，玉壺光轉，一夜魚龍舞。蛾兒雪柳黃金縷，笑語盈盈暗香去。',
+                        '眾裏尋他千百度；驀然回首，那人卻在，燈火闌珊處。'
+                    ]
+                },
+
+                '念奴嬌': {
+                    title: '《念奴嬌．赤壁懷古》',
+                    author: '李清照',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '赤壁懷古大江東去，浪淘盡、千古風流人物。故壘西邊，人道是：三國周郎赤壁。亂石穿空，驚濤拍岸，捲起千堆雪。江山如畫，一時多少豪傑。',
+                        '遙想公瑾當年，小喬初嫁了，雄姿英發，羽扇綸巾，談笑間、檣櫓灰飛煙滅。故國神遊，多情應笑我，早生華髮。人生如夢，一尊還酹江月。'
+                    ]
+                },
+
+
+                '聲聲慢': {
+                    title: '《聲聲慢．秋情》',
+                    author: '李清照',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '尋尋覓覓，冷冷清清，悽悽慘慘戚戚。乍煖還寒時候，最難將息。三杯兩盞淡酒，怎敵它、晚來風急？雁過也，正傷心，卻是舊時相識。',
+                        '滿地黃花堆積。憔悴損，如今有誰堪摘？守著窗兒，獨自怎生得黑？梧桐更兼細雨，到黃昏、點點滴滴。這次第，怎一個愁字了得！'
+                    ]
+                },
+
+                '始得西山宴遊記': {
+                    title: '《始得西山宴遊記》',
+                    author: '柳宗元',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '自余為僇人，居是州，恒惴慄。其隙也，則施施而行，漫漫而遊。日與其徒上高山，入深林，窮迴溪，幽泉怪石，無遠不到。到則披草而坐，傾壺而醉。醉則更相枕以臥，臥而夢。意有所極，夢亦同趣。覺而起，起而歸。以為凡是州之山有異態者，皆我有也，而未始知西山之怪特。',
+                        '今年九月二十八日，因坐法華西亭，望西山，始指異之。遂命僕過湘江，緣染溪，斫榛莽。焚茅茷，窮山之高而止。攀援而登，箕踞而遨，則凡數州之土壤，皆在衽席之下。其高下之勢，岈然窪然，若垤若穴，尺寸千里，攢蹙累積，莫得遯隱。縈青繚白，外與天際，四望如一。然後知是山之特出，不與培塿為類，悠悠乎與顥氣俱，而莫得其涯；洋洋乎與造物者遊，而不知其所窮。引觴滿酌，頹然就醉，不知日之入。蒼然暮色，自遠而至，至無所見，而猶不欲歸。心凝形釋，與萬化冥合。然後知吾嚮之未始遊，遊於是乎始，故為之文以志。是歲元和四年也。'
+                    ]
+                },
+
+                '逍遙遊': {
+                    title: '《逍遙遊》',
+                    author: '莊子',
+                    category: '指定文言', 
+                    paragraphs: [
+                        '惠子謂莊子曰：「魏王貽我大瓠之種，我樹之成而實五石。以盛水漿，其堅不能自舉也。剖之以爲瓢，則瓠落無所容。非不呺然大也，吾爲其無用而掊之。」莊子曰：「夫子固拙於用大矣。宋人有善爲不龜手之藥者，世世以洴澼絖爲事。客聞之，請買其方百金。聚族而謀曰：『我世世爲洴澼絖，不過數金；今一朝而鬻技百金，請與之。』客得之，以說吳王。越有難，吳王使之將，冬與越人水戰，大敗越人，裂地而封之。能不龜手，一也；或以封，或不免於洴澼絖，則所用之異也。今子有五石之瓠，何不慮以爲大樽而浮乎江湖，而憂其瓠落無所容？則夫子猶有蓬之心也夫！」',
+                        '惠子謂莊子曰：「吾有大樹，人謂之樗。其大本擁腫而不中繩墨，其小枝捲曲而不中規矩，立之塗，匠者不顧。今子之言，大而無用，衆所同去也。」莊子曰：「子獨不見狸狌乎？卑身而伏，以候敖者；東西跳梁，不避高下；中於機辟，死於罔罟。今夫斄牛，其大若垂天之雲。此能爲大矣，而不能執鼠。今子有大樹，患其無用，何不樹之於無何有之鄉，廣莫之野，彷徨乎無爲其側，逍遙乎寢臥其下？不夭斤斧，物無害者，無所可用，安所困苦哉！」'
+                    ]
+                },
+
+                '秦風蒹葭': {
+                    title: '《秦風．蒹葭》',
+                    author: '詩經',
+                    category: '文學', 
+                    paragraphs: [
+                        '蒹葭蒼蒼，白露為霜。所謂伊人，在水一方。溯洄從之，道阻且長，溯游從之，宛在水中央。',
+                        '蒹葭萋萋，白露未晞。所謂伊人，在水之湄。溯洄從之，道阻且躋。溯游從之，宛在水中坻。',
+                        '蒹葭采采，白露未已。所謂伊人，在水之涘。溯洄從之，道阻且右。溯游從之，宛在水中沚。'
+                    ]
+                },
+             
+                '九章涉江': {
+                    title: '《九章．涉江》',
+                    author: '屈原',
+                    category: '文學', 
+                    paragraphs: [
+                        '余幼好此奇服兮，年既老而不衰。帶長鋏之陸離兮，冠切雲之崔嵬。被明月兮珮寶璐。世溷濁而莫余知兮，吾方高馳而不顧。駕青虯兮驂白螭，吾與重華遊兮瑤之圃。登崑崙兮食玉英，與天地兮同壽，與日月兮同光。哀南夷之莫吾知兮，旦余濟乎江湘。',
+                        '乘鄂渚而反顧兮，欸秋冬之緒風。步余馬兮山皋，邸余車兮方林。乘舲船余上沅兮，齊吳榜以擊汰。船容與而不進兮，淹回水而疑滯。朝發枉陼兮，夕宿辰陽。苟余心其端直兮，雖僻遠之何傷。',
+                        '入漵浦余儃佪兮，迷不知吾所如。深林杳以冥冥兮，猿狖之所居。山峻高以蔽日兮，下幽晦以多雨。霰雪紛其無垠兮，雲霏霏而承宇。哀吾生之無樂兮，幽獨處乎山中。吾不能變心而從俗兮，固將愁苦而終窮。',
+                        '接輿髡首兮，桑扈臝行。忠不必用兮，賢不必以。伍子逢殃兮，比干菹醢。與前世而皆然兮，吾又何怨乎今之人！余將董道而不豫兮，固將重昏而終身！',
+                        '亂曰：鸞鳥鳳皇，日以遠兮。燕雀烏鵲，巢堂壇兮。露申辛夷，死林薄兮。腥臊並御，芳不得薄兮。陰陽易位，時不當兮。懷信侘傺，忽乎吾將行兮！'
+                    ]
+                },
+
+                '庖丁解牛': {
+                    title: '《庖丁解牛》',
+                    author: '莊子',
+                    category: '文學', 
+                    paragraphs: [
+                        '吾生也有涯，而知也無涯，以有涯隨無涯，殆已！已而為知者，殆而已矣！為善無近名，為惡無近刑，緣督以為經，可以保身，可以全生，可以養親，可以盡年。',
+                        '庖丁為文惠君解牛，手之所解，肩之所倚，足之所履，膝之所踦，砉然嚮然，奏刀騞然，莫不中音，合於桑林之舞，乃中經首之會。文惠君曰：「譆！善哉！技蓋至此乎？」庖丁釋刀對曰：「臣之所好者，道也，進乎技矣。始臣之解牛之時，所見無非牛者，三年之後，未嘗見全牛也。方今之時，臣以神遇，而不以目視，官知止而神欲行，依乎天理，批大郤，導大窾，因其固然，技經肯綮之未嘗，而況大軱乎？良庖歲更刀，割也，族庖月更刀，折也。今臣之刀十九年矣，所解數千牛矣，而刀刃若新發於硎。彼節者有間，而刀刃者無厚，以無厚入有間，恢恢乎其於遊刃，必有餘地矣！是以十九年，而刀刃若新發於硎？雖然，每至於族吾見其難為，怵然為戒，視為止，行為遲，動刀甚微，謋然已解，如土委地。提刀而立，為之四顧，為之躊躇滿志，善刀而藏之。」文惠君曰：「善哉！吾聞庖丁之言，得養生焉。」'
+                    ]
+                },
+
+                '蘇秦約縱': {
+                    title: '《蘇秦約縱》',
+                    author: '戰國策',
+                    category: '文學', 
+                    paragraphs: [
+                        '說秦王書十上而說不行，黑貂之裘弊，黃金百斤盡，資用乏絕，去秦而歸，羸縢履蹻，負書擔橐，形容枯槁，面目犂黑，狀有歸色。歸至家，妻不下絍，嫂不為炊，父母不與言。蘇秦喟歎曰：「妻不以我為夫，嫂不以我為叔，父母不以我為子，是皆秦之罪也。」乃夜發書，陳篋數十，得太公《陰符》之謀，伏而誦之，簡練以為揣摩。讀書欲睡，引錐自刺其股，血流至足，曰︰「安有說人主，不能出其金玉錦繡，取卿相之尊者乎？」朞年，揣摩成，曰︰「此真可以說當世之君矣。」於是乃摩燕烏集闕，見說趙王於華屋之下，抵掌而談，趙王大悅，封為武安君。受相印，革車百乘、錦繡千純、白璧百雙、黃金萬鎰以隨其後，約從散橫以抑強秦，故蘇秦相於趙而關不通。',
+                        '當此之時，天下之大，萬民之眾，王侯之威，謀臣之權，皆欲決蘇秦之策。不費斗糧，未煩一兵，未戰一士，未絕一絃，未折一矢，諸侯相親，賢於兄弟。夫賢人在而天下服，一人用而天下從，故曰︰式於政不式於勇；式於廊廟之內，不式於四境之外。當秦之隆，黃金萬鎰為用，轉轂連騎，炫熿於道，山東之國從風而服，使趙太重。且夫蘇秦，特窮巷掘門桑戶棬樞之士耳，伏軾撙銜，橫歷天下，廷說諸侯之主，杜左右之口，天下莫之能伉。',
+                        '將說楚王，路過洛陽，父母聞之，清宮除道，張樂設飲，郊迎三十里。妻側目而視，傾耳而聽。嫂虵行匍伏，四拜自跪而謝。蘇秦曰︰「嫂何前倨而後卑也？」嫂曰︰「以季子之位尊而多金。」蘇秦曰：「嗟乎，貧窮則父母不子，富貴則親戚畏懼。人生世上，勢位富貴，蓋可忽乎哉？」'
+                    ]
+                },
+
+                '鴻門會': {
+                    title: '《鴻門會》',
+                    author: '司馬遷',
+                    category: '文學', 
+                    paragraphs: [
+                        '沛公旦日從百餘騎來見項王，至鴻門，謝曰：「臣與將軍戮力而攻秦，將軍戰河北，臣戰河南，然不自意能先入關破秦，得復見將軍於此。今者有小人之言，令將軍與臣有郤。」項王曰：「此沛公左司馬曹無傷言之，不然，籍何以至此。」項王即日因留沛公與飲。項王、項伯東嚮坐；亞父南嚮坐──亞父者，范增也；沛公北嚮坐；張良西嚮侍。范增數目項王，舉所佩玉玦以示之者三。項王默然不應。范增起，出召項莊，謂曰：「君王為人不忍，若入前為壽，壽畢，請以劔舞，因擊沛公於坐，殺之。不者，若屬皆且為所虜。」莊則入為壽。壽畢，曰：「君王與沛公飲，軍中無以為樂，請以劔舞。」項王曰：「諾。」項莊拔劔起舞，項伯亦拔劔起舞，常以身翼蔽沛公，莊不得擊。',
+                        '於是張良至軍門，見樊噲。樊噲曰：「今日之事何如？」良曰：「甚急！今者項莊拔劔舞，其意常在沛公也。」噲曰：「此迫矣！臣請入，與之同命！」噲即帶劔擁盾入軍門。交戟之衛士欲止不內，樊噲側其盾以撞，衛士仆地。噲遂入。披帷西嚮立，瞋目視項王，頭髮上指，目眦盡裂。項王按劔而跽曰：「客何為者？」張良曰：「沛公之參乘樊噲者也。」項王曰：「壯士！賜之巵酒！」則與斗巵酒。噲拜謝，起，立而飲之。項王曰：「賜之彘肩！」則與一生彘肩。樊噲覆其盾於地，加彘肩上，拔劔切而啗之。項王曰：「壯士！能復飲乎？」樊噲曰：「臣死且不避，巵酒安足辭！夫秦王有虎狼之心，殺人如不能舉，刑人如恐不勝，天下皆叛之。懷王與諸將約曰：『先破秦入咸陽者王之。』今沛公先破秦入咸陽，毫毛不敢有所近，封閉宮室，還軍霸上，以待大王來。故遣將守關者，備他盜出入與非常也。勞苦而功高如此，未有封侯之賞，而聽細說，欲誅有功之人，此亡秦之續耳，竊為大王不取也。」項王未有以應，曰：「坐！」樊噲從良坐，坐須臾，沛公起如廁，因招樊噲出。',
+                        '沛公已出，項王使都尉陳平召沛公。沛公曰：「今者出，未辭也，為之奈何？」樊噲曰：「大行不顧細謹，大禮不辭小讓。如今人方為刀俎，我為魚肉，何辭為？」於是遂去。乃令張良留謝。良問曰：「大王來何操？」曰：「我持白璧一雙，欲獻項王；玉斗一雙，欲與亞父。會其怒，不敢獻。公為我獻之。」張良曰：「謹諾。」當是時，項王軍在鴻門下，沛公軍在霸上，相去四十里。沛公則置車騎，脫身獨騎，與樊噲、夏侯嬰、靳彊、紀信等四人持劔盾步走，從酈山下，道芷陽間行。沛公謂張良曰：「從此道至吾軍，不過二十里耳。度我至軍中，公乃入。」沛公已去，間至軍中，張良入，謝曰：「沛公不勝桮杓，不能辭。謹使臣良奉白璧一雙，再拜獻大王足下；玉斗一雙，再拜奉大將軍足下。」項王曰：「沛公安在？」良曰：「聞大王有意督過之，脫身獨去，已至軍矣。」項王則受璧，置之坐上。亞父受玉斗，置之地，拔劔撞而破之，曰：「唉！豎子不足與謀！奪項王天下者，必沛公也，吾屬今為之虜矣！」沛公至軍，立誅殺曹無傷。'
+                    ]
+                },
+
+                '戰城南': {
+                    title: '《戰城南》',
+                    author: '佚名',
+                    category: '文學', 
+                    paragraphs: [
+                        '戰城南，死郭北，野死不葬烏可食。為我謂烏：「且為客豪！野死諒不葬，腐肉安能去子逃！」水深激激，蒲葦冥冥；梟騎戰鬭死，駑馬徘徊鳴。梁築室，何以南，何以北？禾黍不穫君何食？願為忠臣安可得？思子良臣，良臣誠可思：朝行出攻，暮不夜歸！'
+                    ]
+                },
+
+                '短歌行': {
+                    title: '《短歌行》',
+                    author: '曹操',
+                    category: '文學', 
+                    paragraphs: [
+                        '對酒當歌，人生幾何？譬如朝露，去日苦多。慨當以慷，憂思難忘。何以解憂？唯有杜康。青青子衿，悠悠我心。但為君故，沉吟至今。呦呦鹿鳴，食野之苹。我有嘉賓，鼓瑟吹笙。明明如月，何時可輟？憂從中來，不可斷絕。越陌度阡，枉用相存。契闊談讌，心念舊恩。月明星稀，烏鵲南飛。繞樹三匝，何枝可依？山不厭高，水不厭深。周公吐哺，天下歸心。'
+                    ]
+                },
+
+                '歸去來辭並序': {
+                    title: '《歸去來辭（並序）》',
+                    author: '陶潛',
+                    category: '文學', 
+                    paragraphs: [
+                        '余家貧，耕植不足以自給。幼稚盈室，缾無儲粟，生生所資，未見其術。親故多勸余為長吏，脫然有懷，求之靡途。會有四方之事，諸侯以惠愛為德，家叔以余貧苦，遂見用于小邑。于時風波未靜，心憚遠役，彭澤去家百里，公田之利，足以為酒，故便求之。及少日，眷然有歸歟之情。何則？質性自然，非矯厲所得。飢凍雖切，違己交病。嘗從人事，皆口腹自役。於是悵然慷慨，深媿平生之志。猶望一稔，當斂裳宵逝。尋程氏妹喪于武昌，情在駿奔，自免去職。仲秋至冬，在官八十餘日。因事順心，命篇曰《歸去來兮》。乙巳歲十一月也。',
+                        '歸去來兮，田園將蕪胡不歸？既自以心為形役，奚惆悵而獨悲！悟已往之不諫，知來者之可追；實迷途其未遠，覺今是而昨非。舟遙遙以輕颺，風飄飄而吹衣。問征夫以前路。恨晨光之熹微。',
+                        '乃瞻衡宇，載欣載奔。僮僕歡迎，稚子候門。三逕就荒，松菊猶存。攜幼入室，有酒盈罇。引壺觴以自酌，眄庭柯以怡顏。倚南窗以寄傲，審容膝之易安。園日涉以成趣，門雖設而常關。策扶老以流憇，時矯首而遐觀。雲無心以出岫，鳥倦飛而知還。景翳翳以將入，撫孤松而盤桓。歸去來兮，請息交以絕游。世與我而相違，復駕言兮焉求？悅親戚之情話，樂琴書以消憂。農人告余以春及，將有事於西疇。或命巾車，或棹孤舟。既窈窕以尋壑，亦崎嶇而經丘。木欣欣以向榮，泉涓涓而始流。喜萬物之得時，感吾生之行休。',
+                        '已矣乎，寓形宇內復幾時，曷不委心任去留？胡為乎遑遑兮欲何之？富貴非吾願，帝鄉不可期。懷良辰以孤往，或植杖而耘耔。登東皐以舒嘯，臨清流而賦詩。聊乘化以歸盡，樂夫天命復奚疑。'
+                    ]
+                },
+
+                '將近酒': {
+                    title: '《將進酒》',
+                    author: '李白',
+                    category: '文學', 
+                    paragraphs: [
+                        '君不見黃河之水天上來，奔流到海不復回！君不見高堂明鏡悲白髮，朝如青絲暮成雪！人生得意須盡歡，莫使金樽空對月。天生我材必有用，千金散盡還復來。烹羊宰牛且為樂，會須一飲三百杯。岑夫子，丹丘生，將進酒，君莫停。與君歌一曲，請君為我傾耳聽：鐘鼓饌玉不足貴，但願長醉不用醒；古來聖賢皆寂寞，唯有飲者留其名。陳王昔時宴平樂，斗酒十千恣歡謔。主人何為言少錢，徑須沽取對君酌。五花馬，千金裘，呼兒將出換美酒，與爾同銷萬古愁。'
+                    ]
+                },
+
+                '登高': {
+                    title: '《登高》',
+                    author: '杜甫',
+                    category: '文學', 
+                    paragraphs: [
+                        '風急天高猿嘯哀，渚清沙白鳥飛迴，無邊落木蕭蕭下，不盡長江滾滾來。萬里悲秋常作客，百年多病獨登臺。艱難苦恨繁霜鬢，潦倒新停濁酒杯。'
+                    ]
+                },
+
+                '進學解': {
+                    title: '《進學解》',
+                    author: '韓愈',
+                    category: '文學', 
+                    paragraphs: [
+                        '國子先生晨入太學，招諸生立館下，誨之曰︰「業精于勤荒于嬉，行成于思毀于隨。方今聖賢相逢，治具畢張，拔去兇邪，登崇畯良。占小善者率以錄，名一藝者無不庸，爬羅剔抉，刮垢磨光。蓋有幸而獲選，孰云多而不揚！諸生業患不能精，無患有司之不明；行患不能成，無患有司之不公。」',
+                        '言未既，有笑于列者曰︰「先生欺余哉！弟子事先生，於茲有年矣。先生口不絕吟於六藝之文，手不停披於百家之編，記事者必提其要，纂言者必鉤其玄；貪多務得，細大不捐，焚膏油以繼晷，恒兀兀以窮年：先生之業，可謂勤矣。觝排異端，攘斥佛老，補苴罅漏，張皇幽眇，尋墜緒之茫茫，獨旁搜而遠紹，障百川而東之，迴狂瀾於既倒：先生之於儒，可謂有勞矣。沈浸醲郁，含英咀華，作為文章，其書滿家。上規姚姒，渾渾無涯，《周誥》《殷盤》，佶屈聱牙，《春秋》謹嚴，《左氏》浮誇，《易》奇而法，《詩》正而葩；下逮《莊》《騷》，太史所錄，子雲相如，同工異曲：先生之於文，可謂閎其中而肆其外矣。少始知學，勇於敢為；長通於方，左右具宜：先生之於為人，可謂成矣。然而公不見信於人，私不見助於友，跋前躓後，動輒得咎，暫為御史，遂竄南夷，三年博士，冗不見治。命與仇謀，取敗幾時。冬暖而兒號寒，年豐而妻啼飢，頭童齒豁，竟死何裨！不知慮此，而反教人為？」',
+                        '先生曰︰「吁！子來前！夫大木為杗，細木為桷，欂櫨侏儒，椳闑扂楔，各得其宜，施以成室者，匠氏之工也。玉札丹砂，赤箭青芝，牛溲馬勃，敗鼓之皮，俱收並畜，待用無遺者，醫師之良也。登明選公，雜進巧拙，紆餘為妍，卓犖為傑，校短量長，惟器是適者，宰相之方也。昔者孟軻好辯，孔道以明，轍還天下，卒老於行；荀卿守正，大論是弘，逃讒於楚，廢死蘭陵：是二儒者，吐辭為經，舉足為法，絕類離倫，優入聖域。其遇於世何如也？今先生，學雖勤而不繇其統，言雖多而不要其中，文雖奇而不濟於用，行雖修而不顯於眾。猶且月費俸錢，歲靡廩粟，子不知耕，婦不知織，乘馬從徒，安坐而食，踵常途之促促，窺陳編以盜竊。然而聖主不加誅，宰臣不見斥，非其幸歟！動而得謗，名亦隨之，投閒置散，乃分之宜。若夫商財賄之有亡，計班資之崇庳，忘己量之所稱，指前人之瑕疵，是所謂詰匠氏之不以杙為楹，而訾醫師以昌陽引年，欲進其豨苓也。」'
+                    ]
+                },
+
+                '醉翁亭記': {
+                    title: '《醉翁亭記》',
+                    author: '歐陽修',
+                    category: '文學', 
+                    paragraphs: [
+                        '環滁皆山也。其西南諸峯，林壑尤美；望之蔚然而深秀者，琅邪也。山行六七里，漸聞水聲潺潺，而瀉出于兩峯之間者，釀泉也。峯回路轉，有亭翼然，臨于泉上者，醉翁亭也。作亭者誰？山之僧曰智僊也。名之者誰？太守自謂也。太守與客來飲于此，飲少輒醉，而年又最高，故自號曰醉翁也。醉翁之意不在酒，而在乎山水之間也。山水之樂，得之心而寓之酒也。',
+                        '若夫日出而林霏開，雲歸而巖穴暝，晦明變化者，山間之朝暮也。野芳發而幽香，佳木秀而繁陰，風霜高潔，水落而石出者，山間之四時也。朝而往，暮而歸，四時之景不同，而樂亦無窮也。',
+                        '至于負者歌於塗，行者休于樹；前者呼，後者應；傴僂提攜，往來而不絕者，滁人遊也。臨谿而漁，谿深而魚肥；釀泉為酒，泉香而酒洌；山肴野蓛，雜然而前陳者，太守宴也。宴酣之樂，非絲非竹，射者中，弈者勝，觥籌交錯，起坐而諠譁者，眾賓懽也。蒼顏白髮，頹然乎其間者，太守醉也。',
+                        '已而夕陽在山，人影散亂，太守歸而賓客從也。樹林陰翳，鳴聲上下，遊人去而禽鳥樂也。然而禽鳥知山林之樂，而不知人之樂；人知從太守遊而樂，而不知太守之樂其樂也。',
+                        '醉能同其樂，醒能述以文者，太守也。太守謂誰？廬陵歐陽修也。'
+                    ]
+                },
+
+                '前赤壁賦': {
+                    title: '《前赤壁賦》',
+                    author: '蘇軾',
+                    category: '文學', 
+                    paragraphs: [
+                        '壬戌之秋，七月既望，蘇子與客泛舟，遊於赤壁之下。清風徐來，水波不興。舉酒屬客，誦明月之詩，歌窈窕之章。少焉，月出於東山之上，徘徊於斗牛之間。白露橫江，水光接天。縱一葦之所如，凌萬頃之茫然。浩浩乎如馮虛御風而不知其所止，飄飄乎如遺世獨立，羽化而登仙。',
+                        '於是飲酒樂甚，扣舷而歌之。歌曰：「桂棹兮蘭槳，擊空明兮泝流光。渺渺兮予懷，望美人兮天一方。」客有吹洞簫者，倚歌而和之，其聲烏烏然，如怨如慕，如泣如訴。餘音嫋嫋，不絕如縷。舞幽壑之潛蛟，泣孤舟之嫠婦。',
+                        '蘇子愀然，正襟危坐，而問客曰：「何為其然也？」客曰：「『月明星稀，烏鵲南飛。』此非曹孟德之詩乎？西望夏口，東望武昌。山川相繆，鬱乎蒼蒼。此非孟德之困於周郎者乎？方其破荊州，下江陵，順流而東也，舳艫千里，旌旗蔽空，釃酒臨江，橫槊賦詩，固一世之雄也，而今安在哉？況吾與子漁樵於江渚之上，侶魚蝦而友麋鹿。駕一葉之扁舟，舉匏尊以相屬。寄蜉蝣於天地，眇滄海之一粟。哀吾生之須臾，羨長江之無窮。挾飛仙以遨遊，抱明月而長終。知不可乎驟得，託遺響於悲風。」',
+                        '蘇子曰：「客亦知夫水與月乎？逝者如斯，而未嘗往也。盈虛者如彼，而卒莫消長也。蓋將自其變者而觀之，則天地曾不能以一瞬。自其不變者而觀之，則物與我皆無盡也，而又何羨乎？且夫天地之間，物各有主，苟非吾之所有，雖一毫而莫取。惟江上之清風，與山間之明月，耳得之而為聲，目遇之而成色。取之無禁，用之不竭。是造物者之無盡藏也，而吾與子之所共適。」客喜而笑，洗盞更酌，肴核既盡，杯盤狼籍，相與枕藉乎舟中，不知東方之既白。'
+                    ]
+                },
+
+                '齊天樂秋思': {
+                    title: '《齊天樂．秋思》',
+                    author: '周邦彥',
+                    category: '文學', 
+                    paragraphs: [
+                        '綠蕪凋盡臺城路，殊鄉又逢秋晚。暮雨生寒，鳴蛩勸織，深閣時聞裁翦。雲窗靜掩。嘆重拂羅裀，頓疏花簟。尚有綀囊，露螢清夜照書卷。',
+                        '荊江留滯最久，故人相望處，離思何限。渭水西風，長安亂葉，空憶詩情宛轉。憑高眺遠，正玉液新篘，蟹螯初薦。醉倒山翁，但愁斜照歛。'
+                    ]
+                },
+
+                '南鄉子': {
+                    title: '《南鄉子．登京口北固亭有懷》',
+                    author: '辛棄疾',
+                    category: '文學', 
+                    paragraphs: [
+                        '何處望神州？滿眼風光北固樓。千古興亡多少事，悠悠，不盡長江滾滾流。',
+                        '年少萬兜鍪，坐斷東南戰未休。天下英雄誰敵手？曹劉。生子當如孫仲謀。'
+                    ]
+                },
+
+                '雙調夜行船': {
+                    title: '《雙調．夜行船．秋思》',
+                    author: '馬致遠',
+                    category: '文學', 
+                    paragraphs: [
+                        '百歲光陰一夢蝶，重回首往事堪嗟。今日春來，明朝花謝，急罰盞夜闌燈滅。',
+                        '想秦宮漢闕，都做了衰草牛羊野。不恁麼漁樵沒話說。縱荒墳橫斷碑，不辨龍蛇。',
+                        '投至狐蹤與兔穴，多少豪傑。鼎足雖堅半腰裏折，魏耶，晉耶？',
+                        '天教你富，莫太奢，不多時好天良夜。富家兒更做道你心似鐵，爭辜負了錦堂風月。',
+                        '眼前紅日又西斜，疾似下坡車。不爭鏡裏添白雪，上牀與鞋履相別。休笑鳩巢計拙，葫蘆提一向裝呆。',
+                        '利名竭，是非絕。紅塵不向門前惹，綠樹偏宜屋角遮。青山正補牆頭缺。更那堪竹籬茅舍。',
+                        '蛩吟罷一覺纔寧貼，雞鳴時萬事無休歇。何年是徹？看密匝匝蟻排兵，亂紛紛蜂釀蜜，鬧攘攘蠅爭血。裴公綠野堂，陶令白蓮社。愛秋來時那些：和露摘黃花，帶霜分紫蟹，煮酒燒紅葉。想人生有限杯，渾幾箇重陽節？人問我頑童記者：便北海探吾來，道東籬醉了也。'
+                    ]
+                },
+
+                '西湖七月半': {
+                    title: '《西湖七月半》',
+                    author: '張岱',
+                    category: '文學', 
+                    paragraphs: [
+                        '西湖七月半，一無可看，止可看看七月半之人。看七月半之人，以五類看之：其一，樓船簫鼓，峨冠盛筵，燈火優傒，聲光相亂，名爲看月而實不見月者，看之；其一，亦船亦樓，名娃閨秀，攜及童孌，笑啼雜之，環坐露臺，左右盼望，身在月下而實不看月者，看之；其一，亦船亦聲歌，名妓閒僧，淺斟低唱，弱管輕絲，竹肉相發，亦在月下，亦看月而欲人看其看月者，看之；其一，不舟不車，不衫不幘，酒醉飯飽，呼群三五，躋入人叢，昭慶斷橋，嘄呼嘈雜，裝假醉，唱無腔曲，月亦看，看月者亦看，不看月者亦看，而實無一看者，看之；其一，小船輕幌，淨几煖爐，茶鐺旋煮，素瓷靜遞，好友佳人，邀月同坐，或匿影樹下，或逃囂裏湖，看月而人不見其看月之態，亦不作意看月者，看之。',
+                        '杭人遊湖，巳出酉歸，避月如仇。是夕好名，逐隊爭出，多犒門軍酒錢，轎夫擎燎，列俟岸上。一入舟，速舟子急放斷橋，趕入勝會。以故二鼓以前，人聲鼓吹，如沸如撼，如魘如囈，如聾如啞，大船小船一齊湊岸，一無所見，止見篙擊篙，舟觸舟，肩摩肩，面看面而已。少刻興盡，官府席散，皂隸喝道去。轎夫叫船上人，怖以關門，燈籠火把如列星，一一簇擁而去。岸上人亦逐隊趕門，漸稀漸薄，頃刻散盡矣。吾輩始艤舟近岸。斷橋石磴始涼，席其上，呼客縱飲。此時月如鏡新磨，山復整粧，湖復頮面。向之淺斟低唱者出，匿影樹下者亦出，吾輩往通聲氣，拉與同坐。韻友來，名妓至，杯箸安，竹肉發。月色蒼涼，東方將白，客方散去。吾輩縱舟酣睡於十里荷花之中，香氣拍人，清夢甚愜。'
+                    ]
+                },
+
+             '關雎': {
+                    title: '《國風．關雎》',
+                    author: '詩經',
+                    category: '其他', 
+                    paragraphs: [
+                        '關關雎鳩，在河之洲。窈窕淑女，君子好逑。參差荇菜，左右流之。窈窕淑女，寤寐求之。求之不得，寤寐思服。悠哉悠哉，輾轉反側。參差荇菜，左右采之。窈窕淑女，琴瑟友之。參差荇菜，左右芼之。窈窕淑女，鐘鼓樂之。'
+                    ]
+                },
+
+                '曹劌論戰': {
+                    title: '《曹劌論戰》',
+                    author: '左傳',
+                    category: '其他', 
+                    paragraphs: [
+                        '十年春，齊師伐我，公將戰，曹劌請見。其鄉人曰：「肉食者謀之，又何間焉？」劌曰：「肉食者鄙，未能遠謀。」乃入見，問：「何以戰。」公曰：「衣食所安，弗敢專也，必以分人。」對曰：「小惠未徧，民弗從也。」公曰：「犧牲玉帛，弗敢加也，必以信。」對曰：「小信未孚，神弗福也。」公曰：「小大之獄，雖不能察，必以情。」對曰：「忠之屬也，可以一戰。戰則請從。」',
+                        '公與之乘，戰於長勺。公將鼓之。劌曰：「未可。」齊人三鼓，劌曰：「可矣。」齊師敗績。公將馳之。劌曰：「未可。」下視其轍，登軾而望之，曰：「可矣。」遂逐齊師。',
+                        '既克，公問其故。對曰：「夫戰，勇氣也。一鼓作氣，再而衰，三而竭。彼竭我盈，故克之。夫大國，難測也，懼有伏焉。吾視其轍亂，望其旗靡，故逐之。」'
+                    ]
+                },
+                '大學': {
+                    title: '《大學》（節錄）',
+                    author: '禮記',
+                    category: '其他', 
+                    paragraphs: [
+                        '大學之道，在明明德，在親民，在止於至善。知止而後有定，定而後能靜，靜而後能安，安而後能慮，慮而後能得。物有本末，事有終始，知所先後，則近道矣。',
+                        '古之欲明明德於天下者，先治其國；欲治其國者，先齊其家；欲齊其家者，先修其身；欲修其身者，先正其心；欲正其心者，先誠其意；欲誠其意者，先致其知；致知在格物。物格而后知至，知至而后意誠，意誠而后心正，心正而后身修，身修而后家齊，家齊而后國治，國治而后天下平。'
+                    ]
+                },
+
+                '陳情表': {
+                    title: '《陳情表》',
+                    author: '李密',
+                    category: '其他', 
+                    paragraphs: [
+                        '臣密言︰臣以險釁，夙遭閔凶，生孩六月，慈父見背，行年四歲，舅奪母志。祖母劉，愍臣孤弱，躬親撫養。臣少多疾病，九歲不行；零丁孤苦，至于成立。既無叔伯，終鮮兄弟，門衰祚薄，晚有兒息。外無期功彊近之親，內無應門五尺之童。煢煢獨立，形影相弔。而劉夙嬰疾病，常在牀蓐。臣侍湯藥，未曾廢離。',
+                        '逮奉聖朝，沐浴清化。前太守臣逵，察臣孝廉；後刺史臣榮，舉臣秀才；臣以供養無主，辭不赴命。詔書特下，拜臣郎中；尋蒙國恩，除臣洗馬。猥以微賤，當侍東宮，非臣隕首所能上報。臣具以表聞，辭不就職。詔書切峻，責臣逋慢；郡縣逼迫，催臣上道；州司臨門，急於星火。臣欲奉詔奔馳，則劉病日篤；欲苟順私情，則告訴不許。臣之進退，實為狼狽。',
+                        '伏惟聖朝以孝治天下，凡在故老，猶蒙矜育，況臣孤苦，特為尤甚。且臣少仕偽朝，歷職郎署，本圖宦達，不矜名節。今臣亡國賤俘，至微至陋，過蒙拔擢，寵命優渥，豈敢盤桓，有所希冀？但以劉日薄西山，氣息奄奄，人命危淺，朝不慮夕。臣無祖母，無以至今日；祖母無臣，無以終餘年。母孫二人，更相為命，是以區區不能廢遠。',
+                        '臣密今年四十有四，祖母劉今年九十有六。是臣盡節於陛下之日長，報養劉之日短也。烏鳥私情，願乞終養。臣之辛苦，非獨蜀之人士，及二州牧伯，所見明知；皇天后土，實所共鑒。願陛下矜愍愚誠，聽臣微志。庶劉僥倖，卒保餘年。臣生當隕首，死當結草。臣不勝犬馬怖懼之情，謹拜表以聞。'
+                    ]
+                },
+
+                '滿井遊記': {
+                    title: '《滿井遊記》',
+                    author: '袁宏道',
+                    category: '其他', 
+                    paragraphs: [
+                        '燕地寒，花朝節後，餘寒猶厲。凍風時作，作則飛沙走礫。局促一室之內，欲出不得。每冒風馳行，未百步輒返。',
+                        '廿二日，天稍和，偕數友出東直。至滿井，高柳夾堤，土膏微潤，一望空闊，若脫籠之鵠。於時冰皮始解，波色乍明，鱗浪層層，清徹見底，晶晶然如鏡之新開而冷光之乍出於匣也。山巒為晴雪所洗，娟然如拭，鮮妍明媚，如倩女之靧面而髻鬟之始掠也。柳條將舒未舒，柔梢披風，麥田淺鬣寸許。遊人雖未盛，泉而茗者，罍而歌者，紅裝而蹇者，亦時時有。風力雖尚勁，然徒步則汗出浹背。凡曝沙之鳥，呷浪之鱗，悠然自得，毛羽鱗鬣之間皆有喜氣。始知郊田之外，未始無春，而城居者未之知也。',
+                        '夫能不以遊墮事，而瀟然於山石草木之間者，惟此官也。而此地適與余近，余之遊將自此始，惡能無紀？己亥之二月也。'
+                    ]
+                },
+
+                '左忠毅公軼事': {
+                    title: '《左忠毅公軼事》',
+                    author: '方苞',
+                    category: '其他', 
+                    paragraphs: [
+                        '先君子嘗言，鄉先輩左忠毅公視學京畿。一日，風雪嚴寒，從數騎出，微行，入古寺。廡下一生伏案臥，文方成草。公閱畢，即解貂覆生，為掩戶，叩之寺僧，則史公可法也。及試，吏呼名，至史公，公瞿然注視。呈卷，即面署第一；召入，使拜夫人，曰：「吾諸兒碌碌，他日繼吾志事，惟此生耳。」',
+                        '及左公下廠獄，史朝夕窺獄門外。逆閹防伺甚嚴，雖家僕不得近。久之，聞左公被炮烙，旦夕且死，持五十金，涕泣謀於禁卒，卒感焉。一日，使史公更敝衣草屨，背筐，手長鑱，為除不潔者，引入，微指左公處，則席地倚牆而坐，面額焦爛不可辨，左膝以下，筋骨盡脫矣。史前跪，抱公膝而嗚咽。公辨其聲，而目不可開，乃奮臂以指撥眥，目光如炬。怒曰：「庸奴！此何地也，而汝前來！國家之事，糜爛至此。老夫已矣，汝復輕身而昧大義，天下事誰可支拄者！不速去，無俟姦人構陷，吾今即撲殺汝。」因摸地上刑械，作投擊勢。史噤不敢發聲，趨而出。後常流涕述其事以語人曰：「吾師肺肝，皆鐵石所鑄造也！」',
+                        '崇禎末，流賊張獻忠出沒蘄、黃、潛、桐間，史公以鳳廬道奉檄守禦，每有警，輒數月不就寢，使將士更休，而自坐幄幕外，擇健卒十人，令二人蹲踞，而背倚之，漏鼓移，則番代。每寒夜起立，振衣裳，甲上冰霜迸落，鏗然有聲。或勸以少休，公曰：「吾上恐負朝廷，下恐愧吾師也。」史公治兵，往來桐城，必躬造左公弟，候太公、太母起居，拜夫人於堂上。',
+                        '余宗老塗山，左公甥也，與先君子善，謂獄中語乃親得之於史公云。'
+                    ]
+                },
+
+
+                '飲酒': {
+                    title: '《飲酒》（其五）',
+                    author: '陶潛',
+                    category: '其他', 
+                    paragraphs: [
+                        '結廬在人境，而無車馬喧。問君何能爾？心遠地自偏。採菊東籬下，悠然見南山。山氣日夕佳，飛鳥相與還。此中有真意，欲辨已忘言。'
+                    ]
+                },
+
+                '四塊玉': {
+                    title: '《四塊玉．閒適》',
+                    author: '關漢卿',
+                    category: '其他', 
+                    paragraphs: [
+                        '南畝耕，東山卧。世態人情經歷多。閒將往事思量過，賢的是他，愚的是我，爭甚麼？'
+                    ]
+                },
+
+                '沉醉東風': {
+                    title: '《沉醉東風．漁父詞》',
+                    author: '白樸',
+                    category: '其他', 
+                    paragraphs: [
+                        '黃蘆岸白蘋渡口。綠楊堤紅蓼灘頭。雖無刎頸交，卻有忘機友。點秋江白鷺沙鷗。傲煞人間萬戶侯，不識字煙波釣叟。'
+                    ]
+                },
+            };
+             
              // 重新生成篇章列表
              generatePassageItems();
          
@@ -1342,6 +975,24 @@
                          // 顯示水墨過渡動畫
                          await showLoadingAnimation();
                          console.log("水墨過渡動畫播放完成");
+
+                         // 音樂😡
+                         function pauseAllAudio() {
+                            // Get all audio elements on the page
+                            const audioElements = document.querySelectorAll('audio');
+                            
+                            // Pause each audio element
+                            audioElements.forEach(audio => {
+                                if (!audio.paused) {
+                                    audio.pause();
+                                }
+                            });
+                         }
+                    
+                         // Example usage: Call this function to pause all audio
+                         pauseAllAudio();
+                         document.getElementById("menu").currentTime=0;
+                         document.getElementById("menu").play();
                          
                          // 執行與暫停菜單中返回主頁相同的操作
                          // 重置遊戲狀態
@@ -1475,7 +1126,7 @@
                  confirmDialog.innerHTML = `
                      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
                          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">雙人對戰模式</h3>
-                         <p class="text-gray-600 dark:text-gray-300 mb-5">兩位玩家分別使用螢幕上半和下半部分同臺競技！。</p>
+                         <p class="text-gray-600 dark:text-gray-300 mb-5">兩位玩家使用螢幕上半和下半同臺競技！</p>
                          <div class="flex justify-center gap-6">
                              <button id="start-multi-btn" class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">開始</button>
                              <button id="cancel-multi-btn" class="px-5 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">返回</button>
@@ -1524,6 +1175,40 @@
                  // 显示双人UI，隐藏单人UI
                  const singlePlayerUI = document.getElementById('single-player-ui');
                  const multiplayerUI = document.getElementById('multiplayer-ui');
+
+                 // 音樂
+                 function pauseAllAudio() {
+                    // Get all audio elements on the page
+                    const audioElements = document.querySelectorAll('audio');
+                    
+                    // Pause each audio element
+                    audioElements.forEach(audio => {
+                        if (!audio.paused) {
+                            audio.pause();
+                        }
+                    });
+                 }
+            
+                 // Example usage: Call this function to pause all audio
+                 pauseAllAudio();
+                 function playRandomAudio() {
+                    // Create an array of audio element IDs
+                    const audioIds = ['obs', 'nip', 'rival1', 'rival2', 'sanctuary', 'flat'];
+        
+                    // Generate a random index
+                    const randomIndex = Math.floor(Math.random() * audioIds.length);
+        
+                    // Get the randomly selected audio element
+                    const selectedAudio = document.getElementById(audioIds[randomIndex]);
+        
+                    // Play the selected audio
+                    selectedAudio.currentTime = 0; // Reset to start
+                    selectedAudio.play();
+                 }
+        
+                 // Simulate running to Line 2096
+                 // Call the function to play a random audio
+                 playRandomAudio();
                  
                  if (singlePlayerUI && multiplayerUI) {
                      singlePlayerUI.classList.add('hidden');
@@ -1807,6 +1492,23 @@
                          
                          // 停止計時器
                          stopMultiplayerTimers();
+
+                         // 音樂
+                         function pauseAllAudio() {
+                            // Get all audio elements on the page
+                            const audioElements = document.querySelectorAll('audio');
+                            // Pause each audio element
+                            audioElements.forEach(audio => {
+                                if (!audio.paused) {
+                                    audio.pause();
+                                }
+                            });
+                         }
+                    
+                         // Example usage: Call this function to pause all audio
+                         pauseAllAudio();
+                         document.getElementById("menu").currentTime=0;
+                         document.getElementById("menu").play();
                          
                          // 重要：完全重置計時器相關變量
                          timerTopInterval = null;
@@ -2138,10 +1840,10 @@
                      }
                  }
                  
-                 // 打乱选项顺序
+                 // 打亂選項順序
                  options = shuffleArray(options);
                  
-                 // 创建选项按钮
+                 // 創建選項按鈕（雙人）
                  options.forEach(option => {
                      const btn = document.createElement('button');
                      btn.className = 'option-btn h-16 md:h-20 text-2xl md:text-3xl bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none';
@@ -2162,7 +1864,7 @@
                  });
              }
              
-             // 处理双人模式正确答案
+             // 處理雙人模式正確答案
              function handleMultiplayerCorrectAnswer(playerIndex, btn) {
                  const player = window.multiplayerMode.players[playerIndex];
                  player.correctAnswers++;
@@ -2192,7 +1894,7 @@
                  // 即時更新進度條
                  updateMultiplayerProgress();
                  
-                 //雙人模式節奏快速
+                 // 雙人模式節奏快速
                  setTimeout(() => {
                      updatePlayerDisplay(playerIndex);
                  }, 10); 
@@ -2268,6 +1970,23 @@
                  const victoryOverlay = document.createElement('div');
                  victoryOverlay.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[1000]';
                  victoryOverlay.id = 'multiplayer-victory-overlay';
+
+                 // 音樂
+                 function pauseAllAudio() {
+                    // Get all audio elements on the page
+                    const audioElements = document.querySelectorAll('audio');
+                    
+                    // Pause each audio element
+                    audioElements.forEach(audio => {
+                        if (!audio.paused) {
+                            audio.pause();
+                        }
+                    });
+                }
+                 pauseAllAudio();
+                 document.getElementById("finish").currentTime=0;
+                 document.getElementById("finish").play();
+                 
                  
                  // 獲取雙方進度
                  const player1Progress = window.multiplayerMode.players[0].correctAnswers;
@@ -2352,6 +2071,23 @@
                          console.log("勝利返回：已切換到單人模式");
                      }
                      
+                     // 音樂
+                     function pauseAllAudio() {
+                        // Get all audio elements on the page
+                        const audioElements = document.querySelectorAll('audio');
+                        // Pause each audio element
+                        audioElements.forEach(audio => {
+                            if (!audio.paused) {
+                                audio.pause();
+                            }
+                        });
+                     }
+                
+                     // Example usage: Call this function to pause all audio
+                     pauseAllAudio();
+                     document.getElementById("menu").currentTime=0;
+                     document.getElementById("menu").play();
+
                      // 重新顯示之前隱藏的元素
                      const headerElement = document.querySelector('header');
                      if (headerElement) {
@@ -2426,6 +2162,9 @@
              // 开始游戏按钮事件
              if (startGameBtn) {
                  startGameBtn.addEventListener('click', function() {
+                     // 播放音效
+                     document.getElementById("select").play();
+
                      // 根据当前模式进入相应游戏
                      if (window.gameMode === 'multi') {
                          // 显示双人模式确认对话框
@@ -2481,7 +2220,7 @@
                                      
                                      // 切換按鈕顯示為暫停按鈕
                                      updateGameControlButtons('playing');
-                                     
+
                                      // 重置並開始秒表 (確保從0開始)
                                      elapsedTimeBeforePause = 0; // 重置累計時間
                                      resetStopwatch();
@@ -2491,6 +2230,45 @@
                                      
                                      // 显示游戏内容
                                      updateDisplay();
+
+                                     // No MENU audio
+                                     document.getElementById("menu").pause();
+                                     document.getElementById("menu").currentTime = 0;
+                                     
+                                     // 音樂
+                                    function pauseAllAudio() {
+                                        // Get all audio elements on the page
+                                        const audioElements = document.querySelectorAll('audio');
+                                        
+                                        // Pause each audio element
+                                        audioElements.forEach(audio => {
+                                            if (!audio.paused) {
+                                                audio.pause();
+                                            }
+                                        });
+                                    }
+                                
+                                    // Example usage: Call this function to pause all audio
+                                    pauseAllAudio();
+                                    function playRandomAudio() {
+                                        // Create an array of audio element IDs
+                                        const audioIds = ['obs', 'nip', 'rival1', 'rival2', 'sanctuary', 'flat'];
+                            
+                                        // Generate a random index
+                                        const randomIndex = Math.floor(Math.random() * audioIds.length);
+                            
+                                        // Get the randomly selected audio element
+                                        const selectedAudio = document.getElementById(audioIds[randomIndex]);
+                            
+                                        // Play the selected audio
+                                        selectedAudio.currentTime = 0; // Reset to start
+                                        selectedAudio.play();
+                                    }
+        
+                                    // Simulate running to Line 2096
+                                    // Call the function to play a random audio
+                                    playRandomAudio();
+                                      
                                  }, 800);
                              }
                          }
@@ -3437,6 +3215,24 @@
                      
                      // 執行重新開始
                      await restartGame();
+
+                     // 音乐
+                     function pauseAllAudio() {
+                        // Get all audio elements on the page
+                        const audioElements = document.querySelectorAll('audio');
+                        
+                        // Pause each audio element
+                        audioElements.forEach(audio => {
+                            if (!audio.paused) {
+                                audio.pause();
+                            }
+                        });
+                     }
+                
+                     // Example usage: Call this function to pause all audio
+                     pauseAllAudio();
+                     document.getElementById("menu").currentTime=0;
+                     document.getElementById("menu").play();
                      
                      // 關鍵修復：確保顯示"返回主頁"按鈕而非暫停按鈕
                      updateGameControlButtons('not-started');
@@ -3467,6 +3263,24 @@
                              // 重置界面
                              pauseButtons.classList.remove('hidden');
                              countdownResume.classList.add('hidden');
+
+                             // 音乐
+                             function pauseAllAudio() {
+                                // Get all audio elements on the page
+                                const audioElements = document.querySelectorAll('audio');
+                                
+                                // Pause each audio element
+                                audioElements.forEach(audio => {
+                                    if (!audio.paused) {
+                                        audio.pause();
+                                    }
+                                });
+                             }
+                        
+                             // Example usage: Call this function to pause all audio
+                             pauseAllAudio();
+                             document.getElementById("menu").currentTime=0;
+                             document.getElementById("menu").play();
                              
                              // 顯示水墨過渡動畫
                              await showLoadingAnimation();
@@ -3689,6 +3503,24 @@
                      gameStartScreen.classList.remove('hidden');
                  }
                  
+                 // 音樂
+                 function pauseAllAudio() {
+                    // Get all audio elements on the page
+                    const audioElements = document.querySelectorAll('audio');
+                    
+                    // Pause each audio element
+                    audioElements.forEach(audio => {
+                        if (!audio.paused) {
+                            audio.pause();
+                        }
+                    });
+                 }
+            
+                 // Example usage: Call this function to pause all audio
+                 pauseAllAudio();
+                 document.getElementById("menu").currentTime=0;
+                 document.getElementById("menu").play();
+
                  // 清空選項並恢復原始的網格佈局
                  if (optionsContainer) {
                      optionsContainer.innerHTML = '';
@@ -3952,6 +3784,9 @@
                          healEffect.className = 'fixed inset-0 pointer-events-none z-50 flex items-center justify-center';
                          healEffect.innerHTML = `<div class="bg-green-500 bg-opacity-30 p-4 rounded-full text-white text-2xl font-bold animate-pulse">+1 ❤️</div>`;
                          document.body.appendChild(healEffect);
+
+                         //音樂
+                         document.getElementById("turning5").play();
                          
                          setTimeout(() => {
                              healEffect.remove();
@@ -4030,6 +3865,23 @@
                      gameContent.classList.add('hidden');
                  }
                  
+                 // 播放音樂
+                 function pauseAllAudio() {
+                    // Get all audio elements on the page
+                    const audioElements = document.querySelectorAll('audio');
+                    
+                    // Pause each audio element
+                    audioElements.forEach(audio => {
+                        if (!audio.paused) {
+                            audio.pause();
+                        }
+                    });
+                }
+            
+                 pauseAllAudio();
+                 document.getElementById("lose").currentTime=0;
+                 document.getElementById("lose").play();
+
                  // 檢查是否過半後失敗並更新成就
                  const progressBar = document.getElementById('progress-bar');
                  if (progressBar) {
@@ -4107,7 +3959,7 @@
                  
                  // 設置結果信息
                  gameOverContainer.innerHTML = `
-                     <p class="text-2xl text-red-600 dark:text-red-500 mb-6 font-bold">可惜！</p>
+                     <p class="text-2xl text-red-600 dark:text-red-500 mb-6 font-bold">不要氣餒，繼續努力！</p>
                      <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-5">
                          <p class="text-gray-700 dark:text-gray-300">時間: ${timerElement ? timerElement.textContent : "00:00.0"}</p>
                          <p class="text-gray-700 dark:text-gray-300">錯誤次數: ${wrongAnswersCount}</p>
@@ -4419,6 +4271,7 @@
                          hideLoadingAnimation();
                          resolve();
                      }, 900);
+                    
                  });
              }
          
@@ -4728,6 +4581,8 @@
                          document.body.removeChild(shareModal);
                      }
                  });
+
+
              }
              
              // 將DataURI轉換為Blob
@@ -4789,6 +4644,24 @@
                  
                  // 播放紙屑慶祝效果
                  createConfetti();
+
+                 // 音樂
+                 function pauseAllAudio() {
+                    // Get all audio elements on the page
+                    const audioElements = document.querySelectorAll('audio');
+                    
+                    // Pause each audio element
+                    audioElements.forEach(audio => {
+                        if (!audio.paused) {
+                            audio.pause();
+                        }
+                    });
+                }
+            
+                 pauseAllAudio();
+                 document.getElementById("finish").currentTime=0;
+                 document.getElementById("finish").play();
+                 
                  
                  // 判斷成就
                  const isPerfect = wrongAnswersCount === 0;
@@ -6130,7 +6003,14 @@
                                  infoModalTitle.textContent = '版本資訊（只顯示主要更新）';
                                  infoModalContent.innerHTML = `
                                      <div class="space-y-4">
-         
+
+                                         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                             <h4 class="text-lg font-medium text-primary mb-3">v1.5 更新資訊（重大更新！）</h4>
+                                             <ul class="list-disc pl-4 text-gray-700 dark:text-gray-300 space-y-2">
+                                                 <li>新增遊戲音樂！（特此鳴謝 音樂總監：萊昂納多•弗拉迪米爾•溫斯頓•梁•芬奇（化名：梁天行）</li>
+                                             </ul>
+                                         </div>         
+
                                          <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                              <h4 class="text-lg font-medium text-primary mb-3">v1.5 更新資訊（重大更新！）</h4>
                                              <ul class="list-disc pl-4 text-gray-700 dark:text-gray-300 space-y-2">
@@ -6257,6 +6137,11 @@
                                          <p class="text-gray-700 dark:text-gray-300">
                                              知之者不如好之者，好之者不如樂之者。我想，如果熱愛一件事，總能把它做好的。
                                          </p>
+
+                                         <p class="text-gray-700 dark:text-gray-300">
+                                             PS 特別鳴謝 萊昂納多•弗拉迪米爾•溫斯頓•梁•芬奇（化名：梁天行）為本程式添加音樂！
+                                         </p>
+
                                          
                                          <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                              <p class="text-gray-600 dark:text-gray-400 text-sm text-center">
@@ -10020,10 +9905,7 @@
              }
              
              console.log("初始化完成");
-         });
-      </script>
-      <script>
-         // 全屏控制逻辑
+         });</script><script>// 全屏控制逻辑
          function toggleFullscreen() {
            if (!document.fullscreenElement) {
              document.documentElement.requestFullscreen();
@@ -10038,8 +9920,4 @@
              // 退出全屏后的处理
              console.log('已退出全屏模式');
            }
-         });
-      </script>
-   </body>
-</html>
-
+         });</script><script>document.addEventListener("keydown",function(e){("F12"===e.key||e.ctrlKey&&e.shiftKey&&"I"===e.key)&&e.preventDefault()})</script></body></html>
